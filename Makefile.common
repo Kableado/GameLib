@@ -1,0 +1,56 @@
+HEADS= \
+	Time.h \
+	Draw.h \
+	Input.h \
+	Audio.h \
+	Entity.h \
+	GameLib.h
+OBJS= \
+	$(BUILDDIR)/Time.o \
+	$(BUILDDIR)/Draw.o \
+	$(BUILDDIR)/Input.o \
+	$(BUILDDIR)/Audio.o \
+	$(BUILDDIR)/Entity.o \
+	$(BUILDDIR)/GameLib.o \
+	$(BUILDDIR)/main.o
+
+
+all: $(BUILDDIR) $(BUILDDIR)/$(RESULT)
+
+$(BUILDDIR):
+	mkdir $(BUILDDIR)
+
+
+
+$(BUILDDIR)/Time.o: Time.c $(HEADS)
+	$(CC) -c Time.c -o $(BUILDDIR)/Time.o $(CFLAGS)
+
+$(BUILDDIR)/Draw.o: Draw.c $(HEADS)
+	$(CC) -c Draw.c -o $(BUILDDIR)/Draw.o $(CFLAGS)
+
+$(BUILDDIR)/Input.o: Input.c $(HEADS)
+	$(CC) -c Input.c -o $(BUILDDIR)/Input.o $(CFLAGS)
+
+$(BUILDDIR)/Audio.o: Audio.c $(HEADS)
+	$(CC) -c Audio.c -o $(BUILDDIR)/Audio.o $(CFLAGS)
+
+$(BUILDDIR)/Entity.o: Entity.c $(HEADS)
+	$(CC) -c Entity.c -o $(BUILDDIR)/Entity.o $(CFLAGS)
+
+$(BUILDDIR)/GameLib.o: GameLib.c $(HEADS)
+	$(CC) -c GameLib.c -o $(BUILDDIR)/GameLib.o $(CFLAGS)
+
+$(BUILDDIR)/main.o: main.c $(HEADS)
+	$(CC) -c main.c -o $(BUILDDIR)/main.o $(CFLAGS)
+
+$(BUILDDIR)/$(RESULT): $(OBJS)
+	$(CC) -o $(BUILDDIR)/$(RESULT) $(OBJS) $(LIBS) $(CFLAGS)
+
+
+clean:
+	rm -f $(OBJS) $(BUILDDIR)/$(RESULT)
+
+run: $(BUILDDIR)/$(RESULT)
+	./$(BUILDDIR)/$(RESULT)
+
+
