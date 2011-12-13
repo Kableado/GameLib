@@ -1,0 +1,349 @@
+#ifdef WIN32
+	#define _WIN32_WINNT 0x0501
+	#include <windows.h>
+#endif
+#include <SDL/SDL.h>
+
+#include "Time.h"
+#include "Draw.h"
+#include "Input.h"
+#include "Audio.h"
+
+
+// Globals
+SDL_Surface *_screen=NULL;
+long long _t_frame=17000;
+
+/////////////////////////////
+// Draw_Init
+//
+// Initializes the game window.
+int Draw_Init(int width,int height,char *title,int fps){
+#ifdef WIN32
+	// Stdout on the parent console
+	AttachConsole(ATTACH_PARENT_PROCESS);
+	if(GetStdHandle(STD_OUTPUT_HANDLE)!=0){
+		fclose(stdin);
+		fclose(stdout);
+		fclose(stderr);
+		freopen("CONIN$","r",stdin);
+		freopen("CONOUT$","w",stdout);
+		freopen("CONOUT$","w",stderr);
+	}
+#endif
+
+	// Initialize SDL
+	if(SDL_Init(SDL_INIT_VIDEO)<0){
+		printf("Draw_Init: Failure initializing SDL.\n");
+		printf("Draw_Init: SDL Error: %s\n",SDL_GetError());
+		return(0);
+	}
+
+	// Initialize video mode
+	_screen=SDL_SetVideoMode(width,height,32,SDL_HWSURFACE);
+	if( _screen == NULL){
+		printf("Draw_Init: Failure initializing video mode.\n");
+		printf("Draw_Init: SDL Error: %s\n",SDL_GetError());
+		return(0);
+	}
+	SDL_WM_SetCaption(title, NULL);
+	_t_frame=1000000/fps;
+
+
+	return(1);
+}
+
+
+/////////////////////////////
+// Draw_Loop
+//
+// Loops updating the game window.
+void Draw_Loop(int (*proc)()){
+	int done=0;
+	SDL_Event event;
+	Uint8* keys;
+	long long t_framestart;
+	long long t_frame;
+	long long t_swap;
+	long long t_proc;
+	int f_count;
+
+	t_framestart=Time_GetTime();
+
+	while(!done){
+
+		// Update screen
+		t_swap=Time_GetTime();
+		SDL_Flip(_screen);
+		t_swap=Time_GetTime()-t_swap;
+
+		// Process Events
+		while(SDL_PollEvent(&event) ){
+			if(event.type == SDL_QUIT ){
+				done=1;
+			}
+			if(event.type == SDL_KEYDOWN ){
+				if(event.key.keysym.sym == SDLK_ESCAPE ) {
+					done=1;
+				}
+			}
+		}
+
+		// Process keys for Draw
+		keys=SDL_GetKeyState(NULL);
+		if(keys[SDLK_F12]){
+			// Screenshot key
+			SDL_SaveBMP(_screen,"shot.bmp");
+		}
+
+		// Input and sound Frame
+		Input_Frame();
+		Audio_Frame();
+
+		// Process loop, with frameskip for slow swapping systems
+		t_proc=Time_GetTime();
+		if(!proc()){
+			done=1;
+		}
+		f_count=(t_swap/_t_frame);
+		while(f_count>0 && !done){
+			if(!proc()){
+				done=1;
+			}
+			f_count--;
+			t_framestart+=_t_frame;
+		}
+		t_proc=Time_GetTime()-t_proc;
+		t_framestart+=_t_frame*(t_proc/_t_frame);
+
+
+		// Sleep to limit frames
+		t_frame=Time_GetTime()-t_framestart;
+		if(t_frame<_t_frame){
+			Time_Pause(_t_frame-t_frame);
+		}else{
+			Time_Pause(0);
+		}
+		t_framestart=Time_GetTime();
+	}
+}
+
+
+/////////////////////////////
+// Draw_Clean
+//
+// Cleans the game window.
+void Draw_Clean(
+	unsigned char r,
+	unsigned char g,
+	unsigned char b)
+{
+	SDL_Rect rect;
+
+	// Draw a full rectangle
+	rect.x=0;
+	rect.y=0;
+	rect.w=_screen->w;
+	rect.h=_screen->h;
+	SDL_FillRect(_screen, &rect,
+		 SDL_MapRGB(_screen->format, r, g, b));
+}
+
+
+/////////////////////////////
+// Draw_LoadImage
+//
+// Loads a image, giving a reference.
+DrawImg Draw_LoadImage(char *filename){
+	SDL_Surface *img;
+
+	// Load the BMP as a surface
+	img=SDL_LoadBMP(filename);
+	if(img == NULL){
+		printf("Draw_LoadImage: Failure Loading image: %s\n",filename);
+		printf("Draw_LoadImage: SDL Error: %s\n",SDL_GetError());
+		return(NULL);
+	}
+
+	// FIX: Setting up the alpha channel.
+	if(img->format->BytesPerPixel==4){
+		img->format->Amask=0xFF000000;
+		img->format->Ashift=24;
+	}
+
+	return((DrawImg *)img);
+}
+
+
+/////////////////////////////
+// Draw_ImgSetKeyCol
+//
+// Setting the image color key.
+void Draw_ImgSetKeyCol(DrawImg img,
+	unsigned char r,
+	unsigned char g,
+	unsigned char b)
+{
+	SDL_Surface *surf;
+	if(!img)
+		return;
+
+	// Set the color key for the surface
+	surf=(SDL_Surface *)img;
+	SDL_SetColorKey(surf, SDL_SRCCOLORKEY,
+		SDL_MapRGB(surf->format, r, g, b));
+}
+
+
+/////////////////////////////
+// Draw_ImgSetAlpha
+//
+// Setting the image alpha.
+void Draw_ImgSetAlpha(DrawImg img, unsigned char a){
+	SDL_Surface *surf;
+	if(!img)
+		return;
+
+	// Set the alpha for the surface
+	surf=(SDL_Surface *)img;
+	SDL_SetAlpha(surf, SDL_SRCALPHA, a);
+}
+
+
+/////////////////////////////
+// Draw_DrawImg
+// Draw_DrawImgCenter
+//
+// Draws an image. And a centered variant
+void Draw_DrawImg(DrawImg img,int x,int y){
+	SDL_Surface *surf;
+	SDL_Rect orig;
+	SDL_Rect dest;
+	if(!img)
+		return;
+
+	// Prepare the rects
+	surf=(SDL_Surface *)img;
+	orig.x=0;
+	orig.y=0;
+	dest.x=x;
+	dest.y=y;
+	orig.w=dest.w=surf->w;
+	orig.h=dest.h=surf->h;
+
+	// Blit the surface on the screen
+	SDL_BlitSurface(surf,&orig,_screen,&dest);
+}
+void Draw_DrawImgCenter(DrawImg img,int x,int y){
+	SDL_Surface *surf;
+	SDL_Rect orig;
+	SDL_Rect dest;
+	if(!img)
+		return;
+
+	// Prepare the rects
+	surf=(SDL_Surface *)img;
+	orig.x=0;
+	orig.y=0;
+	dest.x=x-(surf->w/2);
+	dest.y=y-(surf->h/2);
+	orig.w=dest.w=surf->w;
+	orig.h=dest.h=surf->h;
+
+	// Blit the surface on the screen
+	SDL_BlitSurface(surf,&orig,_screen,&dest);
+}
+
+
+////////////////////////////////////////////////
+// DrawFnt //
+/////////////
+// Reference to a Font.
+typedef struct {
+	SDL_Surface *surf;
+	int w,h;
+} DrawFont;
+
+
+/////////////////////////////
+// Draw_DefaultFont
+//
+// Creates a image with the default font.
+#include "FontData.h"
+DrawFnt Draw_DefaultFont(
+	unsigned char r,
+	unsigned char g,
+	unsigned char b,
+	unsigned char a)
+{
+	DrawFont *font;
+	int x,y,c;
+	Uint32 color,color2;
+
+	// Create the default font
+	font=malloc(sizeof(DrawFont));
+	font->surf = SDL_CreateRGBSurface(SDL_SWSURFACE,
+		8*256, 8, 32,0,0,0,0);
+	font->w=8;
+	font->h=8;
+	font->surf->format->Amask=0xFF000000;
+	font->surf->format->Ashift=24;
+	SDL_SetAlpha(font->surf, SDL_SRCALPHA, 255);
+
+	// Draw the font
+	SDL_LockSurface(font->surf);
+	color =SDL_MapRGBA(font->surf->format,r,g,b,a);
+	color2=SDL_MapRGBA(font->surf->format,r,g,b,0);
+	for(c=0;c<256;c++){
+		for(y=0;y<8;y++){
+			for(x=0;x<8;x++){
+				if(((fontdata_8x8[c*8+y]>>(7-x)) & 0x01)==1){
+					//Imagen_PutPixel(dest,c*8+x,y,color);
+					((Uint32 *)font->surf->pixels)[(c*8+x)+(8*256*y)]=
+						color;
+				}else{
+					//Imagen_PutPixel(dest,c*8+x,y,color2);
+					((Uint32 *)font->surf->pixels)[(c*8+x)+(8*256*y)]=
+						color2;
+				}
+			}
+		}
+	}
+	SDL_UnlockSurface(font->surf);
+
+	return((DrawFnt)font);
+}
+
+
+/////////////////////////////
+// Draw_DrawText
+//
+// Draws text using a font
+void Draw_DrawText(DrawFnt f,char *text,int x,int y){
+	DrawFont *font=f;
+	SDL_Rect orig;
+	SDL_Rect dest;
+	char *ptr;
+	if(!f)
+		return;
+
+	// Prepare the rects
+	orig.w=dest.w=font->w;
+	orig.h=dest.h=font->h;
+	orig.y=0;
+	dest.x=x;
+	dest.y=y;
+
+	// Iterate the string
+	ptr=text;
+	while(*ptr){
+		orig.x=(*ptr)*font->w;
+		dest.x=x;
+		dest.y=y;
+		// Blit every character
+		SDL_BlitSurface(font->surf,&orig,_screen,&dest);
+		x+=font->w;
+		ptr++;
+	}
+}
+

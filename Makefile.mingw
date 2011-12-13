@@ -1,0 +1,11 @@
+LIBS=-I/mingw/include/SDL -D_GNU_SOURCE=1 -Dmain=SDL_main
+CFLAGS= -L/mingw/lib -lmingw32 -lSDLmain -lSDL -mwindows
+CC=gcc
+RM=rm -rf
+
+RESULT=game.exe
+BUILDDIR=build-mingw
+
+include Makefile.common
+
+
