@@ -1,6 +1,8 @@
 #ifndef _INPUT_H_
 #define _INPUT_H_
 
+#include "Util.h"
+
 
 /////////////////////////////
 // Input_Init
@@ -56,6 +58,12 @@ typedef enum {
 // Reports a the status of a key.
 InputKeyStatus Input_GetKey(InputKey key);
 
+
+/////////////////////////////
+// Input_GetDir
+//
+// Reports the direction of the dpad.
+int Input_GetDir(vec2 dir);
 
 
 #endif

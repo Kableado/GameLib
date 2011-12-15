@@ -1,5 +1,7 @@
+#include <math.h>
 #include <SDL/SDL.h>
 
+#include "Util.h"
 #include "Input.h"
 
 
@@ -65,4 +67,35 @@ void Input_SetKey(InputKey key,int status){
 // Reports a the status of a key.
 InputKeyStatus Input_GetKey(InputKey key){
 	return(_keys[key]);
+}
+
+
+/////////////////////////////
+// Input_GetDir
+//
+// Reports the direction of the dpad.
+int Input_GetDir(vec2 dir){
+	float vlen;
+
+	vec2_set(dir,0.0f,0.0f);
+	if(Input_GetKey(InputKey_Up) ){
+		dir[1]-=1.0f;
+	}
+	if(Input_GetKey(InputKey_Down) ){
+		dir[1]+=1.0f;
+	}
+	if(Input_GetKey(InputKey_Left) ){
+		dir[0]-=1.0f;
+	}
+	if(Input_GetKey(InputKey_Right) ){
+		dir[0]+=1.0f;
+	}
+	vlen=vec2_dot(dir,dir);
+	if(vlen>0.0f){
+		vlen=sqrtf(vlen);
+		vec2_scale(dir,dir,1.0f/vlen);
+		return(1);
+	}else{
+		return(0);
+	}
 }
