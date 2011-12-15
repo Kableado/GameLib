@@ -5,6 +5,7 @@
 #include <SDL/SDL.h>
 
 #include "Time.h"
+#include "Util.h"
 #include "Draw.h"
 #include "Input.h"
 #include "Audio.h"
@@ -149,29 +150,79 @@ void Draw_Clean(
 		 SDL_MapRGB(_screen->format, r, g, b));
 }
 
+////////////////////////////////////////////////
+// DrawImage //
+///////////////
+// Image container.
+typedef struct Tag_DrawImage {
+	SDL_Surface *surf;
+	int x,y;
+} DrawImage;
+
 
 /////////////////////////////
 // Draw_LoadImage
 //
 // Loads a image, giving a reference.
 DrawImg Draw_LoadImage(char *filename){
-	SDL_Surface *img;
+	DrawImage *image;
+	SDL_Surface *surf;
 
 	// Load the BMP as a surface
-	img=SDL_LoadBMP(filename);
-	if(img == NULL){
+	surf=SDL_LoadBMP(filename);
+	if(surf == NULL){
 		printf("Draw_LoadImage: Failure Loading image: %s\n",filename);
 		printf("Draw_LoadImage: SDL Error: %s\n",SDL_GetError());
 		return(NULL);
 	}
 
 	// FIX: Setting up the alpha channel.
-	if(img->format->BytesPerPixel==4){
-		img->format->Amask=0xFF000000;
-		img->format->Ashift=24;
+	if(surf->format->BytesPerPixel==4){
+		surf->format->Amask=0xFF000000;
+		surf->format->Ashift=24;
 	}
 
-	return((DrawImg *)img);
+	// Create the image container
+	image=malloc(sizeof(DrawImage));
+	image->surf=surf;
+	image->x=0;
+	image->y=0;
+
+	return((DrawImg)image);
+}
+
+
+/////////////////////////////
+// Draw_GetSize
+//
+// Gets the image size.
+void Draw_GetSize(DrawImg img,int *w,int *h){
+	DrawImage *image=img;
+
+	// Gets the image size
+	*w=image->surf->w;
+	*h=image->surf->h;
+}
+
+
+/////////////////////////////
+// Draw_SetOffset
+// Draw_GetOffset
+//
+// Sets and Gets the image offset.
+void Draw_SetOffset(DrawImg img,int  x,int  y){
+	DrawImage *image=img;
+
+	// Sets the image offset
+	image->x=x;
+	image->y=y;
+}
+void Draw_GetOffset(DrawImg img,int *x,int *y){
+	DrawImage *image=img;
+
+	// Gets the image offset
+	*x=image->x;
+	*y=image->y;
 }
 
 
@@ -184,14 +235,11 @@ void Draw_ImgSetKeyCol(DrawImg img,
 	unsigned char g,
 	unsigned char b)
 {
-	SDL_Surface *surf;
-	if(!img)
-		return;
+	DrawImage *image=img;
 
 	// Set the color key for the surface
-	surf=(SDL_Surface *)img;
-	SDL_SetColorKey(surf, SDL_SRCCOLORKEY,
-		SDL_MapRGB(surf->format, r, g, b));
+	SDL_SetColorKey(image->surf, SDL_SRCCOLORKEY,
+		SDL_MapRGB(image->surf->format, r, g, b));
 }
 
 
@@ -200,58 +248,32 @@ void Draw_ImgSetKeyCol(DrawImg img,
 //
 // Setting the image alpha.
 void Draw_ImgSetAlpha(DrawImg img, unsigned char a){
-	SDL_Surface *surf;
-	if(!img)
-		return;
+	DrawImage *image=img;
 
 	// Set the alpha for the surface
-	surf=(SDL_Surface *)img;
-	SDL_SetAlpha(surf, SDL_SRCALPHA, a);
+	SDL_SetAlpha(image->surf, SDL_SRCALPHA, a);
 }
 
 
 /////////////////////////////
 // Draw_DrawImg
-// Draw_DrawImgCenter
 //
-// Draws an image. And a centered variant
+// Draws an image.
 void Draw_DrawImg(DrawImg img,int x,int y){
-	SDL_Surface *surf;
+	DrawImage *image=img;
 	SDL_Rect orig;
 	SDL_Rect dest;
-	if(!img)
-		return;
 
 	// Prepare the rects
-	surf=(SDL_Surface *)img;
 	orig.x=0;
 	orig.y=0;
-	dest.x=x;
-	dest.y=y;
-	orig.w=dest.w=surf->w;
-	orig.h=dest.h=surf->h;
+	dest.x=x+image->x;
+	dest.y=y+image->y;
+	orig.w=dest.w=image->surf->w;
+	orig.h=dest.h=image->surf->h;
 
 	// Blit the surface on the screen
-	SDL_BlitSurface(surf,&orig,_screen,&dest);
-}
-void Draw_DrawImgCenter(DrawImg img,int x,int y){
-	SDL_Surface *surf;
-	SDL_Rect orig;
-	SDL_Rect dest;
-	if(!img)
-		return;
-
-	// Prepare the rects
-	surf=(SDL_Surface *)img;
-	orig.x=0;
-	orig.y=0;
-	dest.x=x-(surf->w/2);
-	dest.y=y-(surf->h/2);
-	orig.w=dest.w=surf->w;
-	orig.h=dest.h=surf->h;
-
-	// Blit the surface on the screen
-	SDL_BlitSurface(surf,&orig,_screen,&dest);
+	SDL_BlitSurface(image->surf,&orig,_screen,&dest);
 }
 
 
@@ -324,8 +346,6 @@ void Draw_DrawText(DrawFnt f,char *text,int x,int y){
 	SDL_Rect orig;
 	SDL_Rect dest;
 	char *ptr;
-	if(!f)
-		return;
 
 	// Prepare the rects
 	orig.w=dest.w=font->w;

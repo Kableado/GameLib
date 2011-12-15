@@ -41,6 +41,22 @@ DrawImg Draw_LoadImage(char *filename);
 
 
 /////////////////////////////
+// Draw_GetSize
+//
+// Gets the image size.
+void Draw_GetSize(DrawImg img,int *w,int *h);
+
+
+/////////////////////////////
+// Draw_SetOffset
+// Draw_GetOffset
+//
+// Sets and Gets the image offset.
+void Draw_SetOffset(DrawImg img,int  x,int  y);
+void Draw_GetOffset(DrawImg img,int *x,int *y);
+
+
+/////////////////////////////
 // Draw_ImgSetKeyCol
 //
 // Setting the image color key.
@@ -59,11 +75,9 @@ void Draw_ImgSetAlpha(DrawImg img, unsigned char a);
 
 /////////////////////////////
 // Draw_DrawImg
-// Draw_DrawImgCenter
 //
-// Draws an image. And a centered variant
+// Draws an image.
 void Draw_DrawImg(DrawImg img,int x,int y);
-void Draw_DrawImgCenter(DrawImg img,int x,int y);
 
 
 ////////////////////////////////////////////////

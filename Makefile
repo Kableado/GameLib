@@ -14,7 +14,7 @@ endif # windir
 
 
 ifeq ($(TARGET_ARCH),mingw)
-	include Makefile.mingw
+	include Makefile.win32
 else
 ifeq ($(TARGET_ARCH),linux)
 	include Makefile.linux

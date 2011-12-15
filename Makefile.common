@@ -1,15 +1,20 @@
 HEADS= \
 	Time.h \
+	Util.h \
 	Draw.h \
 	Input.h \
 	Audio.h \
+	Anim.h \
 	Entity.h \
 	GameLib.h
+
 OBJS= \
 	$(BUILDDIR)/Time.o \
+	$(BUILDDIR)/Util.o \
 	$(BUILDDIR)/Draw.o \
 	$(BUILDDIR)/Input.o \
 	$(BUILDDIR)/Audio.o \
+	$(BUILDDIR)/Anim.o \
 	$(BUILDDIR)/Entity.o \
 	$(BUILDDIR)/GameLib.o \
 	$(BUILDDIR)/main.o
@@ -25,6 +30,9 @@ $(BUILDDIR):
 $(BUILDDIR)/Time.o: Time.c $(HEADS)
 	$(CC) -c Time.c -o $(BUILDDIR)/Time.o $(CFLAGS)
 
+$(BUILDDIR)/Util.o: Util.c $(HEADS)
+	$(CC) -c Util.c -o $(BUILDDIR)/Util.o $(CFLAGS)
+
 $(BUILDDIR)/Draw.o: Draw.c $(HEADS)
 	$(CC) -c Draw.c -o $(BUILDDIR)/Draw.o $(CFLAGS)
 
@@ -36,6 +44,9 @@ $(BUILDDIR)/Audio.o: Audio.c $(HEADS)
 
 $(BUILDDIR)/Entity.o: Entity.c $(HEADS)
 	$(CC) -c Entity.c -o $(BUILDDIR)/Entity.o $(CFLAGS)
+
+$(BUILDDIR)/Anim.o: Anim.c $(HEADS)
+	$(CC) -c Anim.c -o $(BUILDDIR)/Anim.o $(CFLAGS)
 
 $(BUILDDIR)/GameLib.o: GameLib.c $(HEADS)
 	$(CC) -c GameLib.c -o $(BUILDDIR)/GameLib.o $(CFLAGS)
