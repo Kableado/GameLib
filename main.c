@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
+
 #include "GameLib.h"
 
 
@@ -37,8 +39,8 @@ void PostProcGame(){
 		Audio_PlaySound(coin,1,1);
 	}
 
-	Draw_DrawText(font_shad,"Hola Mundo!",11,11);
-	Draw_DrawText(font     ,"Hola Mundo!",10,10);
+	Draw_DrawText(font_shad,"Buncy Buncy!",41,41);
+	Draw_DrawText(font     ,"Buncy Buncy!",40,40);
 }
 
 void player_proc(Entity *e,int ft){
@@ -81,12 +83,12 @@ int main(int argc,char *argv[]){
 	img_block2=Draw_LoadImage("data/block2.bmp");
 	Draw_SetOffset(img_block2,-16,-16);
 
-//	img_whitey=Draw_LoadImage("data/whitey.bmp");
-//	Draw_SetOffset(img_whitey,-16,-16);
-	anim_whitey=Anim_LoadAnim("data/whitey.bmp",4,5);
+	anim_whitey=Anim_LoadAnim("data/whitey.bmp",4,2.5);
 	Anim_SetOffset(anim_whitey,-16,-16);
 
 	coin=Audio_LoadSound("data/coin.wav");
+
+
 
 
 	ent_player=Entity_New();
@@ -100,8 +102,9 @@ int main(int argc,char *argv[]){
 	ent_ball->type=Ent_Ball;
 	ent_ball->radius=16.0f;
 	ent_ball->fric_static=0.1f;
-	ent_ball->elast=1.0f;
+	ent_ball->elast=0.5f;
 	AnimPlay_SetImg(&ent_ball->anim,img_rball);
+
 
 	ent_block=Entity_New();
 	ent_block->type=Ent_Block;
@@ -152,10 +155,20 @@ int main(int argc,char *argv[]){
 	vec2_set(e->pos,132,100+3*32);
 	GameLib_AddEntity(e);
 
-	e=Entity_Copy(ent_ball);
+	for(i=0;i<3;i++){
+		e=Entity_Copy(ent_ball);
+		vec2_set(e->pos,200+i*33,100);
+		GameLib_AddEntity(e);
+	}
+	for(i=0;i<3;i++){
+		e=Entity_Copy(ent_ball);
+		vec2_set(e->pos,200+i*33,133);
+		GameLib_AddEntity(e);
+	}
+	/*e=Entity_Copy(ent_ball);
 	vec2_set(e->pos,132,100);
 	GameLib_AddEntity(e);
-
+*/
 	e=Entity_Copy(ent_player);
 	vec2_set(e->pos,132,50);
 	GameLib_AddEntity(e);

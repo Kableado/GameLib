@@ -4,16 +4,26 @@
 #include "Draw.h"
 #include "Anim.h"
 
+
+////////////////////////////////////////////////
+// Animation //
+///////////////
+//
 typedef struct {
 	DrawImg img;
 	int w;
-	int fps;
+	float fps;
 	int frames;
 	int ftime;
 	int time;
 } Animation;
 
-Anim Anim_LoadAnim(char *fichero,int frames,int fps){
+
+/////////////////////////////
+// Anim_LoadAnim
+//
+//
+Anim Anim_LoadAnim(char *fichero,int frames,float fps){
 	DrawImg img;
 	Animation *anim;
 	int w,h;
@@ -37,12 +47,22 @@ Anim Anim_LoadAnim(char *fichero,int frames,int fps){
 }
 
 
+/////////////////////////////
+// Anim_GetTime
+//
+//
 int Anim_GetTime(Anim a){
 	Animation *anim=a;
 
 	return(anim->time);
 }
 
+
+/////////////////////////////
+// Anim_SetOffset
+// Anim_GetOffset
+//
+//
 void Anim_SetOffset(Anim a,int  x,int  y){
 	Animation *anim=a;
 
@@ -54,6 +74,11 @@ void Anim_GetOffset(Anim a,int *x,int *y){
 	Draw_GetOffset(anim->img,x,y);
 }
 
+
+/////////////////////////////
+// Anim_Draw
+//
+//
 void Anim_Draw(Anim a,int time_ms,int x,int y){
 	Animation *anim=a;
 	int frame;
@@ -63,14 +88,10 @@ void Anim_Draw(Anim a,int time_ms,int x,int y){
 }
 
 
-
-
-
-
-
-
-
-
+/////////////////////////////
+// AnimPlay_Copy
+//
+//
 void AnimPlay_Copy(AnimPlay *ad,AnimPlay *ao){
 	ad->img=ao->img;
 	ad->anim=ao->anim;
@@ -78,6 +99,11 @@ void AnimPlay_Copy(AnimPlay *ad,AnimPlay *ao){
 }
 
 
+/////////////////////////////
+// AnimPlay_SetImg
+// AnimPlay_SetAnim
+//
+//
 void AnimPlay_SetImg(AnimPlay *ap,DrawImg img){
 	ap->anim=NULL;
 	ap->img=img;
@@ -90,6 +116,10 @@ void AnimPlay_SetAnim(AnimPlay *ap,Anim ani){
 }
 
 
+/////////////////////////////
+// AnimPlay_Draw
+//
+//
 void AnimPlay_Draw(AnimPlay *ani,int x,int y){
 	if(ani->anim){
 		Anim_Draw(ani->anim,ani->time_ms,x,y);
@@ -99,6 +129,11 @@ void AnimPlay_Draw(AnimPlay *ani,int x,int y){
 	}
 }
 
+
+/////////////////////////////
+// AnimPlay_IncTime
+//
+//
 void AnimPlay_IncTime(AnimPlay *ani,int t){
 	if(ani->anim){
 		ani->time_ms+=t;

@@ -87,6 +87,13 @@ void Draw_DrawImg(DrawImg img,int x,int y);
 void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int i);
 
 
+/////////////////////////////
+// Draw_DrawImgTrans
+//
+// Draws an image transformed.
+void Draw_DrawImgTrans(DrawImg img,int x,int y,float angle);
+
+
 ////////////////////////////////////////////////
 // DrawFnt //
 /////////////
@@ -97,12 +104,19 @@ typedef void *DrawFnt;
 /////////////////////////////
 // Draw_DefaultFont
 //
-// Loads a image, giving a reference.
+// Creates the default font.
 DrawFnt Draw_DefaultFont(
 	unsigned char r,
 	unsigned char g,
 	unsigned char b,
 	unsigned char a);
+
+
+/////////////////////////////
+// Draw_LoadFont
+//
+// Load a font from a file.
+DrawFnt Draw_LoadFont(char *fichero,int min,int max);
 
 
 /////////////////////////////

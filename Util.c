@@ -40,7 +40,7 @@ int Intersec_RayUnitCircle(vec2 orig,vec2 vel,vec2 center,float *t){
 
 	// Solve as a unit circle
 	a=vec2_dot(vel,vel);
-	if(fabs(a)<0.0f){
+	if(fabs(a)<=0.0f){
 		return(0);
 	}
 	vec2_minus(temp,orig,center);

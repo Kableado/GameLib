@@ -119,7 +119,7 @@ int GameLib_ProcLoop(){
 		if(_entity[i]->mass>0.0f){
 			vec2_plus(_entity[i]->vel,_entity[i]->vel,grav);
 		}
-		*/
+*/
 	}
 
 	// Process colisions between entities
@@ -136,7 +136,7 @@ int GameLib_ProcLoop(){
 			}
 		}
 		count++;
-	}while(repeat && count<10);
+	}while(repeat && count<20);
 
 	// Stop remaining collisions
 	for(i=0;i<_n_entities-1;i++){
