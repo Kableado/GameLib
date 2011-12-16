@@ -131,6 +131,7 @@ void Entity_PostProcess(Entity *e,int ft){
 			vec2_scale(e->vel,e->vel,
 				1.0f-(e->fric_dynamic+(e->fric_static/len)));
 		}
+
 	}
 
 	// Animate
@@ -146,7 +147,7 @@ void Entity_CollisionResponse(
 	Entity *b1,Entity *b2,float t,vec2 n)
 {
 	float moment;
-	vec2 temp,temp2;
+	vec2 temp;
 	float elast;
 
 	if(b1->mass>0.0f && b2->mass>0.0f){
@@ -194,7 +195,6 @@ int Entity_Collide(Entity *b1,Entity *b2){
 	float t;
 	vec2 n;
 	vec2 cir1[2];
-	vec2 cir1i,cir2i;
 	Entity *b_aux;
 
 	// FIX: Swap colision order based on moving object

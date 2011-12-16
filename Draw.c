@@ -3,6 +3,7 @@
 	#include <windows.h>
 #endif
 #include <SDL/SDL.h>
+#include <time.h>
 
 #include "Time.h"
 #include "Util.h"
@@ -161,11 +162,10 @@ typedef struct Tag_DrawImage {
 
 
 /////////////////////////////
-// Draw_LoadImage
+// Draw_LoadSurface
 //
-// Loads a image, giving a reference.
-DrawImg Draw_LoadImage(char *filename){
-	DrawImage *image;
+// Loads a surface.
+SDL_Surface *Draw_LoadSurface(char *filename){
 	SDL_Surface *surf;
 
 	// Load the BMP as a surface
@@ -197,6 +197,24 @@ DrawImg Draw_LoadImage(char *filename){
 			// Make it use the alpha channel
 			SDL_SetAlpha(surf, SDL_SRCALPHA, 255);
 		}
+	}
+
+	return(surf);
+}
+
+
+/////////////////////////////
+// Draw_LoadImage
+//
+// Loads a image, giving a reference.
+DrawImg Draw_LoadImage(char *filename){
+	DrawImage *image;
+	SDL_Surface *surf;
+
+	// Loads the surface
+	surf=Draw_LoadSurface(filename);
+	if(surf == NULL){
+		return(NULL);
 	}
 
 	// Create the image container
@@ -316,6 +334,28 @@ void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int i){
 }
 
 
+/////////////////////////////
+// Draw_DrawImgTrans
+//
+// Draws an image transformed.
+void Draw_DrawImgTrans(DrawImg img,int x,int y,float angle){
+	DrawImage *image=img;
+	SDL_Rect orig;
+	SDL_Rect dest;
+
+	// Prepare the rects
+	orig.x=0;
+	orig.y=0;
+	dest.x=x+image->x;
+	dest.y=y+image->y;
+	orig.w=dest.w=image->surf->w;
+	orig.h=dest.h=image->surf->h;
+
+	// Blit the surface on the screen
+	SDL_BlitSurface(image->surf,&orig,_screen,&dest);
+}
+
+
 ////////////////////////////////////////////////
 // DrawFnt //
 /////////////
@@ -323,14 +363,59 @@ void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int i){
 typedef struct {
 	SDL_Surface *surf;
 	int w,h;
+	int min,max;
 } DrawFont;
 
 
 /////////////////////////////
 // Draw_DefaultFont
 //
-// Creates a image with the default font.
+// Creates a surface with the default font.
 #include "FontData.h"
+SDL_Surface *Draw_DefaultFontSurface(
+	unsigned char r,
+	unsigned char g,
+	unsigned char b,
+	unsigned char a)
+{
+	SDL_Surface *surf;
+	int x,y,c;
+	Uint32 color,color2;
+
+	// Create the surface
+	surf = SDL_CreateRGBSurface(SDL_SWSURFACE,
+		8*256, 8, 32,0,0,0,0);
+	surf->format->Amask=0xFF000000;
+	surf->format->Ashift=24;
+
+	// Draw the font
+	SDL_LockSurface(surf);
+	color =SDL_MapRGBA(surf->format,r,g,b,a);
+	color2=SDL_MapRGBA(surf->format,r,g,b,0);
+	for(c=0;c<256;c++){
+		for(y=0;y<8;y++){
+			for(x=0;x<8;x++){
+				if(((fontdata_8x8[c*8+y]>>(7-x)) & 0x01)==1){
+					//Imagen_PutPixel(dest,c*8+x,y,color);
+					((Uint32 *)surf->pixels)[(c*8+x)+(8*256*y)]=
+						color;
+				}else{
+					//Imagen_PutPixel(dest,c*8+x,y,color2);
+					((Uint32 *)surf->pixels)[(c*8+x)+(8*256*y)]=
+						color2;
+				}
+			}
+		}
+	}
+	SDL_UnlockSurface(surf);
+
+	return(surf);
+}
+
+/////////////////////////////
+// Draw_DefaultFont
+//
+// Creates the default font.
 DrawFnt Draw_DefaultFont(
 	unsigned char r,
 	unsigned char g,
@@ -338,6 +423,28 @@ DrawFnt Draw_DefaultFont(
 	unsigned char a)
 {
 	DrawFont *font;
+
+	// Create the default font
+	font=malloc(sizeof(DrawFont));
+	font->surf = Draw_DefaultFontSurface(r,g,b,a);
+	font->w=8;
+	font->h=8;
+
+	font->surf->format->Amask=0xFF000000;
+	font->surf->format->Ashift=24;
+	SDL_SetAlpha(font->surf, SDL_SRCALPHA, 255);
+
+
+
+	return((DrawFnt)font);
+}
+
+/////////////////////////////
+// Draw_LoadFont
+//
+// Load a font from a file.
+DrawFnt Draw_LoadFont(char *fichero,int min,int max){
+	/*DrawFont *font;
 	int x,y,c;
 	Uint32 color,color2;
 
@@ -372,9 +479,8 @@ DrawFnt Draw_DefaultFont(
 	}
 	SDL_UnlockSurface(font->surf);
 
-	return((DrawFnt)font);
+	return((DrawFnt)font);*/
 }
-
 
 /////////////////////////////
 // Draw_DrawText
