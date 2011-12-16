@@ -17,7 +17,7 @@ int _n_entities=0;
 int _n_entities_res=0;
 void (*_gameproc)()=NULL;
 void (*_gamepostproc)()=NULL;
-
+int _ft;
 
 /////////////////////////////
 // GameLib_Init
@@ -31,6 +31,9 @@ int GameLib_Init(int w,int h,char *title,int fps){
 		return(0);
 	}
 	Audio_Init();
+
+	_ft=1000/fps;
+
 	return(1);
 }
 
@@ -106,10 +109,17 @@ int GameLib_ProcLoop(){
 	}
 
 	// Process entities
+	vec2 grav;
+	vec2_set(grav,0,1);
 	for(i=0;i<_n_entities;i++){
 		if(!_entity[i])
 			continue;
-		Entity_Process(_entity[i]);
+		Entity_Process(_entity[i],_ft);
+/*
+		if(_entity[i]->mass>0.0f){
+			vec2_plus(_entity[i]->vel,_entity[i]->vel,grav);
+		}
+		*/
 	}
 
 	// Process colisions between entities
@@ -144,7 +154,7 @@ int GameLib_ProcLoop(){
 	for(i=0;i<_n_entities;i++){
 		if(!_entity[i])
 			continue;
-		Entity_PostProcess(_entity[i]);
+		Entity_PostProcess(_entity[i],_ft);
 		Entity_Draw(_entity[i]);
 	}
 

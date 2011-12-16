@@ -4,6 +4,7 @@
 
 #include "Util.h"
 #include "Draw.h"
+#include "Anim.h"
 
 #include "Entity.h"
 
@@ -27,10 +28,12 @@ Entity *Entity_New(){
 	e->fric_static=1.0f;
 	e->fric_dynamic=0.0f;
 
-	e->img=NULL;
+	//e->img=NULL;
+	AnimPlay_SetImg(&e->anim,NULL);
 
 	e->proc=NULL;
 	e->postproc=NULL;
+	e->collision=NULL;
 
 	return(e);
 }
@@ -64,10 +67,12 @@ Entity *Entity_Copy(Entity *e){
 	n->fric_static=e->fric_static;
 	n->fric_dynamic=e->fric_dynamic;
 
-	n->img=e->img;
+	//n->img=e->img;
+	AnimPlay_Copy(&n->anim,&e->anim);
 
 	n->proc=e->proc;
 	n->postproc=e->postproc;
+	n->collision=e->collision;
 
 	return(n);
 }
@@ -78,8 +83,9 @@ Entity *Entity_Copy(Entity *e){
 //
 //
 void Entity_Draw(Entity *e){
-	if(e->img)
-		Draw_DrawImg(e->img,e->pos[0],e->pos[1]);
+	//if(e->img)
+	//	Draw_DrawImg(e->img,e->pos[0],e->pos[1]);
+	AnimPlay_Draw(&e->anim,e->pos[0],e->pos[1]);
 }
 
 
@@ -87,11 +93,11 @@ void Entity_Draw(Entity *e){
 // Entity_Process
 //
 //
-void Entity_Process(Entity *b){
+void Entity_Process(Entity *b,int ft){
 
 	// Launch method
 	if(b->proc){
-		b->proc(b);
+		b->proc(b,ft);
 	}
 }
 
@@ -100,12 +106,12 @@ void Entity_Process(Entity *b){
 // Entity_PostProcess
 //
 //
-void Entity_PostProcess(Entity *e){
+void Entity_PostProcess(Entity *e,int ft){
 	float qlen,len;
 
 	// Launch method
 	if(e->postproc){
-		e->postproc(e);
+		e->postproc(e,ft);
 	}
 
 	// Determine if there is movement
@@ -125,6 +131,57 @@ void Entity_PostProcess(Entity *e){
 			vec2_scale(e->vel,e->vel,
 				1.0f-(e->fric_dynamic+(e->fric_static/len)));
 		}
+	}
+
+	// Animate
+	AnimPlay_IncTime(&e->anim,ft);
+}
+
+
+/////////////////////////////
+// Entity_CollisionResponse
+//
+// Response to a collision
+void Entity_CollisionResponse(
+	Entity *b1,Entity *b2,float t,vec2 n)
+{
+	float moment;
+	vec2 temp,temp2;
+	float elast;
+
+	if(b1->mass>0.0f && b2->mass>0.0f){
+		// Calculate elasticity
+		elast=(b1->mass*b1->elast+b2->mass*b2->elast)/
+			(b1->mass+b2->mass);
+
+		// Collision between two massed balls
+		moment=((1.0f+elast)*b1->mass*b2->mass*
+					(vec2_dot(b1->vel,n)+vec2_dot(b2->vel,n)))
+				/(b1->mass+b2->mass);
+		vec2_scale(temp,n,moment/b1->mass);
+		vec2_minus(b1->vel,b1->vel,temp);
+		vec2_scale(temp,n,moment/b2->mass);
+		vec2_plus(b2->vel,b2->vel,temp);
+	}else
+	if(b1->mass>0.0f && b2->mass<=0.0f){
+		// Collision between a massed ball and a fixed ball
+		moment=(1.0f+b1->elast)*
+					(vec2_dot(b1->vel,n));
+		vec2_scale(temp,n,moment);
+		vec2_minus(b1->vel,b1->vel,temp);
+	}else
+	if(b1->mass<=0.0f && b2->mass>0.0f){
+		// Collision between a massed ball and a fixed ball
+		// (imposible, but better safe)
+		moment=(1.0f+b2->elast)*
+					(vec2_dot(b2->vel,n));
+		vec2_scale(temp,n,moment);
+		vec2_plus(b2->vel,b2->vel,temp);
+	}else{
+		// Collision between 2 fixed balls
+		// (imposible, but better safe)
+		vec2_set(b1->vel,0,0);
+		vec2_set(b2->vel,0,0);
 	}
 }
 
@@ -153,47 +210,29 @@ int Entity_Collide(Entity *b1,Entity *b2){
 	vec2_minus(cir1[1],cir1[1],b2->vel);
 
 	if(Colision_CircleCircle(cir1,b1->radius,b2->pos,b2->radius,&t,n)){
-		float moment;
-		vec2 temp,temp2;
-		float elast;
+		int response=1;
+
+		// Check the collision methods
+		if(b1->collision){
+			if(!b1->collision(b1,b2,t,n)){
+				response=0;
+			}
+		}
+		if(b2->collision){
+			vec2 n2;
+			vec2_scale(n2,n,-1.0f);
+			if(!b2->collision(b2,b1,t,n2)){
+				response=0;
+			}
+		}
 
 		// Collision response
-
-		if(b1->mass>0.0f && b2->mass>0.0f){
-			// Calculate elasticity
-			elast=(b1->mass*b1->elast+b2->mass*b2->elast)/
-				(b1->mass+b2->mass);
-
-			// Collision between two massed balls
-			moment=((1.0f+elast)*b1->mass*b2->mass*
-						(vec2_dot(b1->vel,n)+vec2_dot(b2->vel,n)))
-					/(b1->mass+b2->mass);
-			vec2_scale(temp,n,moment/b1->mass);
-			vec2_minus(b1->vel,b1->vel,temp);
-			vec2_scale(temp,n,moment/b2->mass);
-			vec2_plus(b2->vel,b2->vel,temp);
-		}else
-		if(b1->mass>0.0f && b2->mass<=0.0f){
-			// Collision between a massed ball and a fixed ball
-			moment=(1.0f+b1->elast)*
-						(vec2_dot(b1->vel,n));
-			vec2_scale(temp,n,moment);
-			vec2_minus(b1->vel,b1->vel,temp);
-		}else
-		if(b1->mass<=0.0f && b2->mass>0.0f){
-			// Collision between a massed ball and a fixed ball
-			// (imposible, but better safe)
-			moment=(1.0f+b2->elast)*
-						(vec2_dot(b2->vel,n));
-			vec2_scale(temp,n,moment);
-			vec2_plus(b2->vel,b2->vel,temp);
+		if(response){
+			Entity_CollisionResponse(b1,b2,t,n);
+			return(1);
 		}else{
-			// Collision between 2 fixed balls
-			// (imposible, but better safe)
-			vec2_set(b1->vel,0,0);
-			vec2_set(b2->vel,0,0);
+			return(0);
 		}
-		return(1);
 	}
 	return(0);
 }

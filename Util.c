@@ -40,18 +40,18 @@ int Intersec_RayUnitCircle(vec2 orig,vec2 vel,vec2 center,float *t){
 
 	// Solve as a unit circle
 	a=vec2_dot(vel,vel);
-	if(fabs(a)<0.000001f){
+	if(fabs(a)<0.0f){
 		return(0);
 	}
 	vec2_minus(temp,orig,center);
 	b=2.0f*vec2_dot(temp,vel);
 	c=vec2_dot(temp,temp)-1.0f;
 	if(SolveQuadratic(a,b,c,&Rmin,&Rmax)){
-		if(Rmin>=-0.0001f && Rmin<Rmax && Rmin<=1.0f){
+		if(Rmin>=-0.0f && Rmin<Rmax && Rmin<=1.0f){
 			*t=Rmin;
 			return(1);
 		}
-		if(Rmax>=-0.0001f && Rmin>Rmax && Rmax<=1.0f){
+		if(Rmax>=-0.0f && Rmin>Rmax && Rmax<=1.0f){
 			*t=Rmax;
 			return(1);
 		}

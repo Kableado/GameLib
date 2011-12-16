@@ -178,8 +178,25 @@ DrawImg Draw_LoadImage(char *filename){
 
 	// FIX: Setting up the alpha channel.
 	if(surf->format->BytesPerPixel==4){
+		int i,len,trans;
+
+		// set the correct values
 		surf->format->Amask=0xFF000000;
 		surf->format->Ashift=24;
+
+		// Check if the image has some area transparent
+		trans=0;
+		len=surf->w*surf->h;
+		for(i=0;i<len;i++){
+			if((((Uint32 *)surf->pixels)[i]&0xFF000000)!=0xFF000000){
+				trans=1;
+				break;
+			}
+		}
+		if(trans){
+			// Make it use the alpha channel
+			SDL_SetAlpha(surf, SDL_SRCALPHA, 255);
+		}
 	}
 
 	// Create the image container
@@ -270,6 +287,28 @@ void Draw_DrawImg(DrawImg img,int x,int y){
 	dest.x=x+image->x;
 	dest.y=y+image->y;
 	orig.w=dest.w=image->surf->w;
+	orig.h=dest.h=image->surf->h;
+
+	// Blit the surface on the screen
+	SDL_BlitSurface(image->surf,&orig,_screen,&dest);
+}
+
+
+/////////////////////////////
+// Draw_DrawImgPart
+//
+// Draws an image part.
+void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int i){
+	DrawImage *image=img;
+	SDL_Rect orig;
+	SDL_Rect dest;
+
+	// Prepare the rects
+	orig.x=w*i;
+	orig.y=0;
+	dest.x=x+image->x;
+	dest.y=y+image->y;
+	orig.w=dest.w=w;
 	orig.h=dest.h=image->surf->h;
 
 	// Blit the surface on the screen

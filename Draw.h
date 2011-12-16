@@ -80,6 +80,13 @@ void Draw_ImgSetAlpha(DrawImg img, unsigned char a);
 void Draw_DrawImg(DrawImg img,int x,int y);
 
 
+/////////////////////////////
+// Draw_DrawImgPart
+//
+// Draws an image part.
+void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int i);
+
+
 ////////////////////////////////////////////////
 // DrawFnt //
 /////////////
