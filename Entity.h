@@ -3,6 +3,7 @@
 
 #include "Util.h"
 #include "Draw.h"
+#include "Anim.h"
 
 
 ////////////////////////////////////////////////
@@ -22,10 +23,15 @@ typedef struct Tag_Entity{
 	float fric_static;
 	float fric_dynamic;
 
-	DrawImg img;
+	//DrawImg img;
+	AnimPlay anim;
 
-	void (*proc)(struct Tag_Entity *ent);
-	void (*postproc)(struct Tag_Entity *ent);
+	void (*proc)(struct Tag_Entity *ent,int ft);
+	void (*postproc)(struct Tag_Entity *ent,int ft);
+	int (*collision)(
+		struct Tag_Entity *ent,
+		struct Tag_Entity *ent2,
+		float t,vec2 n);
 } Entity;
 
 
@@ -61,13 +67,13 @@ void Entity_Draw(Entity *e);
 // Entity_Process
 //
 //
-void Entity_Process(Entity *e);
+void Entity_Process(Entity *e,int ft);
 
 /////////////////////////////
 // Entity_PostProcess
 //
 //
-void Entity_PostProcess(Entity *e);
+void Entity_PostProcess(Entity *e,int ft);
 
 
 /////////////////////////////
