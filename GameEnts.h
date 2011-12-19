@@ -1,3 +1,5 @@
+// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+
 #ifndef _GAMEENTS_H_
 #define _GAMEENTS_H_
 

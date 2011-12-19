@@ -1,3 +1,5 @@
+// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+
 #ifndef _AUDIO_H_
 #define _AUDIO_H_
 

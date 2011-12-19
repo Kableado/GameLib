@@ -1,3 +1,5 @@
+// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+
 #include <math.h>
 
 #include "Util.h"

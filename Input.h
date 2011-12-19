@@ -1,3 +1,5 @@
+// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+
 #ifndef _INPUT_H_
 #define _INPUT_H_
 

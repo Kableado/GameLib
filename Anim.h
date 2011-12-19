@@ -1,3 +1,5 @@
+// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+
 #ifndef _ANIM_H_
 #define _ANIM_H_
 

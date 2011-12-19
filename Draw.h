@@ -1,3 +1,5 @@
+// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+
 #ifndef _DRAW_H_
 #define _DRAW_H_
 

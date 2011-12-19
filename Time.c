@@ -1,3 +1,5 @@
+// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+
 #include <stdio.h>
 #include <math.h>
 #include <unistd.h>
