@@ -13,27 +13,42 @@
 // Entity_New
 //
 //
+Entity *_free_entity=NULL;
 Entity *Entity_New(){
 	Entity *e;
 
-	e=malloc(sizeof(Entity));
+	if(!_free_entity){
+		e=malloc(sizeof(Entity));
+	}else{
+		e=_free_entity;
+		_free_entity=e->next;
+	}
 
 	e->type=0;
 	vec2_set(e->pos,0.0f,0.0f);
+	e->flags=EntityFlag_Collision|EntityFlag_Overlap;
+	e->zorder=1;
 
 	vec2_set(e->vel,0.0f,0.0f);
 	e->radius=1.0f;
 	e->mass=1.0f;
 	e->elast=0.0f;
-	e->fric_static=1.0f;
+	e->fric_static=0.5f;
 	e->fric_dynamic=0.0f;
 
 	//e->img=NULL;
 	AnimPlay_SetImg(&e->anim,NULL);
 
+	e->oncopy=NULL;
 	e->proc=NULL;
 	e->postproc=NULL;
 	e->collision=NULL;
+	e->overlap=NULL;
+
+	e->A=0;
+	e->child=NULL;
+
+	e->next=NULL;
 
 	return(e);
 }
@@ -44,7 +59,8 @@ Entity *Entity_New(){
 //
 //
 void Entity_Destroy(Entity *e){
-	free(e);
+	e->next=_free_entity;
+	_free_entity=e;
 }
 
 
@@ -59,6 +75,8 @@ Entity *Entity_Copy(Entity *e){
 
 	n->type=e->type;
 	vec2_set(n->pos,e->pos[0],e->pos[1]);
+	n->flags=e->flags;
+	n->zorder=e->zorder;
 
 	vec2_set(n->vel,e->vel[0],e->vel[1]);
 	n->radius=e->radius;
@@ -70,9 +88,19 @@ Entity *Entity_Copy(Entity *e){
 	//n->img=e->img;
 	AnimPlay_Copy(&n->anim,&e->anim);
 
+	n->oncopy=e->oncopy;
 	n->proc=e->proc;
 	n->postproc=e->postproc;
 	n->collision=e->collision;
+	n->overlap=e->overlap;
+
+	n->A=e->A;
+	n->child=e->child;
+
+	// Call the copy event
+	if(n->oncopy){
+		n->oncopy(n);
+	}
 
 	return(n);
 }
@@ -82,10 +110,8 @@ Entity *Entity_Copy(Entity *e){
 // Entity_Draw
 //
 //
-void Entity_Draw(Entity *e){
-	//if(e->img)
-	//	Draw_DrawImg(e->img,e->pos[0],e->pos[1]);
-	AnimPlay_Draw(&e->anim,e->pos[0],e->pos[1]);
+void Entity_Draw(Entity *e,int x,int y){
+	AnimPlay_Draw(&e->anim,e->pos[0]+x,e->pos[1]+y);
 }
 
 
@@ -197,6 +223,9 @@ int Entity_Collide(Entity *b1,Entity *b2){
 	vec2 cir1[2];
 	Entity *b_aux;
 
+	if(!(b1->flags&EntityFlag_Collision) || !(b2->flags&EntityFlag_Collision))
+		return(0);
+
 	// FIX: Swap colision order based on moving object
 	if(vec2_dot(b1->vel,b1->vel)<vec2_dot(b2->vel,b2->vel)){
 		b_aux=b1;
@@ -235,6 +264,29 @@ int Entity_Collide(Entity *b1,Entity *b2){
 		}
 	}
 	return(0);
+}
+
+
+/////////////////////////////
+// Entity_Overlaps
+//
+//
+void Entity_Overlaps(Entity *b1,Entity *b2){
+	vec2 len;
+	float dist;
+
+	if(!(b1->flags&EntityFlag_Overlap) || !(b2->flags&EntityFlag_Overlap))
+		return;
+
+	vec2_minus(len,b1->pos,b2->pos);
+	dist=sqrtf(vec2_dot(len,len));
+
+	if(b1->radius>dist && b1->overlap){
+		b1->overlap(b1,b2);
+	}
+	if(b2->radius>dist && b2->overlap){
+		b2->overlap(b2,b1);
+	}
 }
 
 

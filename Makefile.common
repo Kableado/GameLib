@@ -6,7 +6,9 @@ HEADS= \
 	Audio.h \
 	Anim.h \
 	Entity.h \
-	GameLib.h
+	GameLib.h \
+	GameEnts.h \
+	GameMap.h
 
 OBJS= \
 	$(BUILDDIR)/Time.o \
@@ -17,6 +19,8 @@ OBJS= \
 	$(BUILDDIR)/Anim.o \
 	$(BUILDDIR)/Entity.o \
 	$(BUILDDIR)/GameLib.o \
+	$(BUILDDIR)/GameEnts.o \
+	$(BUILDDIR)/GameMap.o \
 	$(BUILDDIR)/main.o
 
 
@@ -50,6 +54,12 @@ $(BUILDDIR)/Anim.o: Anim.c $(HEADS)
 
 $(BUILDDIR)/GameLib.o: GameLib.c $(HEADS)
 	$(CC) -c GameLib.c -o $(BUILDDIR)/GameLib.o $(CFLAGS)
+
+$(BUILDDIR)/GameEnts.o: GameEnts.c $(HEADS)
+	$(CC) -c GameEnts.c -o $(BUILDDIR)/GameEnts.o $(CFLAGS)
+
+$(BUILDDIR)/GameMap.o: GameMap.c $(HEADS)
+	$(CC) -c GameMap.c -o $(BUILDDIR)/GameMap.o $(CFLAGS)
 
 $(BUILDDIR)/main.o: main.c $(HEADS)
 	$(CC) -c main.c -o $(BUILDDIR)/main.o $(CFLAGS)

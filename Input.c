@@ -41,6 +41,8 @@ void Input_Frame(){
 	Input_SetKey(InputKey_Left,keys[SDLK_LEFT]);
 	Input_SetKey(InputKey_Right,keys[SDLK_RIGHT]);
 	Input_SetKey(InputKey_Jump,keys[SDLK_SPACE]);
+	Input_SetKey(InputKey_Continue,keys[SDLK_RETURN]|keys[SDLK_KP_ENTER]);
+
 }
 
 
@@ -67,6 +69,21 @@ void Input_SetKey(InputKey key,int status){
 // Reports a the status of a key.
 InputKeyStatus Input_GetKey(InputKey key){
 	return(_keys[key]);
+}
+
+
+/////////////////////////////
+// Input_AnyKey
+//
+//
+int Input_AnyKey(){
+	int i;
+	for(i=0;i<InputKey_Max;i++){
+		if(_keys[i]==InputKey_Pressed){
+			return(1);
+		}
+	}
+	return(0);
 }
 
 

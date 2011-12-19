@@ -56,4 +56,16 @@ void GameLib_BreakLoop();
 
 
 
+void GameLib_GetPos(int pos[2]);
+
+void GameLib_SetPos(int pos[2]);
+
+void GameLib_GetSize(int size[2]);
+
+void GameLib_DelEnts();
+
+void GameLib_ForEachEnt(int (*func)(Entity *ent));
+
+void GameLib_PlaySound(AudioSnd snd,int x,int y);
+
 #endif

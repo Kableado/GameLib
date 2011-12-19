@@ -480,6 +480,7 @@ DrawFnt Draw_LoadFont(char *fichero,int min,int max){
 	SDL_UnlockSurface(font->surf);
 
 	return((DrawFnt)font);*/
+	return(NULL);
 }
 
 /////////////////////////////

@@ -5,15 +5,20 @@
 #include "Draw.h"
 #include "Anim.h"
 
+#define EntityFlag_Collision 1
+#define EntityFlag_Overlap 2
+
 
 ////////////////////////////////////////////////
 // Entity //
 ////////////
 //
-typedef struct Tag_Entity{
+typedef struct Tag_Entity {
 
 	int type;
 	vec2 pos;
+	int flags;
+	int zorder;
 
 	vec2 vel;
 	vec2 bod_offset;
@@ -23,15 +28,23 @@ typedef struct Tag_Entity{
 	float fric_static;
 	float fric_dynamic;
 
-	//DrawImg img;
 	AnimPlay anim;
 
+	void (*oncopy)(struct Tag_Entity *ent);
 	void (*proc)(struct Tag_Entity *ent,int ft);
 	void (*postproc)(struct Tag_Entity *ent,int ft);
 	int (*collision)(
 		struct Tag_Entity *ent,
 		struct Tag_Entity *ent2,
 		float t,vec2 n);
+	void (*overlap)(
+		struct Tag_Entity *ent,
+		struct Tag_Entity *ent2);
+
+	int A;
+	struct Tag_Entity *child;
+
+	void *next;
 } Entity;
 
 
@@ -60,7 +73,7 @@ Entity *Entity_Copy(Entity *e);
 // Entity_Draw
 //
 //
-void Entity_Draw(Entity *e);
+void Entity_Draw(Entity *e,int x,int y);
 
 
 /////////////////////////////
@@ -81,6 +94,13 @@ void Entity_PostProcess(Entity *e,int ft);
 //
 //
 int Entity_Collide(Entity *b1,Entity *b2);
+
+
+/////////////////////////////
+// Entity_Overlaps
+//
+//
+void Entity_Overlaps(Entity *b1,Entity *b2);
 
 
 /////////////////////////////

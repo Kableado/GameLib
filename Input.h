@@ -30,6 +30,7 @@ typedef enum {
 	InputKey_Left,
 	InputKey_Right,
 	InputKey_Jump,
+	InputKey_Continue,
 	InputKey_Max
 } InputKey;
 
@@ -57,6 +58,13 @@ typedef enum {
 //
 // Reports a the status of a key.
 InputKeyStatus Input_GetKey(InputKey key);
+
+
+/////////////////////////////
+// Input_AnyKey
+//
+//
+int Input_AnyKey();
 
 
 /////////////////////////////
