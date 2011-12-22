@@ -1,16 +1,58 @@
 100 100
 
- #########
- #...1...#
- #.......#
- #.......#
- #.SSSSSS#
- #.......#
- #SSSSSS.#
- #.......#
- #.B.SSSS#
- #SSSmmmm#
- #.......#  ############
+##############
+#SSSSm.1.mSSS#
+#SSSSm...mSSS#
+#SSSSm...mSSS#
+#SSSSmBm.mSSS#
+#S..SSB..mSSS#
+#S.SSmmmmmSSS#
+#S.SSSSSSSSSS#
+#S.....BSSB.S#
+#SSSSS.SSSSSS#
+#mmmmm.mmmmmm#
+     mBm
+     mBm
+     mBm
+     mBm
+     mBm
+######B#######
+#SSSSm2..SSSS#
+#SSSSmBm.SSSS#
+#S..SSB..SSSS#
+#S.SSSSSSSSSS#
+#S.SSSSSSSSSS#
+#S.....BSSB.S#
+#SSSSS.SSSSSS#
+#mmmmm.mmmmmm#
+     m.m
+     m.m
+     m.m
+     m.m
+     m.m
+     m.m
+######.######
+#.....3.....#
+#.B.B...B.B.#
+#...........#
+#LLLSSSSSLLL#
+#...A...A...#
+#mmmmm.mmmmm#
+     m.m
+     m.m
+     m.m
+     m.m
+     m.m
+######.######
+#.....4.....#
+#.B.B...B.B.#
+#...........#
+#LLLLLSLLLLL#
+#...A...A...#
+#mmmmmmmmmmm#
+
+
+            ############
  #mmm.mmm#  #....L.....#
     m.m     #..L.L.S..<#
     m.m     #..L.L.S...#
@@ -21,31 +63,4 @@
             m....L.S...#
             m.>..L.S...########
             m.B....S..........#
-            mmmmmmmmmmmmmmmmm.#
-                            m.#
-                            m.#
-                            m.#
-                            m.#
-                       ######.######
-                       #.....3.....#
-                       #.B.B...B.B.#
-                       #...........#
-                       #LLLSSSSSLLL#
-                       #...A...A...#
-                       #...........#
-                       #...........#
-                       #mmmmm.mmmmm#
-                            m.m
-                            m.m
-                            m.m
-                            m.m
-                            m.m
-                       ######.######
-                       #.....4.....#
-                       #.B.B...B.B.#
-                       #...........#
-                       #LLLLLSLLLLL#
-                       #...A...A...#
-                       #...........#
-                       #.....F.....#
-                       #mmmmmmmmmmm#
+            mmmmmmmmmmmmmmmmm

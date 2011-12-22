@@ -126,7 +126,7 @@ int main(int argc,char *argv[]){
 				int  pos[2]={0,0};
 				GameLib_SetPos(pos);
 				game_level=3;
-				game_level_point=2;
+				game_level_point=1;
 				game_level_reset=0;
 				GameMap_CreateLevel(game_level,game_level_point);
 			}

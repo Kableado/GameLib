@@ -35,7 +35,7 @@ Entity *Entity_New(){
 	e->radius=1.0f;
 	e->mass=1.0f;
 	e->elast=0.0f;
-	e->fric_static=0.5f;
+	e->fric_static=0.0f;
 	e->fric_dynamic=0.0f;
 
 	//e->img=NULL;

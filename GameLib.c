@@ -395,7 +395,7 @@ void GameLib_ForEachEnt(int (*func)(Entity *ent)){
 //
 //
 void GameLib_PlaySound(AudioSnd snd,int x,int y){
-	float vleft,vright,vcen;
+	float vleft,vright,dx,dy;
 	int r,cx,cy,off;
 
 	// Get the screen context
@@ -410,11 +410,12 @@ void GameLib_PlaySound(AudioSnd snd,int x,int y){
 	off=r/10.0f;
 
 	// Calculate volumes
-	vcen=1.0f-(abs(y-cy)/(float)r);
-	vright=1.0f-(abs(x-(cx+off))/(float)r);
-	vleft=1.0f-(abs(x-(cx-off))/(float)r);
-	vright*=vcen;
-	vleft*=vcen;
+	dx=x-(cx+off);
+	dy=y-(cy);
+	vright=1.0f-(sqrtf(dx*dx+dy*dy)/(float)r);
+	dx=x-(cx-off);
+	dy=y-(cy);
+	vleft=1.0f-(sqrtf(dx*dx+dy*dy)/(float)r);
 
 	// Clamp to 0
 	if(vleft<0.0f)

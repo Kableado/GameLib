@@ -44,5 +44,10 @@ extern Entity *ent_savepoint_1;
 extern Entity *ent_savepoint_2;
 extern Entity *ent_savepoint_3;
 extern Entity *ent_savepoint_4;
+extern Entity *ent_savepoint_5;
+extern Entity *ent_savepoint_6;
+extern Entity *ent_savepoint_7;
+extern Entity *ent_savepoint_8;
+extern Entity *ent_savepoint_9;
 
 #endif

@@ -70,6 +70,11 @@ Entity *ent_savepoint_1;
 Entity *ent_savepoint_2;
 Entity *ent_savepoint_3;
 Entity *ent_savepoint_4;
+Entity *ent_savepoint_5;
+Entity *ent_savepoint_6;
+Entity *ent_savepoint_7;
+Entity *ent_savepoint_8;
+Entity *ent_savepoint_9;
 
 Entity *ent_fire;
 Entity *ent_player_broken;
@@ -394,6 +399,7 @@ void GameEnts_Init(){
 	ent_player->type=Ent_Player;
 	ent_player->radius=16.0f;
 	ent_player->mass=70.0f;
+	ent_player->fric_static=0.5f;
 	AnimPlay_SetImg(&ent_player->anim,img_player_down);
 	//AnimPlay_SetAnim(&ent_player->anim,anim_fire);
 	ent_player->proc=player_proc;
@@ -403,6 +409,7 @@ void GameEnts_Init(){
 	ent_barrel->type=Ent_Barrel;
 	ent_barrel->radius=16.0f;
 	ent_barrel->mass=100.0f;
+	ent_barrel->fric_static=0.5f;
 	ent_barrel->proc=barrel_proc;
 	AnimPlay_SetImg(&ent_barrel->anim,img_barrel);
 
@@ -458,7 +465,6 @@ void GameEnts_Init(){
 	ent_arrow_up->type=Ent_Arrow;
 	ent_arrow_up->flags=EntityFlag_Collision;
 	ent_arrow_up->radius=7;
-	ent_arrow_up->fric_static=0;
 	ent_arrow_up->collision=arrow_collision;
 	ent_arrow_up->proc=timeoutent_proc;
 	ent_arrow_up->A=120;
@@ -510,6 +516,16 @@ void GameEnts_Init(){
 	ent_savepoint_3->A=3;
 	ent_savepoint_4=Entity_Copy(ent_savepoint_1);
 	ent_savepoint_4->A=4;
+	ent_savepoint_5=Entity_Copy(ent_savepoint_1);
+	ent_savepoint_5->A=5;
+	ent_savepoint_6=Entity_Copy(ent_savepoint_1);
+	ent_savepoint_6->A=6;
+	ent_savepoint_7=Entity_Copy(ent_savepoint_1);
+	ent_savepoint_7->A=7;
+	ent_savepoint_8=Entity_Copy(ent_savepoint_1);
+	ent_savepoint_8->A=8;
+	ent_savepoint_9=Entity_Copy(ent_savepoint_1);
+	ent_savepoint_9->A=9;
 
 
 	ent_exitpoint=Entity_New();

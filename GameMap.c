@@ -60,6 +60,11 @@ int GameMapAux_IsFloor(char c){
 		c=='2' ||
 		c=='3' ||
 		c=='4' ||
+		c=='5' ||
+		c=='6' ||
+		c=='7' ||
+		c=='8' ||
+		c=='9' ||
 		c=='E' ||
 		c=='F' ||
 		c=='A' ||
@@ -161,6 +166,26 @@ int GameMap_CreateLevel(int level,int point){
 			if(line[i]=='4'){
 				// Save point 4
 				GameMapAux_CreateEnt(ent_savepoint_4,i,j);
+			}else
+			if(line[i]=='5'){
+				// Save point 5
+				GameMapAux_CreateEnt(ent_savepoint_5,i,j);
+			}else
+			if(line[i]=='6'){
+				// Save point 6
+				GameMapAux_CreateEnt(ent_savepoint_6,i,j);
+			}else
+			if(line[i]=='7'){
+				// Save point 7
+				GameMapAux_CreateEnt(ent_savepoint_7,i,j);
+			}else
+			if(line[i]=='8'){
+				// Save point 8
+				GameMapAux_CreateEnt(ent_savepoint_8,i,j);
+			}else
+			if(line[i]=='9'){
+				// Save point 9
+				GameMapAux_CreateEnt(ent_savepoint_9,i,j);
 			}else
 			if(line[i]=='E'){
 				// Exit point
