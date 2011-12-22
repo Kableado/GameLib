@@ -31,14 +31,12 @@ typedef float vec2[2];
 int Intersec_RayUnitCircle(vec2 orig,vec2 vel,vec2 center,float *t);
 
 
-
-
 /////////////////////////////
 // Intersect_CircleCircle
 //
 // Colision point of a circle against another circle.
 int Colision_CircleCircle(
-	vec2 ca[2],float ra,
+	vec2 cir1,float ra,vec2 vel,
 	vec2 cb,float rb,
 	float *t,vec2 n);
 

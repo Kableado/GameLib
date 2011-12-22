@@ -28,6 +28,13 @@ int Anim_GetTime(Anim anim);
 
 
 /////////////////////////////
+// Anim_GetSize
+//
+// Gets the animation size.
+void Anim_GetSize(Anim anim,int *w,int *h);
+
+
+/////////////////////////////
 // Anim_SetOffset
 // Anim_GetOffset
 //
@@ -75,6 +82,15 @@ void AnimPlay_SetAnim(AnimPlay *ap,Anim ani);
 //
 //
 void AnimPlay_Draw(AnimPlay *ani,int x,int y);
+
+
+/////////////////////////////
+// AnimPlay_GetOffset
+// AnimPlay_GetSize
+//
+//
+void AnimPlay_GetOffset(AnimPlay *ani,int *x,int *y);
+void AnimPlay_GetSize(AnimPlay *ani,int *w,int *h);
 
 
 /////////////////////////////

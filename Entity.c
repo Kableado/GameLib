@@ -42,6 +42,7 @@ Entity *Entity_New(){
 	AnimPlay_SetImg(&e->anim,NULL);
 
 	e->oncopy=NULL;
+	e->ondelete=NULL;
 	e->proc=NULL;
 	e->postproc=NULL;
 	e->collision=NULL;
@@ -61,6 +62,9 @@ Entity *Entity_New(){
 //
 //
 void Entity_Destroy(Entity *e){
+	if(e->ondelete){
+		e->ondelete(e);
+	}
 	e->next=_free_entity;
 	_free_entity=e;
 }
@@ -91,6 +95,7 @@ Entity *Entity_Copy(Entity *e){
 	AnimPlay_Copy(&n->anim,&e->anim);
 
 	n->oncopy=e->oncopy;
+	n->ondelete=e->ondelete;
 	n->proc=e->proc;
 	n->postproc=e->postproc;
 	n->collision=e->collision;
@@ -222,25 +227,17 @@ void Entity_CollisionResponse(
 int Entity_Collide(Entity *b1,Entity *b2){
 	float t;
 	vec2 n;
-	vec2 cir1[2];
+	vec2 vel;
 	Entity *b_aux;
 
-	if(!(b1->flags&EntityFlag_Collision) || !(b2->flags&EntityFlag_Collision))
+	//if(!(b1->flags&EntityFlag_Collision) || !(b2->flags&EntityFlag_Collision))
+	//	return(0);
+
+	// Test relative to b1
+	vec2_minus(vel,b1->vel,b2->vel);
+	if(vec2_dot(vel,vel)<=0.0f)
 		return(0);
-
-	// FIX: Swap colision order based on moving object
-	if(vec2_dot(b1->vel,b1->vel)<vec2_dot(b2->vel,b2->vel)){
-		b_aux=b1;
-		b1=b2;
-		b2=b_aux;
-	}
-
-	// Prepare testing vectors
-	vec2_copy(cir1[0],b1->pos);
-	vec2_plus(cir1[1],b1->pos,b1->vel);
-	vec2_minus(cir1[1],cir1[1],b2->vel);
-
-	if(Colision_CircleCircle(cir1,b1->radius,b2->pos,b2->radius,&t,n)){
+	if(Colision_CircleCircle(b1->pos,b1->radius,vel,b2->pos,b2->radius,&t,n)){
 		int response=1;
 
 		// Check the collision methods
@@ -259,7 +256,11 @@ int Entity_Collide(Entity *b1,Entity *b2){
 
 		// Collision response
 		if(response){
-			Entity_CollisionResponse(b1,b2,t,n);
+			if(vec2_dot(b1->vel,b1->vel)>vec2_dot(b2->vel,b2->vel)){
+				Entity_CollisionResponse(b1,b2,t,n);
+			}else{
+				Entity_CollisionResponse(b2,b1,t,n);
+			}
 			return(1);
 		}else{
 			return(0);
@@ -281,6 +282,14 @@ void Entity_Overlaps(Entity *b1,Entity *b2){
 		return;
 
 	vec2_minus(len,b1->pos,b2->pos);
+	if(fabs(len[0])>b1->radius)
+		return;
+	if(fabs(len[1])>b1->radius)
+		return;
+	if(fabs(len[0])>b2->radius)
+		return;
+	if(fabs(len[1])>b2->radius)
+		return;
 	dist=sqrtf(vec2_dot(len,len));
 
 	if(b1->radius>dist && b1->overlap){

@@ -22,6 +22,7 @@ DrawImg img_player_up;
 DrawImg img_player_left;
 DrawImg img_player_right;
 DrawImg img_savepoint;
+Anim anim_savepoint_active;
 DrawImg img_endpoint;
 Anim anim_exitpoint;
 DrawImg img_arrowshooter_up;
@@ -104,12 +105,12 @@ void player_proc(Entity *e,int ft){
 			}
 		}
 
-		vec2_scale(vel,vel,1.0f);
+		vec2_scale(vel,vel,1);
 		Entity_AddVelLimit(e,vel,3.0f);
 	}
 
 
-
+	// Scroll View
 	GameLib_GetPos(pos);
 	GameLib_GetSize(size);
 	size[0]/=2;
@@ -139,36 +140,35 @@ void barrel_proc(Entity *e,int ft){
 	}
 }
 
-void destroy_postproc(Entity *e,int ft){
-	GameLib_DelEntity(e);
-}
-
 
 void hole_spiked_overlap(Entity *e1,Entity *e2){
 	Entity *e;
 
-	if(e1->postproc)
-		return;
-
 	if(e2->type==Ent_Barrel){
 		Entity *e;
 
-		e1->postproc=destroy_postproc;
-		e2->postproc=destroy_postproc;
+		// Disable future overlaps
+		e1->overlap=NULL;
 
-		GameLib_PlaySound(snd_fillhole,(int)e2->pos[0],(int)e2->pos[1]);
+		// Remove the two entities
+		GameLib_DelEntity(e1);
+		GameLib_DelEntity(e2);
 
+		// "Fill the hole"
 		e=Entity_Copy(ent_hole_filled);
 		vec2_copy(e->pos,e1->pos);
 		GameLib_AddEntity(e);
+		GameLib_PlaySound(snd_fillhole,(int)e2->pos[0],(int)e2->pos[1]);
 	}
 	if(e2->type==Ent_Player){
-		// KILL the player
+		// "Kill the player"
 		e=Entity_Copy(ent_player_broken);
 		vec2_copy(e->pos,e2->pos);
 		GameLib_AddEntity(e);
 		GameLib_PlaySound(snd_burn,(int)e2->pos[0],(int)e2->pos[1]);
-		e2->postproc=destroy_postproc;
+		GameLib_DelEntity(e2);
+
+		// HACK
 		game_level_reset=1;
 	}
 }
@@ -177,21 +177,18 @@ void hole_spiked_overlap(Entity *e1,Entity *e2){
 void hole_lava_overlap(Entity *e1,Entity *e2){
 	Entity *e;
 
-	if(e2->type==Ent_Barrel && e1->postproc==NULL){
-		e2->postproc=destroy_postproc;
-
-		// Burning effect
+	if(e2->type==Ent_Barrel){
+		// "Burn the barrel"
+		GameLib_DelEntity(e2);
 		e=Entity_Copy(ent_fire);
 		vec2_copy(e->pos,e2->pos);
 		GameLib_AddEntity(e);
 		GameLib_PlaySound(snd_burn,(int)e2->pos[0],(int)e2->pos[1]);
 	}
-	if(e2->type==Ent_Player	&& e1->postproc==NULL){
-		// KILL the player (burned)
-		e2->postproc=destroy_postproc;
+	if(e2->type==Ent_Player){
+		// "Burn the player"
+		GameLib_DelEntity(e2);
 		game_level_reset=1;
-
-		// Burning effect
 		e=Entity_Copy(ent_fire);
 		vec2_copy(e->pos,e2->pos);
 		GameLib_AddEntity(e);
@@ -216,11 +213,11 @@ int arrow_collision(Entity *e1,Entity *e2,float t,vec2 n){
 		e=Entity_Copy(ent_player_broken);
 		vec2_copy(e->pos,e2->pos);
 		GameLib_AddEntity(e);
-		e2->postproc=destroy_postproc;
+		GameLib_DelEntity(e2);
 		GameLib_PlaySound(snd_burn,(int)e2->pos[0],(int)e2->pos[1]);
 		game_level_reset=1;
 	}
-	e1->postproc=destroy_postproc;
+	GameLib_DelEntity(e1);
 	GameLib_PlaySound(snd_arrowhit,(int)e1->pos[0],(int)e1->pos[1]);
 
 	return(0);
@@ -245,12 +242,25 @@ void arrowshooter_proc(Entity *e,int ft){
 	}
 }
 
+Entity *_savepoint=NULL;
+void savepoint_ondelete(Entity *e){
+	if(_savepoint==e){
+		_savepoint=NULL;
+	}
+}
 void savepoint_overlap(Entity *e1,Entity *e2){
 	if(e2->type==Ent_Player){
 		// Save the point
 		if(game_level_point!=e1->A){
 			game_level_point=e1->A;
 			GameLib_PlaySound(snd_savepoint,(int)e1->pos[0],(int)e1->pos[1]);
+		}
+		if(e1!=_savepoint){
+			AnimPlay_SetAnim(&e1->anim,anim_savepoint_active);
+			if(_savepoint){
+				AnimPlay_SetImg(&_savepoint->anim,img_savepoint);
+			}
+			_savepoint=e1;
 		}
 	}
 }
@@ -263,7 +273,7 @@ void exitpoint_overlap(Entity *e1,Entity *e2){
 		game_level_reset=2;
 
 		// HACK: Delete the player
-		e2->postproc=destroy_postproc;
+		GameLib_DelEntity(e2);
 
 		GameLib_PlaySound(snd_exitpoint,(int)e1->pos[0],(int)e1->pos[1]);
 	}
@@ -275,15 +285,15 @@ void endpoint_overlap(Entity *e1,Entity *e2){
 		game_level_reset=3;
 
 		// HACK: Delete the player
-		e2->postproc=destroy_postproc;
+		GameLib_DelEntity(e2);
 
 		GameLib_PlaySound(snd_exitpoint,(int)e1->pos[0],(int)e1->pos[1]);
 	}
 }
 
-void fire_proc(Entity *e,int ft){
+void timeoutent_proc(Entity *e,int ft){
 	if(e->A==0){
-		e->postproc=destroy_postproc;
+		GameLib_DelEntity(e);
 	}else{
 		e->A--;
 	}
@@ -332,6 +342,9 @@ void GameEnts_Init(){
 
 	img_savepoint=Draw_LoadImage("data/save_point.bmp");
 	Draw_SetOffset(img_savepoint,-16,-16);
+
+	anim_savepoint_active=Anim_LoadAnim("data/save_point_active.bmp",2,5);
+	Anim_SetOffset(anim_savepoint_active,-16,-16);
 
 	anim_exitpoint=Anim_LoadAnim("data/exit_point.bmp",2,10);
 	Anim_SetOffset(anim_exitpoint,-16,-48);
@@ -397,6 +410,7 @@ void GameEnts_Init(){
 	ent_column=Entity_New();
 	ent_column->type=Ent_Column;
 	ent_column->flags=EntityFlag_Collision;
+	//ent_column->flags=0;
 	ent_column->radius=12;
 	ent_column->mass=-1.0f;
 	AnimPlay_SetImg(&ent_column->anim,img_column);
@@ -443,9 +457,11 @@ void GameEnts_Init(){
 	ent_arrow_up=Entity_New();
 	ent_arrow_up->type=Ent_Arrow;
 	ent_arrow_up->flags=EntityFlag_Collision;
-	ent_arrow_up->radius=10;
+	ent_arrow_up->radius=7;
 	ent_arrow_up->fric_static=0;
 	ent_arrow_up->collision=arrow_collision;
+	ent_arrow_up->proc=timeoutent_proc;
+	ent_arrow_up->A=120;
 	AnimPlay_SetImg(&ent_arrow_up->anim,img_arrow_up);
 	vec2_set(ent_arrow_up->vel,0,-4);
 	ent_arrow_down=Entity_Copy(ent_arrow_up);
@@ -486,6 +502,7 @@ void GameEnts_Init(){
 	ent_savepoint_1->radius=16;
 	AnimPlay_SetImg(&ent_savepoint_1->anim,img_savepoint);
 	ent_savepoint_1->overlap=savepoint_overlap;
+	ent_savepoint_1->ondelete=savepoint_ondelete;
 	ent_savepoint_1->A=1;
 	ent_savepoint_2=Entity_Copy(ent_savepoint_1);
 	ent_savepoint_2->A=2;
@@ -509,8 +526,8 @@ void GameEnts_Init(){
 	ent_fire->type=Ent_Effect;
 	ent_fire->flags=0;
 	AnimPlay_SetAnim(&ent_fire->anim,anim_fire);
-	ent_fire->proc=fire_proc;
-	ent_fire->A=30;
+	ent_fire->proc=timeoutent_proc;
+	ent_fire->A=60;
 
 	ent_player_broken=Entity_New();
 	ent_player_broken->type=Ent_Effect;

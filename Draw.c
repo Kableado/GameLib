@@ -153,6 +153,8 @@ void Draw_Clean(
 		 SDL_MapRGB(_screen->format, r, g, b));
 }
 
+
+
 ////////////////////////////////////////////////
 // DrawImage //
 ///////////////
@@ -389,11 +391,12 @@ SDL_Surface *Draw_DefaultFontSurface(
 		8*256, 8, 32,0,0,0,0);
 	surf->format->Amask=0xFF000000;
 	surf->format->Ashift=24;
+	SDL_SetAlpha(surf, SDL_SRCALPHA, 255);
 
 	// Draw the font
 	SDL_LockSurface(surf);
 	color =SDL_MapRGBA(surf->format,r,g,b,a);
-	color2=SDL_MapRGBA(surf->format,r,g,b,0);
+	color2=SDL_MapRGBA(surf->format,r,g,0,0);
 	for(c=0;c<256;c++){
 		for(y=0;y<8;y++){
 			for(x=0;x<8;x++){
@@ -431,12 +434,8 @@ DrawFnt Draw_DefaultFont(
 	font->surf = Draw_DefaultFontSurface(r,g,b,a);
 	font->w=8;
 	font->h=8;
-
-	font->surf->format->Amask=0xFF000000;
-	font->surf->format->Ashift=24;
-	SDL_SetAlpha(font->surf, SDL_SRCALPHA, 255);
-
-
+	font->min=0;
+	font->max=128;
 
 	return((DrawFnt)font);
 }
@@ -446,43 +445,18 @@ DrawFnt Draw_DefaultFont(
 //
 // Load a font from a file.
 DrawFnt Draw_LoadFont(char *fichero,int min,int max){
-	/*DrawFont *font;
-	int x,y,c;
-	Uint32 color,color2;
+	DrawFont *font;
+	int w,h;
 
 	// Create the default font
 	font=malloc(sizeof(DrawFont));
-	font->surf = SDL_CreateRGBSurface(SDL_SWSURFACE,
-		8*256, 8, 32,0,0,0,0);
-	font->w=8;
-	font->h=8;
-	font->surf->format->Amask=0xFF000000;
-	font->surf->format->Ashift=24;
-	SDL_SetAlpha(font->surf, SDL_SRCALPHA, 255);
+	font->surf = Draw_LoadSurface(fichero);
+	font->w=font->surf->w/(max-min);
+	font->h=font->surf->h;
+	font->min=min;
+	font->max=max;
 
-	// Draw the font
-	SDL_LockSurface(font->surf);
-	color =SDL_MapRGBA(font->surf->format,r,g,b,a);
-	color2=SDL_MapRGBA(font->surf->format,r,g,b,0);
-	for(c=0;c<256;c++){
-		for(y=0;y<8;y++){
-			for(x=0;x<8;x++){
-				if(((fontdata_8x8[c*8+y]>>(7-x)) & 0x01)==1){
-					//Imagen_PutPixel(dest,c*8+x,y,color);
-					((Uint32 *)font->surf->pixels)[(c*8+x)+(8*256*y)]=
-						color;
-				}else{
-					//Imagen_PutPixel(dest,c*8+x,y,color2);
-					((Uint32 *)font->surf->pixels)[(c*8+x)+(8*256*y)]=
-						color2;
-				}
-			}
-		}
-	}
-	SDL_UnlockSurface(font->surf);
-
-	return((DrawFnt)font);*/
-	return(NULL);
+	return((DrawFnt)font);
 }
 
 /////////////////////////////
@@ -505,11 +479,13 @@ void Draw_DrawText(DrawFnt f,char *text,int x,int y){
 	// Iterate the string
 	ptr=text;
 	while(*ptr){
-		orig.x=(*ptr)*font->w;
-		dest.x=x;
-		dest.y=y;
-		// Blit every character
-		SDL_BlitSurface(font->surf,&orig,_screen,&dest);
+		if((*ptr)<font->max){
+			orig.x=((*ptr)-font->min)*font->w;
+			dest.x=x;
+			dest.y=y;
+			// Blit every character
+			SDL_BlitSurface(font->surf,&orig,_screen,&dest);
+		}
 		x+=font->w;
 		ptr++;
 	}

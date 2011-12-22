@@ -33,6 +33,7 @@ typedef struct Tag_Entity {
 	AnimPlay anim;
 
 	void (*oncopy)(struct Tag_Entity *ent);
+	void (*ondelete)(struct Tag_Entity *ent);
 	void (*proc)(struct Tag_Entity *ent,int ft);
 	void (*postproc)(struct Tag_Entity *ent,int ft);
 	int (*collision)(

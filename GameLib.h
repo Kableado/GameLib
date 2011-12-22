@@ -56,18 +56,36 @@ void GameLib_Loop(
 void GameLib_BreakLoop();
 
 
-
-
+/////////////////////////////
+// GameLib_GetPos
+// GameLib_SetPos
+// GameLib_SetPos
+//
+//
 void GameLib_GetPos(int pos[2]);
-
 void GameLib_SetPos(int pos[2]);
-
 void GameLib_GetSize(int size[2]);
 
+
+/////////////////////////////
+// GameLib_ForEachEn
+//
+// Deletes every entity.
 void GameLib_DelEnts();
 
+
+/////////////////////////////
+// GameLib_ForEachEn
+//
+// Iterates every entity.
 void GameLib_ForEachEnt(int (*func)(Entity *ent));
 
+
+/////////////////////////////
+// GameLib_PlaySound
+//
+// Play a sound position aware.
 void GameLib_PlaySound(AudioSnd snd,int x,int y);
+
 
 #endif

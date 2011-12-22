@@ -1,5 +1,5 @@
 LIBS= -lSDL -lpthread -L/usr/X11R6/lib -L/usr/lib -lm
-CFLAGS= -Wall -g -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/
+CFLAGS= -Wall -g  -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/
 CC=gcc
 RM=rm -rf
 

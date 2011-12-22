@@ -8,18 +8,19 @@
  #.......#
  #SSSSSS.#
  #.......#
- #.B.LLLL#
+ #.B.SSSS#
  #SSSmmmm#
  #.......#  ############
  #mmm.mmm#  #....L.....#
-    m.m     #..S.L.S..<#
-    m.m     #..S.L.S...#
-    m.#######..S.L.S..<#
-    m........2.S.L.S...#
-    mmmmmmmmmSSS.L.S...#
-            m.>..L.S...#
-            m....L.S.B.########
-            m.>....S.B........#
+    m.m     #..L.L.S..<#
+    m.m     #..L.L.S...#
+    m.#######..L.L.S..<#
+    m........2.L.L.S...#
+    mmmmmmmmmmmL.L.S...#
+            m.>L.L.S...#
+            m....L.S...#
+            m.>..L.S...########
+            m.B....S..........#
             mmmmmmmmmmmmmmmmm.#
                             m.#
                             m.#
