@@ -1,11 +1,26 @@
 // Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
 
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+
 #ifdef WIN32
 	#define _WIN32_WINNT 0x0501
 	#include <windows.h>
+	#include <GL/gl.h>
+	#include <GL/glext.h>
+#else
+#ifdef MACOSX
+	#include <Cocoa/Cocoa.h>
+	#include <OpenGL/OpenGL.h>
+	#include <OpenGL/gl.h>
+	#include <OpenGL/glu.h>
+	#include <OpenGL/glext.h>
+#else
+	#include <GL/gl.h>
+#endif
 #endif
 #include <SDL/SDL.h>
-#include <time.h>
 
 #include "Time.h"
 #include "Util.h"
@@ -16,6 +31,8 @@
 
 // Globals
 SDL_Surface *_screen=NULL;
+int _width;
+int _height;
 long long _t_frame=17000;
 
 /////////////////////////////
@@ -43,8 +60,20 @@ int Draw_Init(int width,int height,char *title,int fps){
 		return(0);
 	}
 
+
+	// Prepare OpenGL inicialization
+	SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE, 8);
+	SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE, 8);
+	SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 24);
+	SDL_GL_SetAttribute (SDL_GL_STENCIL_SIZE, 8);
+	SDL_GL_SetAttribute (SDL_GL_SWAP_CONTROL, 0);
+	SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
+
+
 	// Initialize video mode
-	_screen=SDL_SetVideoMode(width,height,32,SDL_HWSURFACE);
+	_screen=SDL_SetVideoMode(width,height,32,SDL_HWSURFACE|SDL_OPENGL);
 	if( _screen == NULL){
 		printf("Draw_Init: Failure initializing video mode.\n");
 		printf("Draw_Init: SDL Error: %s\n",SDL_GetError());
@@ -52,7 +81,49 @@ int Draw_Init(int width,int height,char *title,int fps){
 	}
 	SDL_WM_SetCaption(title, NULL);
 	_t_frame=1000000/fps;
+	_width=width;
+	_height=height;
 
+	// Set the desired state
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_TEXTURE_2D);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_DEPTH_TEST);
+	glDepthMask( GL_FALSE);
+
+	// Triplebuffer swap
+	SDL_GL_SwapBuffers();
+	glClear(GL_COLOR_BUFFER_BIT);
+	SDL_GL_SwapBuffers();
+	glClear(GL_COLOR_BUFFER_BIT);
+	SDL_GL_SwapBuffers();
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	// Show device info
+	char *str;
+	printf("\n*********************************\n");
+	printf("*** Draw Info\n");
+	str=(char *)glGetString(GL_VENDOR);
+	printf(" Vendor: %s\n",str);
+	str=(char *)glGetString(GL_RENDERER);
+	printf(" Renderer: %s\n",str);
+	str=(char *)glGetString(GL_VERSION);
+	printf(" Version: %s\n",str);
+	printf("*********************************\n");
+
+	// Set the proyection (Ortographic)
+	glMatrixMode (GL_PROJECTION);
+	glPushMatrix ();
+	glLoadIdentity ();
+	glOrtho (0,width, 0, height, -1000, 1000);
+	glMatrixMode (GL_MODELVIEW);
+	glPushMatrix ();
+	glLoadIdentity ();
+
+	// Enable Alpha blending
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
 	return(1);
 }
@@ -62,24 +133,20 @@ int Draw_Init(int width,int height,char *title,int fps){
 // Draw_Loop
 //
 // Loops updating the game window.
-void Draw_Loop(int (*proc)()){
+void Draw_Loop(int (*proc)(),void (*draw)()){
 	int done=0;
 	SDL_Event event;
 	Uint8* keys;
-	long long t_framestart;
-	long long t_frame;
-	long long t_swap;
-	long long t_proc;
-	int f_count;
+	long long time,time2;
+	long long t_frame=0;
 
-	t_framestart=Time_GetTime();
-
+	t_frame=0;
 	while(!done){
 
 		// Update screen
-		t_swap=Time_GetTime();
-		SDL_Flip(_screen);
-		t_swap=Time_GetTime()-t_swap;
+		time=Time_GetTime();
+		SDL_GL_SwapBuffers();
+
 
 		// Process Events
 		while(SDL_PollEvent(&event) ){
@@ -104,31 +171,24 @@ void Draw_Loop(int (*proc)()){
 		Input_Frame();
 		Audio_Frame();
 
-		// Process loop, with frameskip for slow swapping systems
-		t_proc=Time_GetTime();
-		if(!proc()){
-			done=1;
-		}
-		f_count=(t_swap/_t_frame);
-		while(f_count>0 && !done){
-			if(!proc()){
-				done=1;
+		// Process
+		time2=Time_GetTime();
+		t_frame+=time2-time;
+		time=time2;
+		if(proc){
+			while(t_frame>_t_frame && !done){
+				if(!proc()){
+					done=1;
+				}
+				t_frame-=_t_frame;
 			}
-			f_count--;
-			t_framestart+=_t_frame;
 		}
-		t_proc=Time_GetTime()-t_proc;
-		t_framestart+=_t_frame*(t_proc/_t_frame);
 
+		// Draw
+		draw();
 
-		// Sleep to limit frames
-		t_frame=Time_GetTime()-t_framestart;
-		if(t_frame<_t_frame){
-			Time_Pause(_t_frame-t_frame);
-		}else{
-			Time_Pause(0);
-		}
-		t_framestart=Time_GetTime();
+		Time_Pause(0);
+		t_frame+=Time_GetTime()-time;
 	}
 }
 
@@ -142,15 +202,8 @@ void Draw_Clean(
 	unsigned char g,
 	unsigned char b)
 {
-	SDL_Rect rect;
-
-	// Draw a full rectangle
-	rect.x=0;
-	rect.y=0;
-	rect.w=_screen->w;
-	rect.h=_screen->h;
-	SDL_FillRect(_screen, &rect,
-		 SDL_MapRGB(_screen->format, r, g, b));
+	glClearColor(r/256.0f,g/256.0f,b/256.0f,1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
 }
 
 
@@ -161,6 +214,7 @@ void Draw_Clean(
 // Image container.
 typedef struct Tag_DrawImage {
 	SDL_Surface *surf;
+	GLuint tex;
 	int x,y;
 } DrawImage;
 
@@ -180,30 +234,61 @@ SDL_Surface *Draw_LoadSurface(char *filename){
 		return(NULL);
 	}
 
-	// FIX: Setting up the alpha channel.
-	if(surf->format->BytesPerPixel==4){
-		int i,len,trans;
-
-		// set the correct values
-		surf->format->Amask=0xFF000000;
-		surf->format->Ashift=24;
-
-		// Check if the image has some area transparent
-		trans=0;
-		len=surf->w*surf->h;
-		for(i=0;i<len;i++){
-			if((((Uint32 *)surf->pixels)[i]&0xFF000000)!=0xFF000000){
-				trans=1;
-				break;
-			}
-		}
-		if(trans){
-			// Make it use the alpha channel
-			SDL_SetAlpha(surf, SDL_SRCALPHA, 255);
+	if (surf->format->BytesPerPixel==4) {
+		// Swap RGB to BGR
+		Uint32 *ptr,*ptr_end;
+		ptr=(Uint32 *)surf->pixels;
+		ptr_end=ptr+(surf->w*surf->h);
+		while (ptr<ptr_end) {
+			unsigned char temp;
+			unsigned char *pixel;
+			pixel=(unsigned char *)ptr;
+			temp=pixel[2];
+			pixel[2]=pixel[0];
+			pixel[0]=temp;
+			ptr++;
 		}
 	}
 
 	return(surf);
+}
+
+
+/////////////////////////////
+// Draw_UploadGLTexture
+//
+// Uploads a OpenGL texture.
+GLuint Draw_UploadGLTexture(SDL_Surface *surf){
+	GLuint tex;
+
+	// Generate OpenGL texture
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+
+	// Load OpenGL texture
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glPixelStorei( GL_UNPACK_ROW_LENGTH, surf->w );
+	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,
+	//			 surf->w, surf->h, 0,
+	//			 GL_RGBA, GL_UNSIGNED_BYTE, surf->pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+				 surf->w, surf->h, 0,
+				 GL_RGBA, GL_UNSIGNED_BYTE, surf->pixels);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8,
+	//			imagen->ancho, imagen->alto, 0,
+	//			GL_RGB, GL_UNSIGNED_BYTE, imagen->data);
+
+	return(tex);
 }
 
 
@@ -215,17 +300,21 @@ DrawImg Draw_LoadImage(char *filename){
 	DrawImage *image;
 	SDL_Surface *surf;
 
+
 	// Loads the surface
 	surf=Draw_LoadSurface(filename);
 	if(surf == NULL){
 		return(NULL);
 	}
 
+
 	// Create the image container
 	image=malloc(sizeof(DrawImage));
 	image->surf=surf;
+	image->tex=Draw_UploadGLTexture(surf);
 	image->x=0;
 	image->y=0;
+
 
 	return((DrawImg)image);
 }
@@ -266,53 +355,34 @@ void Draw_GetOffset(DrawImg img,int *x,int *y){
 
 
 /////////////////////////////
-// Draw_ImgSetKeyCol
-//
-// Setting the image color key.
-void Draw_ImgSetKeyCol(DrawImg img,
-	unsigned char r,
-	unsigned char g,
-	unsigned char b)
-{
-	DrawImage *image=img;
-
-	// Set the color key for the surface
-	SDL_SetColorKey(image->surf, SDL_SRCCOLORKEY,
-		SDL_MapRGB(image->surf->format, r, g, b));
-}
-
-
-/////////////////////////////
-// Draw_ImgSetAlpha
-//
-// Setting the image alpha.
-void Draw_ImgSetAlpha(DrawImg img, unsigned char a){
-	DrawImage *image=img;
-
-	// Set the alpha for the surface
-	SDL_SetAlpha(image->surf, SDL_SRCALPHA, a);
-}
-
-
-/////////////////////////////
 // Draw_DrawImg
 //
 // Draws an image.
 void Draw_DrawImg(DrawImg img,int x,int y){
 	DrawImage *image=img;
-	SDL_Rect orig;
-	SDL_Rect dest;
+	int x1,x2,y1,y2;
 
-	// Prepare the rects
-	orig.x=0;
-	orig.y=0;
-	dest.x=x+image->x;
-	dest.y=y+image->y;
-	orig.w=dest.w=image->surf->w;
-	orig.h=dest.h=image->surf->h;
+	// Prepare
+	x1=x+image->x;
+	y1=_height-(y+image->y);
+	x2=(x+image->x)+image->surf->w;
+	y2=_height-((y+image->y)+image->surf->h);
 
-	// Blit the surface on the screen
-	SDL_BlitSurface(image->surf,&orig,_screen,&dest);
+	// Draw a quad
+	glBindTexture(GL_TEXTURE_2D, image->tex);
+	glBegin (GL_QUADS);
+		glTexCoord2f (1, 0);
+		glVertex2i (x2, y1);
+
+		glTexCoord2f (0, 0);
+		glVertex2i (x1, y1);
+
+		glTexCoord2f (0, 1);
+		glVertex2i (x1, y2);
+
+		glTexCoord2f (1, 1);
+		glVertex2i (x2, y2);
+	glEnd ();
 }
 
 
@@ -322,41 +392,33 @@ void Draw_DrawImg(DrawImg img,int x,int y){
 // Draws an image part.
 void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int i){
 	DrawImage *image=img;
-	SDL_Rect orig;
-	SDL_Rect dest;
+	int x1,x2,y1,y2;
+	float us,u1,u2;
 
-	// Prepare the rects
-	orig.x=w*i;
-	orig.y=0;
-	dest.x=x+image->x;
-	dest.y=y+image->y;
-	orig.w=dest.w=w;
-	orig.h=dest.h=image->surf->h;
+	// Prepare
+	x1=x+image->x;
+	y1=_height-(y+image->y);
+	x2=(x+image->x)+w;
+	y2=_height-((y+image->y)+image->surf->h);
+	us=1.0f/image->surf->w;
+	u1=us*i*w;
+	u2=u1+us*w;
 
-	// Blit the surface on the screen
-	SDL_BlitSurface(image->surf,&orig,_screen,&dest);
-}
+	// Draw a quad
+	glBindTexture(GL_TEXTURE_2D, image->tex);
+	glBegin (GL_QUADS);
+		glTexCoord2f (u2, 0);
+		glVertex2i (x2, y1);
 
+		glTexCoord2f (u1, 0);
+		glVertex2i (x1, y1);
 
-/////////////////////////////
-// Draw_DrawImgTrans
-//
-// Draws an image transformed.
-void Draw_DrawImgTrans(DrawImg img,int x,int y,float angle){
-	DrawImage *image=img;
-	SDL_Rect orig;
-	SDL_Rect dest;
+		glTexCoord2f (u1, 1);
+		glVertex2i (x1, y2);
 
-	// Prepare the rects
-	orig.x=0;
-	orig.y=0;
-	dest.x=x+image->x;
-	dest.y=y+image->y;
-	orig.w=dest.w=image->surf->w;
-	orig.h=dest.h=image->surf->h;
-
-	// Blit the surface on the screen
-	SDL_BlitSurface(image->surf,&orig,_screen,&dest);
+		glTexCoord2f (u2, 1);
+		glVertex2i (x2, y2);
+	glEnd ();
 }
 
 
@@ -365,7 +427,7 @@ void Draw_DrawImgTrans(DrawImg img,int x,int y,float angle){
 /////////////
 // Reference to a Font.
 typedef struct {
-	SDL_Surface *surf;
+	DrawImage img;
 	int w,h;
 	int min,max;
 } DrawFont;
@@ -393,10 +455,12 @@ SDL_Surface *Draw_DefaultFontSurface(
 	surf->format->Ashift=24;
 	SDL_SetAlpha(surf, SDL_SRCALPHA, 255);
 
+	// HACK: Set the colors in BGR order
+	color =SDL_MapRGBA(surf->format,b,g,r,a);
+	color2=SDL_MapRGBA(surf->format,b,g,r,0);
+
 	// Draw the font
 	SDL_LockSurface(surf);
-	color =SDL_MapRGBA(surf->format,r,g,b,a);
-	color2=SDL_MapRGBA(surf->format,r,g,0,0);
 	for(c=0;c<256;c++){
 		for(y=0;y<8;y++){
 			for(x=0;x<8;x++){
@@ -417,6 +481,7 @@ SDL_Surface *Draw_DefaultFontSurface(
 	return(surf);
 }
 
+
 /////////////////////////////
 // Draw_DefaultFont
 //
@@ -431,11 +496,14 @@ DrawFnt Draw_DefaultFont(
 
 	// Create the default font
 	font=malloc(sizeof(DrawFont));
-	font->surf = Draw_DefaultFontSurface(r,g,b,a);
+	font->img.surf=Draw_DefaultFontSurface(r,g,b,a);
+	font->img.tex=Draw_UploadGLTexture(font->img.surf);
+	font->img.x=0;
+	font->img.y=0;
 	font->w=8;
 	font->h=8;
 	font->min=0;
-	font->max=128;
+	font->max=256;
 
 	return((DrawFnt)font);
 }
@@ -446,18 +514,21 @@ DrawFnt Draw_DefaultFont(
 // Load a font from a file.
 DrawFnt Draw_LoadFont(char *fichero,int min,int max){
 	DrawFont *font;
-	int w,h;
 
-	// Create the default font
+	// Create the font form the image
 	font=malloc(sizeof(DrawFont));
-	font->surf = Draw_LoadSurface(fichero);
-	font->w=font->surf->w/(max-min);
-	font->h=font->surf->h;
+	font->img.surf=Draw_LoadSurface(fichero);
+	font->img.tex=Draw_UploadGLTexture(font->img.surf);
+	font->img.x=0;
+	font->img.y=0;
+	font->w=font->img.surf->w/(max-min);
+	font->h=font->img.surf->h;
 	font->min=min;
 	font->max=max;
 
 	return((DrawFnt)font);
 }
+
 
 /////////////////////////////
 // Draw_DrawText
@@ -465,26 +536,13 @@ DrawFnt Draw_LoadFont(char *fichero,int min,int max){
 // Draws text using a font
 void Draw_DrawText(DrawFnt f,char *text,int x,int y){
 	DrawFont *font=f;
-	SDL_Rect orig;
-	SDL_Rect dest;
 	char *ptr;
-
-	// Prepare the rects
-	orig.w=dest.w=font->w;
-	orig.h=dest.h=font->h;
-	orig.y=0;
-	dest.x=x;
-	dest.y=y;
 
 	// Iterate the string
 	ptr=text;
 	while(*ptr){
 		if((*ptr)<font->max){
-			orig.x=((*ptr)-font->min)*font->w;
-			dest.x=x;
-			dest.y=y;
-			// Blit every character
-			SDL_BlitSurface(font->surf,&orig,_screen,&dest);
+			Draw_DrawImgPart((DrawImg)&font->img,x,y,font->w,(*ptr)-font->min);
 		}
 		x+=font->w;
 		ptr++;

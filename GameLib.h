@@ -46,7 +46,8 @@ int GameLib_DelEntity(Entity *e);
 // Loops the game.
 void GameLib_Loop(
 	void (*gameproc)(),
-	void (*gamepostproc)());
+	void (*gamepostproc)(),
+	void (*gamedraw)());
 
 
 /////////////////////////////

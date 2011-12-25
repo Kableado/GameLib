@@ -15,7 +15,7 @@ int Draw_Init(int width,int height,char *title,int fps);
 // Draw_Loop
 //
 // Loops updating the game window.
-void Draw_Loop(int (*proc)());
+void Draw_Loop(int (*proc)(),void (*draw)());
 
 
 /////////////////////////////
@@ -59,23 +59,6 @@ void Draw_GetOffset(DrawImg img,int *x,int *y);
 
 
 /////////////////////////////
-// Draw_ImgSetKeyCol
-//
-// Setting the image color key.
-void Draw_ImgSetKeyCol(DrawImg img,
-	unsigned char r,
-	unsigned char g,
-	unsigned char b);
-
-
-/////////////////////////////
-// Draw_ImgSetAlpha
-//
-// Setting the image alpha.
-void Draw_ImgSetAlpha(DrawImg img, unsigned char a);
-
-
-/////////////////////////////
 // Draw_DrawImg
 //
 // Draws an image.
@@ -87,13 +70,6 @@ void Draw_DrawImg(DrawImg img,int x,int y);
 //
 // Draws an image part.
 void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int i);
-
-
-/////////////////////////////
-// Draw_DrawImgTrans
-//
-// Draws an image transformed.
-void Draw_DrawImgTrans(DrawImg img,int x,int y,float angle);
 
 
 ////////////////////////////////////////////////

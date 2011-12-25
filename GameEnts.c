@@ -401,7 +401,6 @@ void GameEnts_Init(){
 	ent_player->mass=70.0f;
 	ent_player->fric_static=0.5f;
 	AnimPlay_SetImg(&ent_player->anim,img_player_down);
-	//AnimPlay_SetAnim(&ent_player->anim,anim_fire);
 	ent_player->proc=player_proc;
 
 

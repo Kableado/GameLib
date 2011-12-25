@@ -11,15 +11,16 @@
 #S.....BSSB.S#
 #SSSSS.SSSSSS#
 #mmmmm.mmmmmm#
-     mBm
-     mBm
-     mBm
-     mBm
-     mBm
-######B#######
+     m.m
+     m.m
+     m.m
+     m.m
+     m.m
+######.#######
 #SSSSm2..SSSS#
 #SSSSmBm.SSSS#
 #S..SSB..SSSS#
+#S.SSSSSSSSSS#
 #S.SSSSSSSSSS#
 #S.SSSSSSSSSS#
 #S.....BSSB.S#

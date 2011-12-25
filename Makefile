@@ -14,12 +14,15 @@ endif # windir
 
 
 ifeq ($(TARGET_ARCH),mingw)
+	OPENGL_DRAW=opengl
 	include Makefile.win32
 else
 ifeq ($(TARGET_ARCH),linux)
+	OPENGL_DRAW=opengl
 	include Makefile.linux
 else
 ifeq ($(TARGET_ARCH),macosx)
+	OPENGL_DRAW=opengl
 	include Makefile.macosx
 endif # macosx
 endif # linux

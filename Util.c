@@ -57,7 +57,7 @@ int Intersec_RayUnitCircle(vec2 orig,vec2 vel,vec2 center,float *t){
 			*t=Rmin;
 			return(1);
 		}
-		if(Rmax>=-0.0f && Rmin>Rmax && Rmax<=1.0f){
+		if(Rmax>=-1.0f && Rmin>Rmax && Rmax<=1.0f){
 			*t=Rmax;
 			return(1);
 		}

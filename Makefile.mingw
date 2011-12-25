@@ -1,4 +1,4 @@
-LIBS= -L/usr/i486-mingw/lib -D_GNU_SOURCE=1 -Dmain=SDL_main
+LIBS= -L/usr/i486-mingw/lib -D_GNU_SOURCE=1 -Dmain=SDL_main -lopengl32
 CFLAGS= -I/usr/i486-mingw/include  -lmingw32 -lSDLmain -lSDL -mwindows
 CC= i486-mingw32-gcc
 RM=rm -rf

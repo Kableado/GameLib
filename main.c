@@ -24,6 +24,16 @@ DrawFnt font;
 DrawFnt font_shad;
 
 int ProcTitle(){
+	if(	Input_GetKey(InputKey_Jump)==InputKey_Pressed||
+		Input_GetKey(InputKey_Continue)==InputKey_Pressed)
+	{
+		play=1;
+		return(0);
+	}
+	return(1);
+}
+
+void DrawTitle(){
 	Draw_Clean(0,0,0);
 
 	Draw_DrawImg(img_logo,170,100);
@@ -35,16 +45,20 @@ int ProcTitle(){
 
 	Draw_DrawText(font     ,"By Kableado (VAR)",200,440);
 
+}
+
+
+int ProcEnd(){
 	if(	Input_GetKey(InputKey_Jump)==InputKey_Pressed||
 		Input_GetKey(InputKey_Continue)==InputKey_Pressed)
 	{
-		play=1;
 		return(0);
 	}
 	return(1);
 }
 
-int ProcEnd(){
+
+void DrawEnd(){
 	Draw_Clean(0,0,0);
 
 	Draw_DrawImg(img_end,170,100);
@@ -53,20 +67,31 @@ int ProcEnd(){
 	Draw_DrawText(font     ,"Thanks for playing!",250,350);
 
 	Draw_DrawText(font     ,"Press [Space] to Title.",300,400);
-
-	if(	Input_GetKey(InputKey_Jump)==InputKey_Pressed||
-		Input_GetKey(InputKey_Continue)==InputKey_Pressed)
-	{
-		return(0);
-	}
-	return(1);
 }
 
+
 void ProcGame(){
-	Draw_Clean(0,0,0);
 }
 
 void PostProcGame(){
+
+	if(game_level_reset){
+		if(Input_AnyKey()){
+			if(GameMap_CreateLevel(game_level,game_level_point)){
+				if(game_level_reset==2){
+					int  pos[2]={0,0};
+					GameLib_SetPos(pos);
+				}
+				game_level_reset=0;
+			}else{
+				play=2;
+				GameLib_BreakLoop();
+			}
+		}
+	}
+}
+
+void DrawGame(){
 	char string[1024];
 
 	sprintf(string, "Level: %d.%d",game_level+1,game_level_point);
@@ -86,22 +111,7 @@ void PostProcGame(){
 		GameLib_BreakLoop();
 	}
 
-	if(game_level_reset){
-		if(Input_AnyKey()){
-			if(GameMap_CreateLevel(game_level,game_level_point)){
-				if(game_level_reset==2){
-					int  pos[2]={0,0};
-					GameLib_SetPos(pos);
-				}
-				game_level_reset=0;
-			}else{
-				play=2;
-				GameLib_BreakLoop();
-			}
-		}
-	}
 }
-
 
 
 int main(int argc,char *argv[]){
@@ -113,28 +123,28 @@ int main(int argc,char *argv[]){
 	img_logo=Draw_LoadImage("data/logo.bmp");
 	img_end=Draw_LoadImage("data/end.bmp");
 
-	font=Draw_DefaultFont(255,255,255,255);
+	font=Draw_DefaultFont(255,0,0,255);
 	font_shad=Draw_DefaultFont(0,0,0,127);
 
 
 	GameEnts_Init();
 	do{
 		play=0;
-		Draw_Loop(ProcTitle);
+		Draw_Loop(ProcTitle,DrawTitle);
 		if(play==1){
 			if(!game_started){
 				int  pos[2]={0,0};
 				GameLib_SetPos(pos);
-				game_level=3;
+				game_level=0;
 				game_level_point=1;
 				game_level_reset=0;
 				GameMap_CreateLevel(game_level,game_level_point);
 			}
 			game_started=1;
-			GameLib_Loop(ProcGame,PostProcGame);
+			GameLib_Loop(ProcGame,PostProcGame,DrawGame);
 		}
 		if(play==2){
-			Draw_Loop(ProcEnd);
+			Draw_Loop(ProcEnd,DrawEnd);
 		}
 	}while(play);
 

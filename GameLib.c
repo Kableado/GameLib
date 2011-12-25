@@ -1,5 +1,6 @@
 // Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
 
+#include <math.h>
 #include <SDL/SDL.h>
 
 #include "Time.h"
@@ -22,9 +23,17 @@ int _entities_lock=0;
 int _entities_compactate=0;
 void (*_gameproc)()=NULL;
 void (*_gamepostproc)()=NULL;
+void (*_gamedraw)()=NULL;
 int _ft;
 int _game_size[2];
 int _game_pos[2];
+
+long long t_proc;
+long long t_col;
+long long t_over;
+long long t_postproc;
+long long t_draw;
+int f_count;
 
 
 /////////////////////////////
@@ -161,11 +170,6 @@ void GameLib_Compactate(){
 // GameLib_ProcLoop
 //
 // Process the loop.
-long long t_proc;
-long long t_col;
-long long t_over;
-long long t_postproc;
-int f_count;
 int GameLib_ProcLoop(){
 	int i,j;
 	int repeat,count;
@@ -270,25 +274,12 @@ int GameLib_ProcLoop(){
 	}while(n>0);
 
 
-	// PostProcess and draw entities
+	// PostProcess
 	time=Time_GetTime();
 	GameLib_Compactate();_entities_lock=1;
 	for(i=0;i<_n_entities;i++){
 		Entity *e;
 		Entity_PostProcess(_entity[i],_ft);
-
-		// FIXME: This is a hack
-		e=_entity[i];
-		if(e->pos[0]<(_game_pos[0]-128))
-			continue;
-		if(e->pos[0]>(_game_pos[0]+_game_size[0]+128))
-			continue;
-		if(e->pos[1]<(_game_pos[1]-128))
-			continue;
-		if(e->pos[1]>(_game_pos[1]+_game_size[1]+128))
-			continue;
-
-		Entity_Draw(e,-_game_pos[0],-_game_pos[1]);
 	}
 	if(_gamepostproc){
 		_gamepostproc();
@@ -303,29 +294,73 @@ int GameLib_ProcLoop(){
 
 
 /////////////////////////////
+// GameLib_DrawLoop
+//
+//
+void GameLib_DrawLoop(){
+	long long time;
+	int i;
+
+	time=Time_GetTime();
+
+	// Limpiar pantalla
+	Draw_Clean(0,0,0);
+
+	// Draw entities
+	GameLib_Compactate();_entities_lock=1;
+	for(i=0;i<_n_entities;i++){
+		Entity *e;
+
+		// FIXME: This is a hack
+		e=_entity[i];
+		if(e->pos[0]<(_game_pos[0]-128))
+			continue;
+		if(e->pos[0]>(_game_pos[0]+_game_size[0]+128))
+			continue;
+		if(e->pos[1]<(_game_pos[1]-128))
+			continue;
+		if(e->pos[1]>(_game_pos[1]+_game_size[1]+128))
+			continue;
+
+		Entity_Draw(e,-_game_pos[0],-_game_pos[1]);
+	}
+	if(_gamedraw){
+		_gamedraw();
+	}
+	GameLib_Compactate();
+
+	t_draw+=Time_GetTime()-time;
+}
+
+
+/////////////////////////////
 // GameLib_Loop
 //
 // Loops the game.
 void GameLib_Loop(
 	void (*gameproc)(),
-	void (*gamepostproc)())
+	void (*gamepostproc)(),
+	void (*gamedraw)())
 {
 	_running=1;
 
 	_gameproc=gameproc;
 	_gamepostproc=gamepostproc;
+	_gamedraw=gamedraw;
 	t_proc=0;
 	t_col=0;
 	t_over=0;
 	t_postproc=0;
+	t_draw=0;
 	f_count=0;
-	Draw_Loop(GameLib_ProcLoop);
+	Draw_Loop(GameLib_ProcLoop,GameLib_DrawLoop);
 
-	printf("Profiling::::::::::::\n");
-	printf("t_proc........:%6lld\n",t_proc/f_count);
-	printf("t_col.........:%6lld\n",t_col/f_count);
-	printf("t_over........:%6lld\n",t_over/f_count);
-	printf("t_postprocdraw:%6lld\n",t_postproc/f_count);
+	printf("Profiling:::::::::\n");
+	printf("t_proc.....:%6lld\n",t_proc/f_count);
+	printf("t_col......:%6lld\n",t_col/f_count);
+	printf("t_over.....:%6lld\n",t_over/f_count);
+	printf("t_postproc.:%6lld\n",t_postproc/f_count);
+	printf("t_draw.....:%6lld\n",t_draw/f_count);
 }
 
 
