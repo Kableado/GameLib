@@ -9,6 +9,9 @@
 
 #define EntityFlag_Collision 1
 #define EntityFlag_Overlap 2
+#define EntityFlag_Light 4
+#define EntityFlag_UpdateLight 8
+#define EntityFlag_UpdatedPos 16
 
 
 ////////////////////////////////////////////////
@@ -31,6 +34,9 @@ typedef struct Tag_Entity {
 	float fric_dynamic;
 
 	AnimPlay anim;
+
+	float color[4];
+	float light[4];
 
 	void (*oncopy)(struct Tag_Entity *ent);
 	void (*ondelete)(struct Tag_Entity *ent);
@@ -93,6 +99,14 @@ void Entity_PostProcess(Entity *e,int ft);
 
 
 /////////////////////////////
+// Entity_CollisionResponse
+//
+// Normal response to a collision.
+void Entity_CollisionResponse(
+	Entity *b1,Entity *b2,float t,vec2 n);
+
+
+/////////////////////////////
 // Entity_Collide
 //
 //
@@ -113,4 +127,32 @@ void Entity_Overlaps(Entity *b1,Entity *b2);
 void Entity_AddVelLimit(Entity *e,vec2 vel,float limit);
 
 
+/////////////////////////////
+// Entity_SetColor
+//
+//
+void Entity_SetColor(Entity *e,float r,float g,float b,float a);
+
+
+/////////////////////////////
+// Entity_AddColor
+//
+//
+void Entity_AddColor(Entity *e,float r,float g,float b,float a);
+
+
+/////////////////////////////
+// Entity_AddColor
+//
+//
+void Entity_SetLight(Entity *e,float r,float g,float b,float rad);
+
+/////////////////////////////
+// Entity_AddColor
+//
+//
+void Entity_Iluminate(Entity *e,Entity **elist,int n);
+
+
 #endif
+

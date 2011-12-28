@@ -222,6 +222,8 @@ int GameMap_CreateLevel(int level,int point){
 	_startpoint=point;
 	GameLib_ForEachEnt(GameMapAux_CreatePlayer);
 
+	// Iluminate
+	//GameLib_Iluminate();
 
 	return(1);
 }

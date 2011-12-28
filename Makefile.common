@@ -37,13 +37,8 @@ $(BUILDDIR)/Time.o: Time.c $(HEADS)
 $(BUILDDIR)/Util.o: Util.c $(HEADS)
 	$(CC) -c Util.c -o $(BUILDDIR)/Util.o $(CFLAGS)
 
-ifeq ($(OPENGL_DRAW),opengl)
-$(BUILDDIR)/Draw.o: DrawGL.c $(HEADS)
-	$(CC) -c DrawGL.c -o $(BUILDDIR)/Draw.o $(CFLAGS)
-else
-$(BUILDDIR)/Draw.o: DrawSDL.c $(HEADS)
-	$(CC) -c DrawSDL.c -o $(BUILDDIR)/Draw.o $(CFLAGS)
-endif
+$(BUILDDIR)/Draw.o: Draw.c $(HEADS)
+	$(CC) -c Draw.c -o $(BUILDDIR)/Draw.o $(CFLAGS)
 
 $(BUILDDIR)/Input.o: Input.c $(HEADS)
 	$(CC) -c Input.c -o $(BUILDDIR)/Input.o $(CFLAGS)
@@ -77,6 +72,6 @@ clean:
 	rm -f $(OBJS) $(BUILDDIR)/$(RESULT)
 
 run: $(BUILDDIR)/$(RESULT)
-	./$(BUILDDIR)/$(RESULT)
+	./$(BUILDDIR)/$(RESULT) debug
 
 

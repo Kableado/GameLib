@@ -38,8 +38,10 @@ Entity *Entity_New(){
 	e->fric_static=0.0f;
 	e->fric_dynamic=0.0f;
 
-	//e->img=NULL;
 	AnimPlay_SetImg(&e->anim,NULL);
+
+	e->color[0]=e->color[1]=e->color[2]=e->color[3]=1.0f;
+	e->light[0]=e->light[1]=e->light[2]=e->light[3]=1.0f;
 
 	e->oncopy=NULL;
 	e->ondelete=NULL;
@@ -91,8 +93,15 @@ Entity *Entity_Copy(Entity *e){
 	n->fric_static=e->fric_static;
 	n->fric_dynamic=e->fric_dynamic;
 
-	//n->img=e->img;
 	AnimPlay_Copy(&n->anim,&e->anim);
+	n->color[0]=e->color[0];
+	n->color[1]=e->color[1];
+	n->color[2]=e->color[2];
+	n->color[3]=e->color[3];
+	n->light[0]=e->light[0];
+	n->light[1]=e->light[1];
+	n->light[2]=e->light[2];
+	n->light[3]=e->light[3];
 
 	n->oncopy=e->oncopy;
 	n->ondelete=e->ondelete;
@@ -118,6 +127,7 @@ Entity *Entity_Copy(Entity *e){
 //
 //
 void Entity_Draw(Entity *e,int x,int y){
+	Draw_SetColor(e->color[0],e->color[1],e->color[2],e->color[3]);
 	AnimPlay_Draw(&e->anim,e->pos[0]+x,e->pos[1]+y);
 }
 
@@ -127,6 +137,7 @@ void Entity_Draw(Entity *e,int x,int y){
 //
 //
 void Entity_Process(Entity *b,int ft){
+	b->flags&=~EntityFlag_UpdatedPos;
 
 	// Launch method
 	if(b->proc){
@@ -165,6 +176,8 @@ void Entity_PostProcess(Entity *e,int ft){
 				1.0f-(e->fric_dynamic+(e->fric_static/len)));
 		}
 
+
+		e->flags|=EntityFlag_UpdatedPos;
 	}
 
 	// Animate
@@ -175,7 +188,7 @@ void Entity_PostProcess(Entity *e,int ft){
 /////////////////////////////
 // Entity_CollisionResponse
 //
-// Response to a collision
+// Normal response to a collision.
 void Entity_CollisionResponse(
 	Entity *b1,Entity *b2,float t,vec2 n)
 {
@@ -278,10 +291,11 @@ void Entity_Overlaps(Entity *b1,Entity *b2){
 	vec2 len;
 	float dist;
 
-	if(!(b1->flags&EntityFlag_Overlap) || !(b2->flags&EntityFlag_Overlap))
-		return;
+//	if(!(b1->flags&EntityFlag_Overlap) || !(b2->flags&EntityFlag_Overlap))
+//		return;
 
 	vec2_minus(len,b1->pos,b2->pos);
+#if 0
 	if(fabs(len[0])>b1->radius)
 		return;
 	if(fabs(len[1])>b1->radius)
@@ -298,6 +312,23 @@ void Entity_Overlaps(Entity *b1,Entity *b2){
 	if(b2->radius>dist && b2->overlap){
 		b2->overlap(b2,b1);
 	}
+#else
+	vec2_set(len,fabs(b1->pos[0]-b2->pos[0]),fabs(b1->pos[1]-b2->pos[1]));
+	if(b1->overlap){
+		if(	len[0]<=b1->radius &&
+			len[1]<=b1->radius)
+		{
+			b1->overlap(b1,b2);
+		}
+	}
+	if(b2->overlap){
+		if(	len[0]<=b2->radius &&
+			len[1]<=b2->radius)
+		{
+			b2->overlap(b2,b1);
+		}
+	}
+#endif
 }
 
 
@@ -323,5 +354,91 @@ void Entity_AddVelLimit(Entity *e,vec2 vel,float limit){
 		vec2_scale(vel_temp,dir,vlen);
 		vec2_plus(e->vel,e->vel,vel_temp);
 	}
-
 }
+
+
+/////////////////////////////
+// Entity_SetColor
+//
+//
+void Entity_SetColor(Entity *e,float r,float g,float b,float a){
+	e->color[0]=r;
+	e->color[1]=g;
+	e->color[2]=b;
+	e->color[3]=a;
+}
+
+
+/////////////////////////////
+// Entity_AddColor
+//
+//
+void Entity_AddColor(Entity *e,float r,float g,float b,float a){
+	e->color[0]+=r;
+	if(e->color[0]>1.0f)
+		e->color[0]=1.0f;
+	e->color[1]+=g;
+	if(e->color[1]>1.0f)
+		e->color[1]=1.0f;
+	e->color[2]+=b;
+	if(e->color[2]>1.0f)
+		e->color[2]=1.0f;
+	e->color[3]+=a;
+	if(e->color[3]>1.0f)
+		e->color[3]=1.0f;
+}
+
+
+/////////////////////////////
+// Entity_AddColor
+//
+//
+void Entity_SetLight(Entity *e,float r,float g,float b,float rad){
+	e->light[0]=r;
+	e->light[1]=g;
+	e->light[2]=b;
+	e->light[3]=rad;
+}
+
+
+/////////////////////////////
+// Entity_AddColor
+//
+//
+void Entity_Iluminate(Entity *e,Entity **elist,int n){
+	int i;
+	vec2 vdist;
+	float qdist,dist,f;
+	float qrad;
+
+	if(!(e->flags&EntityFlag_Light)){
+		Entity_SetColor(e,
+			e->light[0],
+			e->light[1],
+			e->light[2],
+			1.0f);
+	}else{
+		Entity_SetColor(e,1.0f,1.0f,1.0f,1.0f);
+		return;
+	}
+
+	for(i=0;i<n;i++){
+		if(e==elist[i] || !(elist[i]->flags&EntityFlag_Light))
+			continue;
+
+		vec2_minus(vdist,e->pos,elist[i]->pos);
+		qdist=vec2_dot(vdist,vdist);
+		qrad=elist[i]->light[3]*elist[i]->light[3];
+		if(qdist<qrad){
+			//dist=sqrtf(qdist);
+			//f=1.0f-dist/elist[i]->light[3];
+			f=1.0f-qdist/qrad;
+			Entity_AddColor(e,
+				f*elist[i]->light[0],
+				f*elist[i]->light[1],
+				f*elist[i]->light[2],
+				1.0f);
+		}
+	}
+}
+

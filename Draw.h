@@ -72,6 +72,13 @@ void Draw_DrawImg(DrawImg img,int x,int y);
 void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int i);
 
 
+/////////////////////////////
+// Draw_SetColor
+//
+//
+void Draw_SetColor(float r,float g,float b,float a);
+
+
 ////////////////////////////////////////////////
 // DrawFnt //
 /////////////

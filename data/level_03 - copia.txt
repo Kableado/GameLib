@@ -52,50 +52,17 @@
 #...A...A...#
 #mmmmm.mmmmm#
      m.m
-     m.m
-     m.m
-     m.m
-     m.m
-######5######
-#..V.V.....L#
-#LLLLLLLLL.L#
-#L.........L#
-#L.LLLLLLLLL#
-#L.........L#
-#LLLLLLLLL.L#
-#L.........L#
-#L.LLLLLLLLL#
-#L.....A.A..#
-#mmmmm.mmmmm#
-     m.m
-     m.m
-     m.m
-     m.m
-     m.m
-###V#V6######
-#LLLLL.LLLLL#
-#LLLLL.....L#
->LLLLLLLLL.L#
-mL.........L#
-mL.LLLLLLLLL<
-mL.........Lm
->LLLLLLLLL.Lm
-mL.........Lm
-mL.LLLLLLLLL<
-mL.....LLLLLm
-mLLLLL.LLLLLm
-mmmmmm.AmAmmm
-     m.m
-     m.m
-     m.m
-     m.m
-     m.m
-  ####.####
-  #.......#
-  #.......#
-  #.......#
-  #...E...#
-  #mmmmmmm#
-
-
+     m.m  ###########
+     m.m  #LLLLLLLL.#
+     m.m  #...L...L.#
+     m.m  #.L.L.L.L<#
+     m.m  #.L.L.L.L.#
+     m.####.L.L.L.L<######
+     m....5.L.L.L.L.......
+     mmmmmm>L.L.L.L.mmmmmm
+          m.L.L.L.L.m
+          m>L.L.L.L.m
+          m.L...L...m
+          m.LLLLLLLL#
+          mmmmmmmmmm#
 

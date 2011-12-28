@@ -93,6 +93,7 @@ int Draw_Init(int width,int height,char *title,int fps){
 	glDepthMask( GL_FALSE);
 
 	// Triplebuffer swap
+	glClear(GL_COLOR_BUFFER_BIT);
 	SDL_GL_SwapBuffers();
 	glClear(GL_COLOR_BUFFER_BIT);
 	SDL_GL_SwapBuffers();
@@ -116,7 +117,7 @@ int Draw_Init(int width,int height,char *title,int fps){
 	glMatrixMode (GL_PROJECTION);
 	glPushMatrix ();
 	glLoadIdentity ();
-	glOrtho (0,width, 0, height, -1000, 1000);
+	glOrtho (0,_width, 0, _height, -1000, 1000);
 	glMatrixMode (GL_MODELVIEW);
 	glPushMatrix ();
 	glLoadIdentity ();
@@ -136,7 +137,7 @@ int Draw_Init(int width,int height,char *title,int fps){
 void Draw_Loop(int (*proc)(),void (*draw)()){
 	int done=0;
 	SDL_Event event;
-	Uint8* keys;
+//	Uint8* keys;
 	long long time,time2;
 	long long t_frame=0;
 
@@ -159,28 +160,35 @@ void Draw_Loop(int (*proc)(),void (*draw)()){
 				}
 			}
 		}
-
+/*
 		// Process keys for Draw
 		keys=SDL_GetKeyState(NULL);
 		if(keys[SDLK_F12]){
 			// Screenshot key
 			SDL_SaveBMP(_screen,"shot.bmp");
 		}
-
-		// Input and sound Frame
-		Input_Frame();
+*/
+		// Sound Frame
 		Audio_Frame();
 
-		// Process
+		// Measure time
 		time2=Time_GetTime();
 		t_frame+=time2-time;
 		time=time2;
+		if(t_frame>50000){
+			t_frame=50000;
+		}
+
+		// Process
 		if(proc){
 			while(t_frame>_t_frame && !done){
+			//while(t_frame>0 && !done){
+				Input_Frame();
 				if(!proc()){
 					done=1;
 				}
 				t_frame-=_t_frame;
+
 			}
 		}
 
@@ -419,6 +427,15 @@ void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int i){
 		glTexCoord2f (u2, 1);
 		glVertex2i (x2, y2);
 	glEnd ();
+}
+
+
+/////////////////////////////
+// Draw_SetColor
+//
+//
+void Draw_SetColor(float r,float g,float b,float a){
+	glColor4f(r,g,b,a);
 }
 
 

@@ -4,6 +4,7 @@
 #include <math.h>
 
 #include "GameLib.h"
+extern int gamelib_debug;
 
 #include "GameEnts.h"
 
@@ -88,6 +89,19 @@ void player_proc(Entity *e,int ft){
 	vec2 vel;
 	int pos[2],size[2],delta[2];
 
+	if (gamelib_debug) {
+		if (Input_GetKey(InputKey_Jump)==InputKey_Pressed) {
+			if (!(e->flags&EntityFlag_Collision)) {
+				e->flags|=(EntityFlag_Collision|EntityFlag_Overlap);
+				GameLib_EntitySetLight(e,0.4f,0.4f,0.4f,5*32.0f);
+			}else {
+				e->flags&=~(EntityFlag_Collision|EntityFlag_Overlap);
+				GameLib_EntitySetLight(e,0.7f,0.7f,0.7f,20*32.0f);
+			}
+		}
+	}
+
+
 	if(Input_GetDir(vel)){
 		vec2 up,right;
 		float updown,leftright;
@@ -129,6 +143,30 @@ void player_proc(Entity *e,int ft){
 	pos[0]=pos[0]+delta[0]/10;
 	pos[1]=pos[1]+delta[1]/10;
 	GameLib_SetPos(pos);
+}
+
+int player_collision(Entity *e1,Entity *e2,float t,vec2 n){
+	if(e2->type==Ent_Barrel){
+		/*
+		vec2_scale(e1->vel,e1->vel,0.5f);
+		vec2_plus(e2->vel,e2->vel,e1->vel);
+		*/
+		float vlen,dotp;
+		vec2 vdir;
+		vlen=sqrtf(vec2_dot(e1->vel,e1->vel));
+		if(vlen>0.0f){
+			vec2_scale(vdir,e1->vel,1.0f/vlen);
+			if(vec2_dot(vdir,n)>0.9){
+				Entity_CollisionResponse(e1,e2,t,vdir);
+				return(0);
+			}else{
+				return(1);
+			}
+		}else{
+			return(1);
+		}
+	}
+	return(1);
 }
 
 void barrel_proc(Entity *e,int ft){
@@ -262,8 +300,10 @@ void savepoint_overlap(Entity *e1,Entity *e2){
 		}
 		if(e1!=_savepoint){
 			AnimPlay_SetAnim(&e1->anim,anim_savepoint_active);
+			GameLib_EntitySetLight(e1,0.0f,0.0f,0.5f,4*32.0f);
 			if(_savepoint){
 				AnimPlay_SetImg(&_savepoint->anim,img_savepoint);
+				GameLib_EntitySetLight(_savepoint,0.0f,0.0f,0.5f,2*32.0f);
 			}
 			_savepoint=e1;
 		}
@@ -306,9 +346,10 @@ void timeoutent_proc(Entity *e,int ft){
 
 
 void GameEnts_Init(){
+	Entity *ent;
 
-
-	// Load Graphics
+	//////////////////////////////
+	// Load Resources
 
 	img_barrel=Draw_LoadImage("data/barrel.bmp");
 	Draw_SetOffset(img_barrel,-16,-32);
@@ -393,19 +434,35 @@ void GameEnts_Init(){
 
 
 
+
+
+
+	///////////////////////////////////////
 	//  Create the entity templates
 
-	ent_player=Entity_New();
+	ent=Entity_New();
+	ent->mass=-1.0f;
+	ent->flags=0;
+	Entity_SetLight(ent,0.2f,0.2f,0.2f,1.0f);
+
+
+	ent_player=Entity_Copy(ent);
 	ent_player->type=Ent_Player;
 	ent_player->radius=16.0f;
 	ent_player->mass=70.0f;
 	ent_player->fric_static=0.5f;
+	ent_player->flags=
+		EntityFlag_Collision|EntityFlag_Overlap|EntityFlag_Light;
+	Entity_SetLight(ent_player,0.4f,0.4f,0.4f,5*32.0f);
 	AnimPlay_SetImg(&ent_player->anim,img_player_down);
 	ent_player->proc=player_proc;
+	ent_player->collision=player_collision;
 
 
-	ent_barrel=Entity_New();
+	ent_barrel=Entity_Copy(ent);
 	ent_barrel->type=Ent_Barrel;
+	ent_barrel->flags=
+		EntityFlag_Collision|EntityFlag_Overlap;
 	ent_barrel->radius=16.0f;
 	ent_barrel->mass=100.0f;
 	ent_barrel->fric_static=0.5f;
@@ -413,19 +470,18 @@ void GameEnts_Init(){
 	AnimPlay_SetImg(&ent_barrel->anim,img_barrel);
 
 
-	ent_column=Entity_New();
+	ent_column=Entity_Copy(ent);
 	ent_column->type=Ent_Column;
 	ent_column->flags=EntityFlag_Collision;
 	//ent_column->flags=0;
 	ent_column->radius=12;
-	ent_column->mass=-1.0f;
 	AnimPlay_SetImg(&ent_column->anim,img_column);
 	ent_column_faded=Entity_Copy(ent_column);
 	AnimPlay_SetImg(&ent_column_faded->anim,img_column_faded);
 
 
 
-	ent_floor=Entity_New();
+	ent_floor=Entity_Copy(ent);
 	ent_floor->type=Ent_Floor;
 	ent_floor->zorder=-1;
 	ent_floor->flags=0;
@@ -437,7 +493,7 @@ void GameEnts_Init(){
 	ent_floor_center=Entity_Copy(ent_floor);
 	AnimPlay_SetImg(&ent_floor_center->anim,img_floor_center);
 
-	ent_hole_spiked=Entity_New();
+	ent_hole_spiked=Entity_Copy(ent);
 	ent_hole_spiked->type=Ent_Hole_Spiked;
 	ent_hole_spiked->zorder=-1;
 	ent_hole_spiked->flags=EntityFlag_Overlap;
@@ -445,25 +501,29 @@ void GameEnts_Init(){
 	AnimPlay_SetImg(&ent_hole_spiked->anim,img_hole_spiked);
 	ent_hole_spiked->overlap=hole_spiked_overlap;
 
-	ent_hole_filled=Entity_New();
+	ent_hole_filled=Entity_Copy(ent);
 	ent_hole_filled->type=Ent_Hole_Filled;
 	ent_hole_filled->zorder=-1;
 	ent_hole_filled->flags=0;
 	AnimPlay_SetImg(&ent_hole_filled->anim,img_barrel2);
 
-	ent_hole_lava=Entity_New();
+	ent_hole_lava=Entity_Copy(ent);
 	ent_hole_lava->type=Ent_Hole_Lava;
 	ent_hole_lava->zorder=-1;
-	ent_hole_lava->flags=EntityFlag_Overlap;
+	ent_hole_lava->flags=EntityFlag_Overlap|EntityFlag_Light;
 	ent_hole_lava->radius=18;
 	AnimPlay_SetAnim(&ent_hole_lava->anim,anim_hole_lava);
+	Entity_SetLight(ent_hole_lava,1.0f,0.0f,0.0f,4*32.0f);
 	ent_hole_lava->overlap=hole_lava_overlap;
 
 
-	ent_arrow_up=Entity_New();
+	ent_arrow_up=Entity_Copy(ent);
 	ent_arrow_up->type=Ent_Arrow;
-	ent_arrow_up->flags=EntityFlag_Collision;
-	ent_arrow_up->radius=7;
+	//ent_arrow_up->flags=EntityFlag_Collision;
+	ent_arrow_up->flags=EntityFlag_Collision|EntityFlag_Light;
+	Entity_SetLight(ent_arrow_up,0.2f,0.2f,0.2f,2*32.0f);
+	ent_arrow_up->radius=4;
+	ent_arrow_up->mass=0.1f;
 	ent_arrow_up->collision=arrow_collision;
 	ent_arrow_up->proc=timeoutent_proc;
 	ent_arrow_up->A=120;
@@ -480,11 +540,10 @@ void GameEnts_Init(){
 	vec2_set(ent_arrow_right->vel,4,0);
 
 
-	ent_arrowshooter_up=Entity_New();
+	ent_arrowshooter_up=Entity_Copy(ent);
 	ent_arrowshooter_up->type=Ent_ArrowShooter;
 	ent_arrowshooter_up->flags=EntityFlag_Collision;
 	ent_arrowshooter_up->radius=15;
-	ent_arrowshooter_up->mass=-1.0f;
 	ent_arrowshooter_up->oncopy=arrowshooter_oncopy;
 	ent_arrowshooter_up->proc=arrowshooter_proc;
 	AnimPlay_SetImg(&ent_arrowshooter_up->anim,img_arrowshooter_up);
@@ -500,11 +559,12 @@ void GameEnts_Init(){
 	ent_arrowshooter_right->child=ent_arrow_right;
 
 
-	ent_savepoint_1=Entity_New();
+	ent_savepoint_1=Entity_Copy(ent);
 	ent_savepoint_1->type=Ent_SavePoint;
 	ent_savepoint_1->zorder=0;
-	ent_savepoint_1->flags=EntityFlag_Overlap;
-	ent_savepoint_1->radius=16;
+	ent_savepoint_1->flags=EntityFlag_Overlap|EntityFlag_Light;
+	ent_savepoint_1->radius=20;
+	Entity_SetLight(ent_savepoint_1,0.0f,0.0f,0.5f,2*32.0f);
 	AnimPlay_SetImg(&ent_savepoint_1->anim,img_savepoint);
 	ent_savepoint_1->overlap=savepoint_overlap;
 	ent_savepoint_1->ondelete=savepoint_ondelete;
@@ -527,24 +587,26 @@ void GameEnts_Init(){
 	ent_savepoint_9->A=9;
 
 
-	ent_exitpoint=Entity_New();
+	ent_exitpoint=Entity_Copy(ent);
 	ent_exitpoint->type=Ent_ExitPoint;
-	ent_exitpoint->flags=EntityFlag_Overlap;
-	ent_exitpoint->radius=16;
+	ent_exitpoint->flags=EntityFlag_Overlap|EntityFlag_Light;
+	Entity_SetLight(ent_exitpoint,0.5f,0.5f,0.5f,5*32.0f);
+	ent_exitpoint->radius=20;
 	AnimPlay_SetAnim(&ent_exitpoint->anim,anim_exitpoint);
 	ent_exitpoint->overlap=exitpoint_overlap;
 	ent_endpoint=Entity_Copy(ent_exitpoint);
 	AnimPlay_SetImg(&ent_endpoint->anim,img_endpoint);
 	ent_endpoint->overlap=endpoint_overlap;
 
-	ent_fire=Entity_New();
+	ent_fire=Entity_Copy(ent);
 	ent_fire->type=Ent_Effect;
-	ent_fire->flags=0;
+	ent_fire->flags=EntityFlag_Light;
+	Entity_SetLight(ent_fire,1.0f,0.0f,0.0f,3*32.0f);
 	AnimPlay_SetAnim(&ent_fire->anim,anim_fire);
 	ent_fire->proc=timeoutent_proc;
 	ent_fire->A=60;
 
-	ent_player_broken=Entity_New();
+	ent_player_broken=Entity_Copy(ent);
 	ent_player_broken->type=Ent_Effect;
 	ent_player_broken->flags=0;
 	AnimPlay_SetImg(&ent_player_broken->anim,img_player_broken);

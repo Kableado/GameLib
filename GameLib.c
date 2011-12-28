@@ -33,7 +33,10 @@ long long t_col;
 long long t_over;
 long long t_postproc;
 long long t_draw;
-int f_count;
+int fproc_count;
+int fdraw_count;
+
+int gamelib_debug=0;
 
 
 /////////////////////////////
@@ -93,6 +96,9 @@ void GameLib_AddEntity(Entity *e){
 	_entity[_n_entities]=e;
 	_entity_flag[_n_entities]=1;
 	_n_entities++;
+
+	// Mark for light update
+	GameLib_EntityUpdateLight(e);
 }
 
 
@@ -104,6 +110,7 @@ int GameLib_UnrefEntity(Entity *e){
 	int i;
 	for(i=0;i<_n_entities;i++){
 		if(e==_entity[i]){
+			// Mark or unref
 			if(_entities_lock){
 				_entity_flag[i]=-2;
 			}else{
@@ -111,6 +118,9 @@ int GameLib_UnrefEntity(Entity *e){
 				_entity_flag[i]=0;
 			}
 			_entities_compactate=1;
+
+			// Mark for light update
+			GameLib_EntityUpdateLight(e);
 			return(i);
 		}
 	}
@@ -197,11 +207,11 @@ int GameLib_ProcLoop(){
 	count=0;
 	do{
 		repeat=0;
-		for(i=0;i<_n_entities-1;i++){
-			if(!(_entity[i]->flags&EntityFlag_Collision))
+		for(i=0;i<_n_entities;i++){
+			if(!(_entity[i]->flags&EntityFlag_Collision) || _entity[i]->mass<0.0f)
 				continue;
-			for(j=i+1;j<_n_entities;j++){
-				if(!(_entity[j]->flags&EntityFlag_Collision))
+			for(j=0;j<_n_entities;j++){
+				if(!(_entity[j]->flags&EntityFlag_Collision) || i==j)
 					continue;
 				if(Entity_Collide(_entity[i],_entity[j])){
 					repeat=1;
@@ -212,11 +222,11 @@ int GameLib_ProcLoop(){
 	}while(repeat && count<10);
 	// Stop remaining collisions
 	if(count==10){
-		for(i=0;i<_n_entities-1;i++){
-			if(!(_entity[i]->flags&EntityFlag_Collision))
+		for(i=0;i<_n_entities;i++){
+			if(!(_entity[i]->flags&EntityFlag_Collision) || _entity[i]->mass<0.0f)
 				continue;
-			for(j=i+1;j<_n_entities;j++){
-				if(!(_entity[j]->flags&EntityFlag_Collision))
+			for(j=0;j<_n_entities;j++){
+				if(!(_entity[j]->flags&EntityFlag_Collision) || i==j)
 					continue;
 				if(Entity_Collide(_entity[i],_entity[j])){
 					vec2_set(_entity[i]->vel,0,0);
@@ -231,11 +241,11 @@ int GameLib_ProcLoop(){
 	// Process Overlaps
 	time=Time_GetTime();
 	GameLib_Compactate();_entities_lock=1;
-	for(i=0;i<_n_entities-1;i++){
-		if(!(_entity[i]->flags&EntityFlag_Overlap))
+	for(i=0;i<_n_entities;i++){
+		if(!(_entity[i]->flags&EntityFlag_Overlap) || _entity[i]->mass<0.0f)
 			continue;
-		for(j=i+1;j<_n_entities;j++){
-			if(!(_entity[j]->flags&EntityFlag_Overlap))
+		for(j=0;j<_n_entities;j++){
+			if(!(_entity[j]->flags&EntityFlag_Overlap) || i==j)
 				continue;
 			Entity_Overlaps(_entity[i],_entity[j]);
 		}
@@ -280,6 +290,9 @@ int GameLib_ProcLoop(){
 	for(i=0;i<_n_entities;i++){
 		Entity *e;
 		Entity_PostProcess(_entity[i],_ft);
+		if(_entity[i]->flags&EntityFlag_UpdatedPos){
+			GameLib_EntityUpdateLight(_entity[i]);
+		}
 	}
 	if(_gamepostproc){
 		_gamepostproc();
@@ -287,7 +300,7 @@ int GameLib_ProcLoop(){
 	GameLib_Compactate();
 	t_postproc+=Time_GetTime()-time;
 
-	f_count++;
+	fproc_count++;
 
 	return(_running);
 }
@@ -302,6 +315,9 @@ void GameLib_DrawLoop(){
 	int i;
 
 	time=Time_GetTime();
+
+	// Update Lights
+	//GameLib_UpdateIlumination();
 
 	// Limpiar pantalla
 	Draw_Clean(0,0,0);
@@ -322,6 +338,12 @@ void GameLib_DrawLoop(){
 		if(e->pos[1]>(_game_pos[1]+_game_size[1]+128))
 			continue;
 
+		// Update ilumination of this entity
+		if(e->flags&EntityFlag_UpdateLight){
+			Entity_Iluminate(e,_entity,_n_entities);
+			e->flags&=~EntityFlag_UpdateLight;
+		}
+
 		Entity_Draw(e,-_game_pos[0],-_game_pos[1]);
 	}
 	if(_gamedraw){
@@ -329,7 +351,10 @@ void GameLib_DrawLoop(){
 	}
 	GameLib_Compactate();
 
+
 	t_draw+=Time_GetTime()-time;
+
+	fdraw_count++;
 }
 
 
@@ -352,15 +377,18 @@ void GameLib_Loop(
 	t_over=0;
 	t_postproc=0;
 	t_draw=0;
-	f_count=0;
+	fproc_count=0;
+	fdraw_count=0;
 	Draw_Loop(GameLib_ProcLoop,GameLib_DrawLoop);
 
-	printf("Profiling:::::::::\n");
-	printf("t_proc.....:%6lld\n",t_proc/f_count);
-	printf("t_col......:%6lld\n",t_col/f_count);
-	printf("t_over.....:%6lld\n",t_over/f_count);
-	printf("t_postproc.:%6lld\n",t_postproc/f_count);
-	printf("t_draw.....:%6lld\n",t_draw/f_count);
+	if (gamelib_debug) {
+		printf("Profiling:::::::::\n");
+		printf("t_proc.....:%6lld\n",t_proc/fproc_count);
+		printf("t_col......:%6lld\n",t_col/fproc_count);
+		printf("t_over.....:%6lld\n",t_over/fproc_count);
+		printf("t_postproc.:%6lld\n",t_postproc/fproc_count);
+		printf("t_draw.....:%6lld\n",t_draw/fdraw_count);
+	}
 }
 
 
@@ -464,3 +492,76 @@ void GameLib_PlaySound(AudioSnd snd,int x,int y){
 	// PLAY!
 	Audio_PlaySound(snd,vleft,vright);
 }
+
+
+/////////////////////////////
+// GameLib_Iluminate
+//
+//
+void GameLib_Iluminate(){
+	int i;
+
+	for(i=0;i<_n_entities;i++){
+		Entity_Iluminate(_entity[i],_entity,_n_entities);
+	}
+}
+
+
+/////////////////////////////
+// GameLib_EntitySetLight
+//
+//
+void GameLib_EntitySetLight(Entity *e,float r,float g,float b,float rad){
+	if(e->flags&EntityFlag_Light){
+		GameLib_EntityUpdateLight(e);
+		Entity_SetLight(e,r,g,b,rad);
+		GameLib_EntityUpdateLight(e);
+	}else{
+		Entity_SetLight(e,r,g,b,rad);
+		e->flags|=EntityFlag_UpdateLight;
+	}
+}
+
+
+/////////////////////////////
+// GameLib_EntityUpdateLight
+//
+//
+void GameLib_EntityUpdateLight(Entity *e){
+	if(e->flags&EntityFlag_Light){
+		int i;
+		vec2 max,min;
+
+		vec2_set(max,e->pos[0]+e->light[3],e->pos[1]+e->light[3]);
+		vec2_set(min,e->pos[0]-e->light[3],e->pos[1]-e->light[3]);
+		for(i=0;i<_n_entities;i++){
+			if(	min[0]<=_entity[i]->pos[0] &&
+				max[0]>=_entity[i]->pos[0] &&
+				min[1]<=_entity[i]->pos[1] &&
+				max[1]>=_entity[i]->pos[1])
+			{
+				_entity[i]->flags|=EntityFlag_UpdateLight;
+			}
+		}
+	}else{
+		e->flags|=EntityFlag_UpdateLight;
+	}
+}
+
+
+/////////////////////////////
+// GameLib_UpdateIlumination
+//
+//
+void GameLib_UpdateIlumination(){
+	int i;
+
+	for(i=0;i<_n_entities;i++){
+		if(_entity[i]->flags&EntityFlag_UpdateLight){
+			Entity_Iluminate(_entity[i],_entity,_n_entities);
+			_entity[i]->flags&=~EntityFlag_UpdateLight;
+		}
+	}
+}
+
+

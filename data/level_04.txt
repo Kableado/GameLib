@@ -1,0 +1,37 @@
+100 100
+
+1
+     #######7#######
+     #SSSSSS.SSSSSS#
+     #S....S.S....S#
+     #S.LLBS.S.LL.S#
+     #S...........S#
+     #SSSS.SSSSSSSS#####
+     #SSSS.SSS.........8
+     #SSSSSSSSSSSSSmmmmm
+     #S..B...S....Sm
+     #S.LL.SSSBLL.Sm
+     #S....SSS....Sm
+     #SSSSSSSSSSSSSm
+     mmmmmmmmmmmmmmm
+
+
+
+
+     m.m
+     m.m  #####################
+     m.m  #S....SSS.....S...BB#
+     m.m  #S.SSBSSS.SSS.SSS....
+     m.m  #S............SSSS..m
+     m.m  #SSSL.LLL.LLL.LSSSS.m
+     m.####SSSL.LLL.LLL..LLSS.m
+     m....8......L.B.......LS.m
+     mmmmmmSSSS.LLL.LLL..LLSS.m
+          mSSSSSLLL.LLL.LSSSS.m
+          m.SSS....S...LSS....m
+          m..LLLLLL.LLLLLL.SS.m
+          mB...............SS.m
+          mmmmmmmmmmmmmmmmmmmmm
+
+
+

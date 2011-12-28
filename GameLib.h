@@ -89,4 +89,32 @@ void GameLib_ForEachEnt(int (*func)(Entity *ent));
 void GameLib_PlaySound(AudioSnd snd,int x,int y);
 
 
+/////////////////////////////
+// GameLib_Iluminate
+//
+//
+void GameLib_Iluminate();
+
+
+/////////////////////////////
+// GameLib_EntitySetLight
+//
+//
+void GameLib_EntitySetLight(Entity *e,float r,float g,float b,float rad);
+
+
+/////////////////////////////
+// GameLib_EntityUpdateLight
+//
+//
+void GameLib_EntityUpdateLight(Entity *e);
+
+
+/////////////////////////////
+// GameLib_UpdateIlumination
+//
+//
+void GameLib_UpdateIlumination();
+
+
 #endif
