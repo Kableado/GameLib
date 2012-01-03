@@ -252,32 +252,39 @@ int Entity_Collide(Entity *b1,Entity *b2){
 		return(0);
 	if(Colision_CircleCircle(b1->pos,b1->radius,vel,b2->pos,b2->radius,&t,n)){
 		int response=1;
+		int rc;
 
 		// Check the collision methods
 		if(b1->collision){
-			if(!b1->collision(b1,b2,t,n)){
+			rc=b1->collision(b1,b2,t,n);
+			if (rc==0)
 				response=0;
-			}
+			if (rc>1)
+				response=2;
 		}
 		if(b2->collision){
 			vec2 n2;
 			vec2_scale(n2,n,-1.0f);
-			if(!b2->collision(b2,b1,t,n2)){
+			rc=b2->collision(b2,b1,t,n2);
+			if (rc==0)
 				response=0;
-			}
+			if (rc>1)
+				response=2;
 		}
 
 		// Collision response
-		if(response){
+		if(response==1){
 			if(vec2_dot(b1->vel,b1->vel)>vec2_dot(b2->vel,b2->vel)){
 				Entity_CollisionResponse(b1,b2,t,n);
 			}else{
 				Entity_CollisionResponse(b2,b1,t,n);
 			}
 			return(1);
-		}else{
-			return(0);
 		}
+		if (response==2) {
+			return(1);
+		}
+		return(0);
 	}
 	return(0);
 }

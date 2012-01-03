@@ -70,7 +70,8 @@ int GameMapAux_IsFloor(char c){
 		c=='A' ||
 		c=='V' ||
 		c=='<' ||
-		c=='>' )
+		c=='>' ||
+		c=='r' )
 	{
 		return(1);
 	}
@@ -138,6 +139,10 @@ int GameMap_CreateLevel(int level,int point){
 			if(line[i]=='m'){
 				// Column faded
 				GameMapAux_CreateEnt(ent_column_faded,i,j);
+			}else
+			if(line[i]=='r'){
+				// Rock
+				GameMapAux_CreateEnt(ent_rock,i,j);
 			}else
 			if(line[i]=='B'){
 				// Barrel

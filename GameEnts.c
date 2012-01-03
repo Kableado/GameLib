@@ -12,6 +12,7 @@ DrawImg img_barrel;
 DrawImg img_barrel2;
 DrawImg img_column;
 DrawImg img_column_faded;
+DrawImg img_rock;
 DrawImg img_floor;
 DrawImg img_floor_left;
 DrawImg img_floor_right;
@@ -50,6 +51,7 @@ Entity *ent_player;
 Entity *ent_barrel;
 Entity *ent_column;
 Entity *ent_column_faded;
+Entity *ent_rock;
 Entity *ent_floor;
 Entity *ent_floor_right;
 Entity *ent_floor_left;
@@ -147,18 +149,14 @@ void player_proc(Entity *e,int ft){
 
 int player_collision(Entity *e1,Entity *e2,float t,vec2 n){
 	if(e2->type==Ent_Barrel){
-		/*
-		vec2_scale(e1->vel,e1->vel,0.5f);
-		vec2_plus(e2->vel,e2->vel,e1->vel);
-		*/
-		float vlen,dotp;
+		float vlen;
 		vec2 vdir;
 		vlen=sqrtf(vec2_dot(e1->vel,e1->vel));
 		if(vlen>0.0f){
 			vec2_scale(vdir,e1->vel,1.0f/vlen);
 			if(vec2_dot(vdir,n)>0.9){
 				Entity_CollisionResponse(e1,e2,t,vdir);
-				return(0);
+				return(2);
 			}else{
 				return(1);
 			}
@@ -370,6 +368,8 @@ void GameEnts_Init(){
 	Draw_SetOffset(img_column,-16,-80);
 	img_column_faded=Draw_LoadImage("data/column_faded.bmp");
 	Draw_SetOffset(img_column_faded,-16,-80);
+	img_rock=Draw_LoadImage("data/rock.bmp");
+	Draw_SetOffset(img_rock,-16,-32);
 
 	img_hole_spiked=Draw_LoadImage("data/hole_spiked.bmp");
 	Draw_SetOffset(img_hole_spiked,-16,-16);
@@ -478,6 +478,8 @@ void GameEnts_Init(){
 	AnimPlay_SetImg(&ent_column->anim,img_column);
 	ent_column_faded=Entity_Copy(ent_column);
 	AnimPlay_SetImg(&ent_column_faded->anim,img_column_faded);
+	ent_rock=Entity_Copy(ent_column);
+	AnimPlay_SetImg(&ent_rock->anim,img_rock);
 
 
 

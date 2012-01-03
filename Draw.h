@@ -110,4 +110,12 @@ DrawFnt Draw_LoadFont(char *fichero,int min,int max);
 // Draws text using a font
 void Draw_DrawText(DrawFnt f,char *text,int x,int y);
 
+
+/////////////////////////////
+// Draw_SaveScreenshoot
+//
+//
+void Draw_SaveScreenshoot(char *filename);
+
+
 #endif

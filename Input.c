@@ -88,7 +88,7 @@ void Input_Frame(){
 
 	// Process Keys
 	keys=SDL_GetKeyState(NULL);
-	Input_SetKey(InputKey_Action1,keys[SDLK_z]|buttons);
+	Input_SetKey(InputKey_Action1,keys[SDLK_z]);
 	Input_SetKey(InputKey_Action2,keys[SDLK_x]);
 	Input_SetKey(InputKey_Up,keys[SDLK_UP]|mup);
 	Input_SetKey(InputKey_Down,keys[SDLK_DOWN]|mdown);

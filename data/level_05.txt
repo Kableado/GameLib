@@ -1,0 +1,68 @@
+100 100
+
+  #########
+  #...1...#
+  #.......#
+  #.......#
+  #.......#
+  #mmm.mmm#
+     m.m
+     m.m
+     m.m
+     m.m
+     m.m
+     m.m
+######2######
+#...........#
+#.B.B...B.B.#
+#...........#
+#LLLLrSrLLLL#
+#...A...A...#
+#mmmmm.mmmmm#
+     m.m
+     m.m
+     m.m
+     m.m
+######3######
+#..V.V.....L#
+#LLLLLLLLL.L#
+#L.........L#
+#L.LLLLLLLLL#
+#L.........L#
+#LLLLLLLLL.L#
+#L.........L#
+#L.LLLLLLLLL#
+#L.....A.A..#
+#mmmmm.mmmmm#
+     m.m
+     m.m
+     m.m
+     m.m
+     m.m
+###V#V4######
+#LLLLL.LLLLL#
+#LLLLL.....L#
+>LLLLLLLLL.L#
+mL.........L#
+mL.LLLLLLLLL<
+mL.........Lm
+>LLLLLLLLL.Lm
+mL.........Lm
+mL.LLLLLLLLL<
+mL.....LLLLLm
+mLLLLL.LLLLLm
+mmmmmm.AmAmmm
+     m.m
+     m.m
+     m.m
+     m.m
+     m.m
+  ####.####
+  #.......#
+  #.......#
+  #.......#
+  #...E...#
+  #mmmmmmm#
+
+
+

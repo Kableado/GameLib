@@ -137,7 +137,7 @@ int Draw_Init(int width,int height,char *title,int fps){
 void Draw_Loop(int (*proc)(),void (*draw)()){
 	int done=0;
 	SDL_Event event;
-//	Uint8* keys;
+	Uint8* keys;
 	long long time,time2;
 	long long t_frame=0;
 
@@ -160,14 +160,14 @@ void Draw_Loop(int (*proc)(),void (*draw)()){
 				}
 			}
 		}
-/*
+
 		// Process keys for Draw
 		keys=SDL_GetKeyState(NULL);
 		if(keys[SDLK_F12]){
 			// Screenshot key
-			SDL_SaveBMP(_screen,"shot.bmp");
+			Draw_SaveScreenshoot("shot.bmp");
 		}
-*/
+
 		// Sound Frame
 		Audio_Frame();
 
@@ -550,7 +550,7 @@ DrawFnt Draw_LoadFont(char *fichero,int min,int max){
 /////////////////////////////
 // Draw_DrawText
 //
-// Draws text using a font
+// Draws text using a font.
 void Draw_DrawText(DrawFnt f,char *text,int x,int y){
 	DrawFont *font=f;
 	char *ptr;
@@ -565,4 +565,61 @@ void Draw_DrawText(DrawFnt f,char *text,int x,int y){
 		ptr++;
 	}
 }
+
+
+/////////////////////////////
+// Draw_SaveScreenshoot
+//
+//
+void Draw_SaveScreenshoot(char *filename){
+	SDL_Surface *surf;
+	unsigned char *image_line;
+	int i,half_height,line_size;
+
+	// Create the surface
+	surf = SDL_CreateRGBSurface(SDL_SWSURFACE,
+		_width, _height, 32,0,0,0,0);
+	surf->format->Amask=0xFF000000;
+	surf->format->Ashift=24;
+	SDL_SetAlpha(surf, SDL_SRCALPHA, 255);
+
+	// Get the screenshot
+	SDL_LockSurface(surf);
+	glReadPixels(0, 0,
+		_width, _height, GL_RGBA,
+		GL_UNSIGNED_BYTE, surf->pixels);
+	SDL_UnlockSurface(surf);
+
+	// Flip the image data
+	line_size=_width*4;
+	half_height=_height/2;
+	image_line=malloc(line_size);
+	for(i=0;i<half_height;i++){
+		memcpy(image_line,surf->pixels+i*line_size,line_size);
+		memcpy(surf->pixels+i*line_size,surf->pixels+(_height-(i+1))*line_size,line_size);
+		memcpy(surf->pixels+(_height-(i+1))*line_size,image_line,line_size);
+	}
+
+	// Swap RGB to BGR
+	Uint32 *ptr,*ptr_end;
+	ptr=(Uint32 *)surf->pixels;
+	ptr_end=ptr+(surf->w*surf->h);
+	while (ptr<ptr_end) {
+		unsigned char temp;
+		unsigned char *pixel;
+		pixel=(unsigned char *)ptr;
+		temp=pixel[2];
+		pixel[2]=pixel[0];
+		pixel[0]=temp;
+		ptr++;
+	}
+
+	// Save the image
+	SDL_SaveBMP(surf,filename);
+
+	// Cleanup
+	SDL_FreeSurface(surf);
+}
+
+
 

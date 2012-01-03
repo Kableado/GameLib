@@ -1,0 +1,191 @@
+/***********************************************
+ *    Copyright (c) 2012 Valeriano Alfonso     *
+ ***********************************************/
+
+
+
+/*  Elementos Base */
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	font-family: Verdana,Arial,Helvetica,sans-serif;
+	background-color:#000000;
+	color: #777777;
+	font-size: 10pt;
+}
+h1{
+	text-align: left;
+	margin-top: 0;
+	margin-bottom: 1em;
+	font-size: 16pt;
+	font-weight: bold;
+}
+h2{
+	text-align: left;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+	font-size: 14pt;
+	font-weight: bold;
+}
+h3{
+	text-align: left;
+	margin-top: 0;
+	margin-bottom: 0.5em;
+	font-size: 10pt;
+	font-weight: bold;
+}
+h4{
+	margin-top: 0;
+	margin-bottom: 0.5em;
+	font-size: 11pt;
+	font-weight: bold;
+}
+p,li,td{
+	margin-top: 0;
+	margin-bottom: 0.5em;
+	font-size: 10pt;
+}
+li {
+	padding:2px;
+}
+img {
+	border:0;
+}
+
+
+
+
+
+
+/* Links normales */
+a {
+	text-decoration:none;
+	font-weight: bold;
+	display:inline;
+}
+a:link {
+	color: #7777FF;
+}
+a:visited {
+	color: #7777FF;
+}
+a:hover {
+	color: #FFFFFF;
+	text-decoration: underline;
+}
+a:active {
+	color: #CBB545;
+}
+
+
+
+
+
+
+
+
+
+
+/* Estilo de Lonely Ruins */
+.contenedor {
+	margin: 0;
+	padding: 0;
+	float: left;
+	width: 100%;
+	min-height: 100%;
+}
+.cabecera {
+	width: 700px;
+	height:130px;
+	margin: 0 auto;
+	position: relative;
+}
+.titulo {
+	margin:0;
+	padding:0;
+	border:0;
+	vertical-align:bottom;
+	position:absolute;
+}
+a.titulo:hover {
+	background:none;
+}
+a.titulo img {
+	border:none;
+}
+a.titulo:hover img{
+	border:none;
+}
+.contenido {
+	width: 700px;
+	margin:0;
+	padding:0;
+	border:0;
+	position:relative;
+	margin: 0 auto;
+	vertical-align:bottom;
+}
+.pie {
+	width:700px;
+	height: 64px;
+	margin:0;
+	padding:0;
+	border:0;
+	position:relative;
+	margin: 0 auto;
+	font-weight: bold;
+}
+
+
+
+
+.navbar {
+	height:130px;
+	width:500px;
+	margin:0;
+	padding:0;
+	border:0;
+	vertical-align:bottom;
+	position:absolute;
+	bottom:0px;
+	right:0px;
+}
+.navbar ul {
+	list-style:none;
+	list-style-type:none;
+	list-style-position:inside;
+	border:0;
+	padding:0;
+	margin:0;
+	display:block;
+	position:absolute;
+	bottom:0;
+	right:0;
+}
+.navbar li{
+	padding:0px;
+	float: left;
+	text-align: center;
+	vertical-align: bottom;
+	margin: 1px;
+	border-left:1px solid #777777;
+}
+
+/* links del navbar */
+.navbar a {
+	padding: 4px;
+	font-size:12pt;
+	display:block;
+	/*border-top: 2px solid rgb(127,127,127);
+	border-left: 2px solid rgb(96,96,96);
+	border-right: 2px solid rgb(16,16,16);
+	border-bottom: 2px solid rgb(0,0,0);
+	border-radius:7px;
+	-moz-border-radius:7px;
+	-webkit-border-radius:7px;
+	-ms-border-radius:7px;*/
+}
+
+
+
