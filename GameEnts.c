@@ -13,6 +13,7 @@ DrawImg img_barrel2;
 DrawImg img_column;
 DrawImg img_column_faded;
 DrawImg img_rock;
+DrawImg img_lamp;
 DrawImg img_floor;
 DrawImg img_floor_left;
 DrawImg img_floor_right;
@@ -52,6 +53,7 @@ Entity *ent_barrel;
 Entity *ent_column;
 Entity *ent_column_faded;
 Entity *ent_rock;
+Entity *ent_lamp;
 Entity *ent_floor;
 Entity *ent_floor_right;
 Entity *ent_floor_left;
@@ -370,6 +372,8 @@ void GameEnts_Init(){
 	Draw_SetOffset(img_column_faded,-16,-80);
 	img_rock=Draw_LoadImage("data/rock.bmp");
 	Draw_SetOffset(img_rock,-16,-32);
+	img_lamp=Draw_LoadImage("data/lamp.bmp");
+	Draw_SetOffset(img_lamp,-16,-48);
 
 	img_hole_spiked=Draw_LoadImage("data/hole_spiked.bmp");
 	Draw_SetOffset(img_hole_spiked,-16,-16);
@@ -480,6 +484,11 @@ void GameEnts_Init(){
 	AnimPlay_SetImg(&ent_column_faded->anim,img_column_faded);
 	ent_rock=Entity_Copy(ent_column);
 	AnimPlay_SetImg(&ent_rock->anim,img_rock);
+	ent_lamp=Entity_Copy(ent_rock);
+	AnimPlay_SetImg(&ent_lamp->anim,img_lamp);
+	ent_lamp->flags=
+		EntityFlag_Collision|EntityFlag_Light;
+	Entity_SetLight(ent_lamp,0.4f,0.4f,0.4f,5*32.0f);
 
 
 

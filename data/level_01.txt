@@ -5,8 +5,7 @@
   #.......#
   #.......#
   #.......#
-  #mmm.mmm#
-     m.m
+  #mml.lmm#
      m.m
      m.m
      m.m
@@ -16,13 +15,29 @@
 ######2#######
 #SSSS....SSSS#
 #SSSS.Br.SSSS#
-#S..SSB..SSSS#
-#S.SSSSSSSSSS#
-#S.SSSSSSSSSS#
-#S.SSSSSSSSSS#
-#S.....BSSB.S#
-#SSSSS.SSSSSS#
-#mmmmm.mmmmmm#
+lS..SSB..SSSSl
+mS.SSSSSSSSSSm
+mS.SSSSSSSSSSm
+mS.SSSSSSSSSSm
+mS.....BSSB.Sm
+mSSSSS.SSSSSSm
+mmmmml.lmmmmmm
+     m.m
+     m.m
+     m.m
+     m.m
+     m.m
+######3######
+#...S...S...#
+#...S.B.S...#
+l...SSSSS.B.l
+mSSSrrrrrSSSm
+m...........m
+mSSS..B..SSSm
+m...rSSSr...m
+m...SrrrS...m
+m..BS...S...m
+mmmmml.lmmmmm
      m.m
      m.m
      m.m

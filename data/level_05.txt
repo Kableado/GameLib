@@ -5,20 +5,20 @@
   #.......#
   #.......#
   #.......#
-  #mmm.mmm#
+  #mml.lmm#
      m.m
      m.m
      m.m
      m.m
      m.m
      m.m
-######2######
+##l###2###l##
 #...........#
 #.B.B...B.B.#
 #...........#
 #LLLLrSrLLLL#
 #...A...A...#
-#mmmmm.mmmmm#
+#mmmml.lmmmm#
      m.m
      m.m
      m.m
@@ -33,7 +33,7 @@
 #L.........L#
 #L.LLLLLLLLL#
 #L.....A.A..#
-#mmmmm.mmmmm#
+#mmmml.lmmmm#
      m.m
      m.m
      m.m
@@ -52,7 +52,7 @@ mL.LLLLLLLLL<
 mL.....LLLLLm
 mLLLLL.LLLLLm
 mmmmmm.AmAmmm
-     m.m
+     l.l
      m.m
      m.m
      m.m

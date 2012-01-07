@@ -24,6 +24,7 @@ extern Entity *ent_barrel;
 extern Entity *ent_column;
 extern Entity *ent_column_faded;
 extern Entity *ent_rock;
+extern Entity *ent_lamp;
 extern Entity *ent_floor;
 extern Entity *ent_floor_right;
 extern Entity *ent_floor_left;

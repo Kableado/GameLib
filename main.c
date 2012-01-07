@@ -169,9 +169,10 @@ int main(int argc,char *argv[]){
 	if (argc>1) {
 		if (!strcmp(argv[1],"debug")) {
 			gamelib_debug=1;
+			printf("Debug Mode Activated!\n");
 		}
 	}
-	
+
 	GameLib_Init(640,480,"Game",60);
 
 	img_logo=Draw_LoadImage("data/logo.bmp");

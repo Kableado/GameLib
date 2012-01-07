@@ -4,7 +4,7 @@
         #.......#
         #.......#
         #.......#
-        #mmm.mmm#
+        #mml.lmm#
            m.m
            m.m
            m.m
@@ -14,9 +14,9 @@
      #S....S.S....S#   ########
      #S.LLBS.S.LL.S#   #......#
      #S......S....S#   #......#
-     #SSSS.SSSSSSSS#####......#
+     #SSSS.SSSSSSSSl####......#
      #SSSS.SSS..............E.#
-     #SSSSSSSSSSSSSmmmmm......#
+     #SSSSSSSSSSSSSlmmmm......#
      #S..B...S....Sm   m......#
      #S.LL.SSSBLL.Sm   m......#
      #S....SSS....Sm   mmmmmmm#

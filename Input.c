@@ -55,7 +55,7 @@ int Input_Init(){
 // Notify a frame update to the input subsystem.
 void Input_Frame(){
 	Uint8* keys;
-	Uint8 buttons;
+	/*Uint8 buttons;
 	int mx,my;
 	vec2 mdir;
 	float temp;
@@ -96,7 +96,18 @@ void Input_Frame(){
 	Input_SetKey(InputKey_Right,keys[SDLK_RIGHT]|mright);
 	Input_SetKey(InputKey_Jump,keys[SDLK_SPACE]);
 	Input_SetKey(InputKey_Continue,keys[SDLK_RETURN]|keys[SDLK_KP_ENTER]);
+*/
 
+	// Process Keys
+	keys=SDL_GetKeyState(NULL);
+	Input_SetKey(InputKey_Action1,keys[SDLK_z]);
+	Input_SetKey(InputKey_Action2,keys[SDLK_x]);
+	Input_SetKey(InputKey_Up,keys[SDLK_UP]);
+	Input_SetKey(InputKey_Down,keys[SDLK_DOWN]);
+	Input_SetKey(InputKey_Left,keys[SDLK_LEFT]);
+	Input_SetKey(InputKey_Right,keys[SDLK_RIGHT]);
+	Input_SetKey(InputKey_Jump,keys[SDLK_SPACE]);
+	Input_SetKey(InputKey_Continue,keys[SDLK_RETURN]|keys[SDLK_KP_ENTER]);
 }
 
 
@@ -147,26 +158,42 @@ int Input_AnyKey(){
 // Reports the direction of the dpad.
 int Input_GetDir(vec2 dir){
 	float vlen;
+	Uint8 buttons;
+	int mx,my;
+	float dlen;
+	extern int _width,_height;
 
-	vec2_set(dir,0.0f,0.0f);
-	if(Input_GetKey(InputKey_Up) ){
-		dir[1]-=1.0f;
-	}
-	if(Input_GetKey(InputKey_Down) ){
-		dir[1]+=1.0f;
-	}
-	if(Input_GetKey(InputKey_Left) ){
-		dir[0]-=1.0f;
-	}
-	if(Input_GetKey(InputKey_Right) ){
-		dir[0]+=1.0f;
-	}
-	vlen=vec2_dot(dir,dir);
-	if(vlen>0.0f){
-		vlen=sqrtf(vlen);
-		vec2_scale(dir,dir,1.0f/vlen);
+
+	// Get mouse state
+	buttons=SDL_GetMouseState(&mx,&my);
+	if(buttons){
+		// Use the mouse
+		vec2_set(dir,mx-(_width/2),my-(_height/2.0f));
+		dlen=1.0f/sqrtf(vec2_dot(dir,dir));
+		vec2_scale(dir,dir,dlen);
 		return(1);
 	}else{
-		return(0);
+		// Use the keyboar
+		vec2_set(dir,0.0f,0.0f);
+		if(Input_GetKey(InputKey_Up) ){
+			dir[1]-=1.0f;
+		}
+		if(Input_GetKey(InputKey_Down) ){
+			dir[1]+=1.0f;
+		}
+		if(Input_GetKey(InputKey_Left) ){
+			dir[0]-=1.0f;
+		}
+		if(Input_GetKey(InputKey_Right) ){
+			dir[0]+=1.0f;
+		}
+		vlen=vec2_dot(dir,dir);
+		if(vlen>0.0f){
+			vlen=sqrtf(vlen);
+			vec2_scale(dir,dir,1.0f/vlen);
+			return(1);
+		}else{
+			return(0);
+		}
 	}
 }
