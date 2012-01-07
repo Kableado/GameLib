@@ -71,15 +71,7 @@ Entity *ent_arrow_left;
 Entity *ent_arrow_right;
 Entity *ent_exitpoint;
 Entity *ent_endpoint;
-Entity *ent_savepoint_1;
-Entity *ent_savepoint_2;
-Entity *ent_savepoint_3;
-Entity *ent_savepoint_4;
-Entity *ent_savepoint_5;
-Entity *ent_savepoint_6;
-Entity *ent_savepoint_7;
-Entity *ent_savepoint_8;
-Entity *ent_savepoint_9;
+Entity *ent_savepoint;
 
 Entity *ent_fire;
 Entity *ent_player_broken;
@@ -570,32 +562,15 @@ void GameEnts_Init(){
 	ent_arrowshooter_right->child=ent_arrow_right;
 
 
-	ent_savepoint_1=Entity_Copy(ent);
-	ent_savepoint_1->type=Ent_SavePoint;
-	ent_savepoint_1->zorder=0;
-	ent_savepoint_1->flags=EntityFlag_Overlap|EntityFlag_Light;
-	ent_savepoint_1->radius=20;
-	Entity_SetLight(ent_savepoint_1,0.0f,0.0f,0.5f,2*32.0f);
-	AnimPlay_SetImg(&ent_savepoint_1->anim,img_savepoint);
-	ent_savepoint_1->overlap=savepoint_overlap;
-	ent_savepoint_1->ondelete=savepoint_ondelete;
-	ent_savepoint_1->A=1;
-	ent_savepoint_2=Entity_Copy(ent_savepoint_1);
-	ent_savepoint_2->A=2;
-	ent_savepoint_3=Entity_Copy(ent_savepoint_1);
-	ent_savepoint_3->A=3;
-	ent_savepoint_4=Entity_Copy(ent_savepoint_1);
-	ent_savepoint_4->A=4;
-	ent_savepoint_5=Entity_Copy(ent_savepoint_1);
-	ent_savepoint_5->A=5;
-	ent_savepoint_6=Entity_Copy(ent_savepoint_1);
-	ent_savepoint_6->A=6;
-	ent_savepoint_7=Entity_Copy(ent_savepoint_1);
-	ent_savepoint_7->A=7;
-	ent_savepoint_8=Entity_Copy(ent_savepoint_1);
-	ent_savepoint_8->A=8;
-	ent_savepoint_9=Entity_Copy(ent_savepoint_1);
-	ent_savepoint_9->A=9;
+	ent_savepoint=Entity_Copy(ent);
+	ent_savepoint->type=Ent_SavePoint;
+	ent_savepoint->zorder=0;
+	ent_savepoint->flags=EntityFlag_Overlap|EntityFlag_Light;
+	ent_savepoint->radius=20;
+	Entity_SetLight(ent_savepoint,0.0f,0.0f,0.5f,2*32.0f);
+	AnimPlay_SetImg(&ent_savepoint->anim,img_savepoint);
+	ent_savepoint->overlap=savepoint_overlap;
+	ent_savepoint->ondelete=savepoint_ondelete;
 
 
 	ent_exitpoint=Entity_Copy(ent);

@@ -42,14 +42,6 @@ extern Entity *ent_arrow_left;
 extern Entity *ent_arrow_right;
 extern Entity *ent_exitpoint;
 extern Entity *ent_endpoint;
-extern Entity *ent_savepoint_1;
-extern Entity *ent_savepoint_2;
-extern Entity *ent_savepoint_3;
-extern Entity *ent_savepoint_4;
-extern Entity *ent_savepoint_5;
-extern Entity *ent_savepoint_6;
-extern Entity *ent_savepoint_7;
-extern Entity *ent_savepoint_8;
-extern Entity *ent_savepoint_9;
+extern Entity *ent_savepoint;
 
 #endif

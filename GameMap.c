@@ -8,11 +8,12 @@
 
 #include "GameMap.h"
 
-void GameMapAux_CreateEnt(Entity *ent,int i,int j){
+Entity *GameMapAux_CreateEnt(Entity *ent,int i,int j){
 	Entity *e;
 	e=Entity_Copy(ent);
 	vec2_set(e->pos,16+i*32,16+j*32);
 	GameLib_AddEntity(e);
+	return(e);
 }
 
 void Aux_Linea(FILE *f,char *line){
@@ -56,15 +57,7 @@ int GameMapAux_IsFloor(char c){
 		c=='#' ||
 		c=='m' ||
 		c=='B' ||
-		c=='1' ||
-		c=='2' ||
-		c=='3' ||
-		c=='4' ||
-		c=='5' ||
-		c=='6' ||
-		c=='7' ||
-		c=='8' ||
-		c=='9' ||
+		c=='S' ||
 		c=='E' ||
 		c=='F' ||
 		c=='A' ||
@@ -84,7 +77,7 @@ int GameMap_CreateLevel(int level,int point){
 	FILE *file;
 	char line[1024];
 	int w,h;
-	int i,j;
+	int i,j,i2;
 	int floor;
 
 	sprintf(filename,"data/level_%02d.txt",level);
@@ -100,19 +93,20 @@ int GameMap_CreateLevel(int level,int point){
 	for(j=0;j<h;j++){
 		Aux_Linea(file,line);
 		for(i=0;i<w;i++){
+			i2=i*2;
 			// Prepare the floor
 			floor=0;
 			if(i>0){
-				if(GameMapAux_IsFloor(line[i-1])){
+				if(GameMapAux_IsFloor(line[i2-2])){
 					floor|=4;
 				}
 			}
 			if(i<(w-1)){
-				if(GameMapAux_IsFloor(line[i+1])){
+				if(GameMapAux_IsFloor(line[i2+2])){
 					floor|=1;
 				}
 			}
-			if(GameMapAux_IsFloor(line[i])){
+			if(GameMapAux_IsFloor(line[i2])){
 				floor|=2;
 			}
 			if(floor==7){
@@ -130,94 +124,64 @@ int GameMap_CreateLevel(int level,int point){
 
 
 			// Put the rest of the entities
-			if(line[i]=='.'){
+			if(line[i2]=='.'){
 				// Floor
 			}else
-			if(line[i]=='#'){
+			if(line[i2]=='#'){
 				// Column
 				GameMapAux_CreateEnt(ent_column,i,j);
 			}else
-			if(line[i]=='m'){
+			if(line[i2]=='m'){
 				// Column faded
 				GameMapAux_CreateEnt(ent_column_faded,i,j);
 			}else
-			if(line[i]=='r'){
+			if(line[i2]=='r'){
 				// Rock
 				GameMapAux_CreateEnt(ent_rock,i,j);
 			}else
-			if(line[i]=='l'){
+			if(line[i2]=='l'){
 				// Lamp
 				GameMapAux_CreateEnt(ent_lamp,i,j);
 			}else
-			if(line[i]=='B'){
+			if(line[i2]=='B'){
 				// Barrel
 				GameMapAux_CreateEnt(ent_barrel,i,j);
 			}else
-			if(line[i]=='S'){
+			if(line[i2]=='|'){
 				// Spiked hole
 				GameMapAux_CreateEnt(ent_hole_spiked,i,j);
 			}else
-			if(line[i]=='L'){
+			if(line[i2]=='L'){
 				// Lava hole
 				GameMapAux_CreateEnt(ent_hole_lava,i,j);
 			}else
-			if(line[i]=='1'){
-				// Save point 1
-				GameMapAux_CreateEnt(ent_savepoint_1,i,j);
+			if(line[i2]=='S'){
+				Entity *e;
+				// Save point
+				e=GameMapAux_CreateEnt(ent_savepoint,i,j);
+				e->A=line[i2+1]-'0';
 			}else
-			if(line[i]=='2'){
-				// Save point 2
-				GameMapAux_CreateEnt(ent_savepoint_2,i,j);
-			}else
-			if(line[i]=='3'){
-				// Save point 3
-				GameMapAux_CreateEnt(ent_savepoint_3,i,j);
-			}else
-			if(line[i]=='4'){
-				// Save point 4
-				GameMapAux_CreateEnt(ent_savepoint_4,i,j);
-			}else
-			if(line[i]=='5'){
-				// Save point 5
-				GameMapAux_CreateEnt(ent_savepoint_5,i,j);
-			}else
-			if(line[i]=='6'){
-				// Save point 6
-				GameMapAux_CreateEnt(ent_savepoint_6,i,j);
-			}else
-			if(line[i]=='7'){
-				// Save point 7
-				GameMapAux_CreateEnt(ent_savepoint_7,i,j);
-			}else
-			if(line[i]=='8'){
-				// Save point 8
-				GameMapAux_CreateEnt(ent_savepoint_8,i,j);
-			}else
-			if(line[i]=='9'){
-				// Save point 9
-				GameMapAux_CreateEnt(ent_savepoint_9,i,j);
-			}else
-			if(line[i]=='E'){
+			if(line[i2]=='E'){
 				// Exit point
 				GameMapAux_CreateEnt(ent_exitpoint,i,j);
 			}else
-			if(line[i]=='F'){
+			if(line[i2]=='F'){
 				// End point
 				GameMapAux_CreateEnt(ent_endpoint,i,j);
 			}else
-			if(line[i]=='>'){
+			if(line[i2]=='>'){
 				// ArrowShooter right
 				GameMapAux_CreateEnt(ent_arrowshooter_right,i,j);
 			}else
-			if(line[i]=='<'){
+			if(line[i2]=='<'){
 				// ArrowShooter left
 				GameMapAux_CreateEnt(ent_arrowshooter_left,i,j);
 			}else
-			if(line[i]=='V'){
+			if(line[i2]=='V'){
 				// ArrowShooter down
 				GameMapAux_CreateEnt(ent_arrowshooter_down,i,j);
 			}else
-			if(line[i]=='A'){
+			if(line[i2]=='A'){
 				// ArrowShooter up
 				GameMapAux_CreateEnt(ent_arrowshooter_up,i,j);
 			}else

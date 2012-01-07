@@ -55,48 +55,6 @@ int Input_Init(){
 // Notify a frame update to the input subsystem.
 void Input_Frame(){
 	Uint8* keys;
-	/*Uint8 buttons;
-	int mx,my;
-	vec2 mdir;
-	float temp;
-	int mup,mdown,mleft,mright;
-	extern int _width,_height;
-
-
-	// Get mouse state
-	buttons=SDL_GetMouseState(&mx,&my);
-	vec2_set(mdir,mx-(_width/2),my-(_height/2.0f));
-	temp=1.0f/sqrtf(vec2_dot(mdir,mdir));
-	vec2_scale(mdir,mdir,temp);
-	mup=mdown=mleft=mright=0;
-
-	// Virtual Dpad on screen using mouse position
-	if(buttons){
-		if(mdir[0]>0.5f){
-			mright=1;
-		}
-		if(mdir[0]<-0.5f){
-			mleft=1;
-		}
-		if(mdir[1]>0.5f){
-			mdown=1;
-		}
-		if(mdir[1]<-0.5f){
-			mup=1;
-		}
-	}
-
-	// Process Keys
-	keys=SDL_GetKeyState(NULL);
-	Input_SetKey(InputKey_Action1,keys[SDLK_z]);
-	Input_SetKey(InputKey_Action2,keys[SDLK_x]);
-	Input_SetKey(InputKey_Up,keys[SDLK_UP]|mup);
-	Input_SetKey(InputKey_Down,keys[SDLK_DOWN]|mdown);
-	Input_SetKey(InputKey_Left,keys[SDLK_LEFT]|mleft);
-	Input_SetKey(InputKey_Right,keys[SDLK_RIGHT]|mright);
-	Input_SetKey(InputKey_Jump,keys[SDLK_SPACE]);
-	Input_SetKey(InputKey_Continue,keys[SDLK_RETURN]|keys[SDLK_KP_ENTER]);
-*/
 
 	// Process Keys
 	keys=SDL_GetKeyState(NULL);

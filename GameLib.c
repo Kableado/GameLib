@@ -288,7 +288,6 @@ int GameLib_ProcLoop(){
 	time=Time_GetTime();
 	GameLib_Compactate();_entities_lock=1;
 	for(i=0;i<_n_entities;i++){
-		Entity *e;
 		Entity_PostProcess(_entity[i],_ft);
 		if(_entity[i]->flags&EntityFlag_UpdatedPos){
 			GameLib_EntityUpdateLight(_entity[i]);

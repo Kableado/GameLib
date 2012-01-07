@@ -241,7 +241,6 @@ int Entity_Collide(Entity *b1,Entity *b2){
 	float t;
 	vec2 n;
 	vec2 vel;
-	Entity *b_aux;
 
 	//if(!(b1->flags&EntityFlag_Collision) || !(b2->flags&EntityFlag_Collision))
 	//	return(0);
@@ -296,7 +295,6 @@ int Entity_Collide(Entity *b1,Entity *b2){
 //
 void Entity_Overlaps(Entity *b1,Entity *b2){
 	vec2 len;
-	float dist;
 
 //	if(!(b1->flags&EntityFlag_Overlap) || !(b2->flags&EntityFlag_Overlap))
 //		return;
@@ -415,7 +413,7 @@ void Entity_SetLight(Entity *e,float r,float g,float b,float rad){
 void Entity_Iluminate(Entity *e,Entity **elist,int n){
 	int i;
 	vec2 vdist;
-	float qdist,dist,f;
+	float qdist,f;
 	float qrad;
 
 	if(!(e->flags&EntityFlag_Light)){
