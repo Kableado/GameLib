@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DATE=$(date +%Y%m)
+DATE=$(date +%Y%m%d)
 DIRNAME="Lonely_Ruins"
 ZIPNAME="$DIRNAME.$DATE.zip"
 

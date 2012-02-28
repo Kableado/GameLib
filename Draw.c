@@ -115,11 +115,9 @@ int Draw_Init(int width,int height,char *title,int fps){
 
 	// Set the proyection (Ortographic)
 	glMatrixMode (GL_PROJECTION);
-	glPushMatrix ();
 	glLoadIdentity ();
 	glOrtho (0,_width, 0, _height, -1000, 1000);
 	glMatrixMode (GL_MODELVIEW);
-	glPushMatrix ();
 	glLoadIdentity ();
 
 	// Enable Alpha blending

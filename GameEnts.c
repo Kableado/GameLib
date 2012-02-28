@@ -439,7 +439,8 @@ void GameEnts_Init(){
 	ent=Entity_New();
 	ent->mass=-1.0f;
 	ent->flags=0;
-	Entity_SetLight(ent,0.2f,0.2f,0.2f,1.0f);
+	//Entity_SetLight(ent,0.2f,0.2f,0.2f,1.0f);
+	Entity_SetLight(ent,0,0,0,1);
 
 
 	ent_player=Entity_Copy(ent);
@@ -449,7 +450,7 @@ void GameEnts_Init(){
 	ent_player->fric_static=0.5f;
 	ent_player->flags=
 		EntityFlag_Collision|EntityFlag_Overlap|EntityFlag_Light;
-	Entity_SetLight(ent_player,0.4f,0.4f,0.4f,5*32.0f);
+	Entity_SetLight(ent_player,0.4f,0.4f,0.4f,3*32.0f);
 	AnimPlay_SetImg(&ent_player->anim,img_player_down);
 	ent_player->proc=player_proc;
 	ent_player->collision=player_collision;
