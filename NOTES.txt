@@ -1,0 +1,61 @@
+TODO
+----
+- Entities:
+	- Teleporters
+	- Doors
+	- Buttons
+- Music
+- Non-SFXR sounds
+
+
+
+
+
+DONE
+----
+- Util
+	- Circle collision
+- Draw
+	- Screen init
+	- Image loading
+	- Image drawing
+	- Font loading
+	- Text Drawing
+	- Draw loop
+- Input
+	- Keyboard
+	- Mouse
+- Audio
+	- Sound loading
+	- Sound playing
+- Anim
+	- Animation loading
+	- Animation playing
+- Entity
+	- Process
+	- Overlap
+	- Collision
+- GameLib
+	- Game loop
+	- Entity processing
+	- Sound playing spatially
+	- Lighting
+- Game Map
+	- Loading
+- Game Entities:
+	- Player
+	- Barrel
+	- Spikes
+	- Lava
+	- ArrowShooters
+	- Arrows
+	- Columns
+	- Rock
+	- Floor
+	- Save points
+	- Light points
+- Title Screen
+- Game End Screen
+- Game saving and loading
+	- Level and savepoint
+

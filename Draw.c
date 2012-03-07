@@ -34,6 +34,7 @@ SDL_Surface *_screen=NULL;
 int _width;
 int _height;
 long long _t_frame=17000;
+long long min_t_frame=16000;
 
 /////////////////////////////
 // Draw_Init
@@ -173,6 +174,8 @@ void Draw_Loop(int (*proc)(),void (*draw)()){
 		time2=Time_GetTime();
 		t_frame+=time2-time;
 		time=time2;
+
+		// FIX: Limit
 		if(t_frame>50000){
 			t_frame=50000;
 		}
@@ -191,9 +194,15 @@ void Draw_Loop(int (*proc)(),void (*draw)()){
 		}
 
 		// Draw
+		time2=Time_GetTime();
 		draw();
+		time2=Time_GetTime()-time2;
+		if(time2<min_t_frame){
+			Time_Pause(min_t_frame-time2);
+		}
 
-		Time_Pause(0);
+
+		//Time_Pause(0);
 		t_frame+=Time_GetTime()-time;
 	}
 }
