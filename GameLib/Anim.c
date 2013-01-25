@@ -125,6 +125,10 @@ void AnimPlay_SetImg(AnimPlay *ap,DrawImg img){
 	ap->time_ms=0;
 }
 void AnimPlay_SetAnim(AnimPlay *ap,Anim ani){
+	ap->pause=0;
+	if(ap->anim==ani){
+		return;
+	}
 	ap->anim=ani;
 	ap->img=NULL;
 	ap->time_ms=0;
@@ -168,13 +172,25 @@ void AnimPlay_GetSize(AnimPlay *ani,int *w,int *h){
 }
 
 
+
+/////////////////////////////
+// AnimPlay_SetPause
+//
+//
+void AnimPlay_SetPause(AnimPlay *ani,int p){
+	ani->pause=p;
+}
+
+
 /////////////////////////////
 // AnimPlay_IncTime
 //
 //
 void AnimPlay_IncTime(AnimPlay *ani,int t){
 	if(ani->anim){
-		ani->time_ms+=t;
+		if(!ani->pause){
+			ani->time_ms+=t;
+		}
 	}
 }
 

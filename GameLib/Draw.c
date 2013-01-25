@@ -33,14 +33,14 @@
 SDL_Surface *_screen=NULL;
 int _width;
 int _height;
-long long _t_frame=17000;
-long long min_t_frame=16000;
+long long proc_t_frame=33333;
+long long draw_t_frame=16667;
 
 /////////////////////////////
 // Draw_Init
 //
 // Initializes the game window.
-int Draw_Init(int width,int height,char *title,int fps){
+int Draw_Init(int width,int height,char *title,int pfps,int fps){
 #ifdef WIN32
 	// Stdout on the parent console
 	AttachConsole(ATTACH_PARENT_PROCESS);
@@ -81,7 +81,8 @@ int Draw_Init(int width,int height,char *title,int fps){
 		return(0);
 	}
 	SDL_WM_SetCaption(title, NULL);
-	_t_frame=1000000/fps;
+	proc_t_frame=1000000/pfps;
+	draw_t_frame=1000000/fps;
 	_width=width;
 	_height=height;
 
@@ -137,16 +138,15 @@ void Draw_Loop(int (*proc)(),void (*draw)()){
 	int done=0;
 	SDL_Event event;
 	Uint8* keys;
-	long long time,time2;
+	long long time,time2,timed;
 	long long t_frame=0;
 
-	t_frame=0;
+	t_frame=proc_t_frame;
+	time=Time_GetTime();
 	while(!done){
 
 		// Update screen
-		time=Time_GetTime();
 		SDL_GL_SwapBuffers();
-
 
 		// Process Events
 		while(SDL_PollEvent(&event) ){
@@ -170,40 +170,38 @@ void Draw_Loop(int (*proc)(),void (*draw)()){
 		// Sound Frame
 		Audio_Frame();
 
-		// Measure time
-		time2=Time_GetTime();
-		t_frame+=time2-time;
-		time=time2;
 
-		// FIX: Limit
-		if(t_frame>50000){
-			t_frame=50000;
-		}
-
-		// Process
+		// Process and draw
 		if(proc){
-			while(t_frame>_t_frame && !done){
-			//while(t_frame>0 && !done){
+			while(t_frame>=proc_t_frame && !done){
 				Input_Frame();
 				if(!proc()){
 					done=1;
 				}
-				t_frame-=_t_frame;
+				t_frame-=proc_t_frame;
 
 			}
 		}
-
-		// Draw
-		time2=Time_GetTime();
-		draw();
-		time2=Time_GetTime()-time2;
-		if(time2<min_t_frame){
-			Time_Pause(min_t_frame-time2);
+		if(draw){
+			draw();
 		}
 
+		// Measure time
+		time2=Time_GetTime();
+		timed=time2-time;
+		if(timed<draw_t_frame){
+			Time_Pause(draw_t_frame-timed);
+			time2=Time_GetTime();
+			t_frame+=time2-time;
+		}else{
+			t_frame+=timed;
+		}
+		time=time2;
 
-		//Time_Pause(0);
-		t_frame+=Time_GetTime()-time;
+		// FIX: Limit process frame rate
+		if(t_frame>50000){
+			t_frame=50000;
+		}
 	}
 }
 
@@ -327,8 +325,10 @@ DrawImg Draw_LoadImage(char *filename){
 	image=malloc(sizeof(DrawImage));
 	image->surf=surf;
 	image->tex=Draw_UploadGLTexture(surf);
-	image->x=0;
-	image->y=0;
+	//image->x=0;
+	//image->y=0;
+	image->x=-(surf->w/2);
+	image->y=-(surf->h/2);
 
 
 	return((DrawImg)image);
@@ -399,6 +399,39 @@ void Draw_DrawImg(DrawImg img,int x,int y){
 		glVertex2i (x2, y2);
 	glEnd ();
 }
+
+
+/////////////////////////////
+// Draw_DrawImgResized
+//
+// Draws an image, resizing.
+void Draw_DrawImgResized(DrawImg img,int x,int y,float w,float h){
+	DrawImage *image=img;
+	int x1,x2,y1,y2;
+
+	// Prepare
+	x1=x+image->x;
+	y1=_height-(y+image->y);
+	x2=(x+image->x)+w;
+	y2=_height-((y+image->y)+h);
+
+	// Draw a quad
+	glBindTexture(GL_TEXTURE_2D, image->tex);
+	glBegin (GL_QUADS);
+		glTexCoord2f (1, 0);
+		glVertex2i (x2, y1);
+
+		glTexCoord2f (0, 0);
+		glVertex2i (x1, y1);
+
+		glTexCoord2f (0, 1);
+		glVertex2i (x1, y2);
+
+		glTexCoord2f (1, 1);
+		glVertex2i (x2, y2);
+	glEnd ();
+}
+
 
 
 /////////////////////////////

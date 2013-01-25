@@ -46,7 +46,7 @@ void DrawTitle(){
 	Draw_Clean(0,0,0);
 	Draw_SetColor(1.0f,1.0f,1.0f,1.0f);
 
-	Draw_DrawImg(img_logo,170,100);
+	Draw_DrawImg(img_logo,320,150);
 	if(!game_started){
 		Draw_DrawText(font,"Press [Space] to Start.",300,300);
 	}else{
@@ -73,7 +73,7 @@ void DrawEnd(){
 	Draw_Clean(0,0,0);
 	Draw_SetColor(1.0f,1.0f,1.0f,1.0f);
 
-	Draw_DrawImg(img_end,170,100);
+	Draw_DrawImg(img_end,320,150);
 
 	Draw_DrawText(font,"Congratulations you saved the kittie!",250,320);
 	Draw_DrawText(font,"Thanks for playing!",250,350);
@@ -174,7 +174,7 @@ int main(int argc,char *argv[]){
 		}
 	}
 
-	GameLib_Init(640,480,"Game",60);
+	GameLib_Init(640,480,"Game",60,60);
 
 	img_logo=Draw_LoadImage("data/logo.bmp");
 	img_end=Draw_LoadImage("data/end.bmp");
@@ -199,7 +199,7 @@ int main(int argc,char *argv[]){
 				GameMap_CreateLevel(game_level,game_level_point);
 				game_started=1;
 			}
-			GameLib_Loop(ProcGame,PostProcGame,DrawGame);
+			GameLib_Loop(ProcGame,PostProcGame,NULL,DrawGame);
 		}
 		if(play==2){
 			Draw_Loop(ProcEnd,DrawEnd);

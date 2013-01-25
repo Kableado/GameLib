@@ -4,6 +4,17 @@
 
 #include "Util.h"
 
+////////////////////////////////////////////////
+// vec2 //
+//////////
+// A 2D vector.
+float vec2_norm(vec2 v){
+	float len;
+	len=vec2_len(v);
+	vec2_scale(v,v,1.0f/len);
+	return(len);
+}
+
 
 /////////////////////////////
 // SolveQuadratic
@@ -29,6 +40,7 @@ int SolveQuadratic(float a,float b,float c,float *Rmin,float *Rmax){
 	Rmax[0]=(float)((-b+root)/divisor);
 	return(1);
 }
+
 
 /////////////////////////////
 // Intersec_RayUnitCircle
@@ -57,7 +69,7 @@ int Intersec_RayUnitCircle(vec2 orig,vec2 vel,vec2 center,float *t){
 			*t=Rmin;
 			return(1);
 		}
-		if(Rmax>=-1.0f && Rmin>Rmax && Rmax<=1.0f){
+		if(Rmax>=-0.0f && Rmin>Rmax && Rmax<=1.0f){
 			*t=Rmax;
 			return(1);
 		}
@@ -102,7 +114,6 @@ int Colision_CircleCircle(
 		return(0);
 
 	// Convert to a unit circle vs ray
-	rads=rad1+rad2;
 	invrads=1.0f/rads;
 	vec2_scale(vel_a,vel,invrads);
 	vec2_scale(orig_a,cir1,invrads);
@@ -117,4 +128,76 @@ int Colision_CircleCircle(
 	}
 	return(0);
 }
+
+
+/////////////////////////////
+// Intersect_RayEdge
+//
+// Intersection between a ray and a edge.
+int Intersect_RayEdge(
+	vec2 pos,vec2 vel,
+	vec2 norm,vec2 edgePos,float len,
+	float *t)
+{
+	vec2 pos2,intersection,perp,edgePos2;
+	float delta,d1,d2,hLen;
+
+	vec2_plus(pos2,pos,vel);
+	hLen=len/2;
+
+	// Check intersection against the line
+	delta=vec2_dot(norm,edgePos);
+	d1=vec2_dot(pos ,norm)-delta;
+	d2=vec2_dot(pos2,norm)-delta;
+	if(d1>=-0.0001f && d2<=0.0001f){
+		// Intersection with line, Calculate intersection point
+		*t=d1/(d1-d2);
+		vec2_scaleadd(intersection,pos,vel,*t);
+
+		// Perpendicular
+		vec2_perp(perp,norm);
+
+		// Check sides
+		vec2_scaleadd(edgePos2,edgePos,perp,-hLen);
+		delta=-vec2_dot(perp,edgePos2);
+		d1=(-vec2_dot(perp,intersection))-delta;
+
+		vec2_scaleadd(edgePos2,edgePos,perp,hLen);
+		delta=vec2_dot(perp,edgePos2);
+		d2=vec2_dot(perp,intersection)-delta;
+
+		if(d1<=0.0f && d2<=0.0f){
+			// Intersection inside Edge.
+			return(1);
+		}
+	}
+	return(0);
+}
+
+
+
+
+/////////////////////////////
+// absmod
+//
+int absmod(int v,int d){
+	if(v<0){
+		v+=d*(((v/d)*(-1))+1);
+		return(v);
+	}else{
+		return(v%d);
+	}
+}
+
+float fabsmod(float v,int d){
+	if(v<0){
+		v+=d*((((int)(v/d))*(-1))+1);
+		return(v);
+	}else{
+		v-=d*(((int)(v/d))+1);
+		return(v);
+	}
+}
+
+
 

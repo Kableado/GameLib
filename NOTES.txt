@@ -2,7 +2,7 @@ TODO
 ----
 - Entities:
 	- Teleporters
-	- Doors
+	- Doors and Buttons
 	- Buttons
 - Music
 - Non-SFXR sounds

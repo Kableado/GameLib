@@ -8,7 +8,7 @@
 // Draw_Init
 //
 // Initializes the game window.
-int Draw_Init(int width,int height,char *title,int fps);
+int Draw_Init(int width,int height,char *title,int pfps,int fps);
 
 
 /////////////////////////////
@@ -63,6 +63,13 @@ void Draw_GetOffset(DrawImg img,int *x,int *y);
 //
 // Draws an image.
 void Draw_DrawImg(DrawImg img,int x,int y);
+
+
+/////////////////////////////
+// Draw_DrawImgResized
+//
+// Draws an image, resizing.
+void Draw_DrawImgResized(DrawImg img,int x,int y,float w,float h);
 
 
 /////////////////////////////

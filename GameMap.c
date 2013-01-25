@@ -65,6 +65,8 @@ int GameMapAux_IsFloor(char c){
 		c=='<' ||
 		c=='>' ||
 		c=='r' ||
+		c=='T' ||
+		c=='D' ||
 		c=='l' )
 	{
 		return(1);
@@ -184,6 +186,16 @@ int GameMap_CreateLevel(int level,int point){
 			if(line[i2]=='A'){
 				// ArrowShooter up
 				GameMapAux_CreateEnt(ent_arrowshooter_up,i,j);
+			}else
+			if(line[i2]=='T'){
+				// Teleporter
+				Entity *ent=GameMapAux_CreateEnt(ent_teleporter,i,j);
+				ent->A=line[i2+1]-'0';
+			}else
+			if(line[i2]=='D'){
+				// Teleporter Destination
+				Entity *ent=GameMapAux_CreateEnt(ent_teleporter_dest,i,j);
+				ent->A=line[i2+1]-'0';
 			}else
 
 			{}

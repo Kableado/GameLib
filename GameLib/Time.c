@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
-#include <SDL/SDL.h>
 
 #include "Time.h"
 
@@ -38,7 +37,7 @@ void Time_Pause(int pausa){
 	do{
 		diff=tend-t;
 		if(diff>1000){
-			SDL_Delay(diff/1000);
+			Sleep(diff/1000);
 		}else{
 			Sleep(0);
 		}

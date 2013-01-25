@@ -17,6 +17,8 @@ enum {
 	Ent_Arrow,
 	Ent_SavePoint,
 	Ent_ExitPoint,
+	Ent_Teleporter,
+	Ent_Teleporter_Dest,
 	Ent_Effect
 } EntityType;
 extern Entity *ent_player;
@@ -43,5 +45,7 @@ extern Entity *ent_arrow_right;
 extern Entity *ent_exitpoint;
 extern Entity *ent_endpoint;
 extern Entity *ent_savepoint;
+extern Entity *ent_teleporter;
+extern Entity *ent_teleporter_dest;
 
 #endif

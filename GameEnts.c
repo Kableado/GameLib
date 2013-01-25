@@ -72,6 +72,9 @@ Entity *ent_arrow_right;
 Entity *ent_exitpoint;
 Entity *ent_endpoint;
 Entity *ent_savepoint;
+Entity *ent_teleporter;
+Entity *ent_teleporter_dest;
+
 
 Entity *ent_fire;
 Entity *ent_player_broken;
@@ -149,7 +152,7 @@ int player_collision(Entity *e1,Entity *e2,float t,vec2 n){
 		if(vlen>0.0f){
 			vec2_scale(vdir,e1->vel,1.0f/vlen);
 			if(vec2_dot(vdir,n)>0.9){
-				Entity_CollisionResponse(e1,e2,t,vdir);
+				Entity_CollisionResponseCircle(e1,e2,t,vdir);
 				return(2);
 			}else{
 				return(1);
@@ -336,6 +339,29 @@ void timeoutent_proc(Entity *e,int ft){
 	}
 }
 
+int teleporter_searchdest(Entity *ent,void *d){
+	int a=*(int*)d;
+	if(ent->type!=Ent_Teleporter_Dest){
+		return 0;
+	}
+
+	if(ent->A==a){
+		return 1;
+	}
+	return 0;
+}
+
+void teleporter_overlap(Entity *e1,Entity *e2){
+	Entity *dest=NULL;
+
+	// Search the destination
+	dest=GameLib_SearchEnt(teleporter_searchdest,&e1->A);
+
+	if(dest){
+		vec2_copy(e2->pos,dest->pos);
+	}
+}
+
 
 void GameEnts_Init(){
 	Entity *ent;
@@ -447,7 +473,7 @@ void GameEnts_Init(){
 	ent_player->type=Ent_Player;
 	ent_player->radius=16.0f;
 	ent_player->mass=70.0f;
-	ent_player->fric_static=0.5f;
+	ent_player->backFric_static=0.5f;
 	ent_player->flags=
 		EntityFlag_Collision|EntityFlag_Overlap|EntityFlag_Light;
 	Entity_SetLight(ent_player,0.4f,0.4f,0.4f,3*32.0f);
@@ -462,7 +488,7 @@ void GameEnts_Init(){
 		EntityFlag_Collision|EntityFlag_Overlap;
 	ent_barrel->radius=16.0f;
 	ent_barrel->mass=100.0f;
-	ent_barrel->fric_static=0.5f;
+	ent_barrel->backFric_static=0.5f;
 	ent_barrel->proc=barrel_proc;
 	AnimPlay_SetImg(&ent_barrel->anim,img_barrel);
 
@@ -584,6 +610,25 @@ void GameEnts_Init(){
 	ent_endpoint=Entity_Copy(ent_exitpoint);
 	AnimPlay_SetImg(&ent_endpoint->anim,img_endpoint);
 	ent_endpoint->overlap=endpoint_overlap;
+
+	ent_teleporter=Entity_Copy(ent);
+	ent_teleporter->zorder=0;
+	ent_teleporter->type=Ent_Teleporter;
+	ent_teleporter->flags=EntityFlag_Overlap|EntityFlag_Light;
+	Entity_SetLight(ent_teleporter,0.5f,0.5f,0.5f,5*32.0f);
+	ent_teleporter->radius=20;
+	AnimPlay_SetImg(&ent_teleporter->anim,img_savepoint);
+	ent_teleporter->overlap=teleporter_overlap;
+
+	ent_teleporter_dest=Entity_Copy(ent);
+	ent_teleporter_dest->zorder=0;
+	ent_teleporter_dest->type=Ent_Teleporter_Dest;
+	ent_teleporter_dest->flags=0;
+	AnimPlay_SetImg(&ent_teleporter_dest->anim,img_savepoint);
+
+
+
+
 
 	ent_fire=Entity_Copy(ent);
 	ent_fire->type=Ent_Effect;

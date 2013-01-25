@@ -23,6 +23,7 @@ int _entities_lock=0;
 int _entities_compactate=0;
 void (*_gameproc)()=NULL;
 void (*_gamepostproc)()=NULL;
+void (*_gamepredraw)()=NULL;
 void (*_gamedraw)()=NULL;
 int _ft;
 int _game_size[2];
@@ -43,8 +44,8 @@ int gamelib_debug=0;
 // GameLib_Init
 //
 // Initializes the game.
-int GameLib_Init(int w,int h,char *title,int fps){
-	if(!Draw_Init(w,h,title,fps)){
+int GameLib_Init(int w,int h,char *title,int pfps,int fps){
+	if(!Draw_Init(w,h,title,pfps,fps)){
 		return(0);
 	}
 	if(!Input_Init()){
@@ -98,7 +99,7 @@ void GameLib_AddEntity(Entity *e){
 	_n_entities++;
 
 	// Mark for light update
-	GameLib_EntityUpdateLight(e);
+	Entity_MarkUpdateLight(e,_entity,_n_entities);
 }
 
 
@@ -120,7 +121,7 @@ int GameLib_UnrefEntity(Entity *e){
 			_entities_compactate=1;
 
 			// Mark for light update
-			GameLib_EntityUpdateLight(e);
+			Entity_MarkUpdateLight(e,_entity,_n_entities);
 			return(i);
 		}
 	}
@@ -290,7 +291,7 @@ int GameLib_ProcLoop(){
 	for(i=0;i<_n_entities;i++){
 		Entity_PostProcess(_entity[i],_ft);
 		if(_entity[i]->flags&EntityFlag_UpdatedPos){
-			GameLib_EntityUpdateLight(_entity[i]);
+			Entity_MarkUpdateLight(_entity[i],_entity,_n_entities);
 		}
 	}
 	if(_gamepostproc){
@@ -318,24 +319,28 @@ void GameLib_DrawLoop(){
 	// Update Lights
 	//GameLib_UpdateIlumination();
 
-	// Limpiar pantalla
-	Draw_Clean(0,0,0);
+
+
+	// Predibujado
+	if(_gamepredraw){
+		_gamepredraw();
+	}else{
+		// Limpiar pantalla
+		Draw_Clean(0,0,0);
+	}
 
 	// Draw entities
 	GameLib_Compactate();_entities_lock=1;
 	for(i=0;i<_n_entities;i++){
-		Entity *e;
+		Entity *e=_entity[i];
 
-		// FIXME: This is a hack
-		e=_entity[i];
-		if(e->pos[0]<(_game_pos[0]-128))
+		// Check visivility
+		if(!Entity_IsVisible(e,
+			_game_pos[0],_game_pos[1],
+			_game_size[0],_game_size[1]))
+		{
 			continue;
-		if(e->pos[0]>(_game_pos[0]+_game_size[0]+128))
-			continue;
-		if(e->pos[1]<(_game_pos[1]-128))
-			continue;
-		if(e->pos[1]>(_game_pos[1]+_game_size[1]+128))
-			continue;
+		}
 
 		// Update ilumination of this entity
 		if(e->flags&EntityFlag_UpdateLight){
@@ -345,6 +350,7 @@ void GameLib_DrawLoop(){
 
 		Entity_Draw(e,-_game_pos[0],-_game_pos[1]);
 	}
+	Draw_SetColor(1,1,1,1);
 	if(_gamedraw){
 		_gamedraw();
 	}
@@ -364,12 +370,14 @@ void GameLib_DrawLoop(){
 void GameLib_Loop(
 	void (*gameproc)(),
 	void (*gamepostproc)(),
+	void (*gamepredraw)(),
 	void (*gamedraw)())
 {
 	_running=1;
 
 	_gameproc=gameproc;
 	_gamepostproc=gamepostproc;
+	_gamepredraw=gamepredraw;
 	_gamedraw=gamedraw;
 	t_proc=0;
 	t_col=0;
@@ -420,6 +428,28 @@ void GameLib_GetSize(int size[2]){
 }
 
 
+
+
+/////////////////////////////
+// GameLib_MoveToPos
+// GameLib_MoveToPosH
+// GameLib_MoveToPosV
+//
+//
+void GameLib_MoveToPos(vec2 pos,float f){
+	GameLib_MoveToPosH(pos,f);
+	GameLib_MoveToPosV(pos,f);
+}
+void GameLib_MoveToPosH(vec2 pos,float f){
+	_game_pos[0]=_game_pos[0]+(pos[0]-(_game_pos[0]+(_game_size[0]/2.0f)))*f;
+}
+void GameLib_MoveToPosV(vec2 pos,float f){
+	_game_pos[1]=_game_pos[1]+(pos[1]-(_game_pos[1]+(_game_size[1]/2.0f)))*f;
+}
+
+
+
+
 /////////////////////////////
 // GameLib_ForEachEn
 //
@@ -451,6 +481,24 @@ void GameLib_ForEachEnt(int (*func)(Entity *ent)){
 	}
 }
 
+
+/////////////////////////////
+// GameLib_SearchEnt
+//
+// Searches throught the entities.
+Entity *GameLib_SearchEnt(int (*func)(Entity *ent,void *d),void *d){
+	int i;
+	Entity *ent=NULL;
+	for(i=0;i<_n_entities;i++){
+		if(!_entity[i])
+			continue;
+		if(func(_entity[i],d)){
+			ent=_entity[i];
+			break;
+		}
+	}
+	return ent;
+}
 
 /////////////////////////////
 // GameLib_PlaySound
@@ -512,37 +560,11 @@ void GameLib_Iluminate(){
 //
 void GameLib_EntitySetLight(Entity *e,float r,float g,float b,float rad){
 	if(e->flags&EntityFlag_Light){
-		GameLib_EntityUpdateLight(e);
+		Entity_MarkUpdateLight(e,_entity,_n_entities);
 		Entity_SetLight(e,r,g,b,rad);
-		GameLib_EntityUpdateLight(e);
+		Entity_MarkUpdateLight(e,_entity,_n_entities);
 	}else{
 		Entity_SetLight(e,r,g,b,rad);
-		e->flags|=EntityFlag_UpdateLight;
-	}
-}
-
-
-/////////////////////////////
-// GameLib_EntityUpdateLight
-//
-//
-void GameLib_EntityUpdateLight(Entity *e){
-	if(e->flags&EntityFlag_Light){
-		int i;
-		vec2 max,min;
-
-		vec2_set(max,e->pos[0]+e->light[3],e->pos[1]+e->light[3]);
-		vec2_set(min,e->pos[0]-e->light[3],e->pos[1]-e->light[3]);
-		for(i=0;i<_n_entities;i++){
-			if(	min[0]<=_entity[i]->pos[0] &&
-				max[0]>=_entity[i]->pos[0] &&
-				min[1]<=_entity[i]->pos[1] &&
-				max[1]>=_entity[i]->pos[1])
-			{
-				_entity[i]->flags|=EntityFlag_UpdateLight;
-			}
-		}
-	}else{
 		e->flags|=EntityFlag_UpdateLight;
 	}
 }

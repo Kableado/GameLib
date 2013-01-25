@@ -57,6 +57,7 @@ void Anim_Draw(Anim anim,int time_ms,int x,int y);
 typedef struct {
 	Anim anim;
 	DrawImg img;
+	int pause;
 	int time_ms;
 } AnimPlay;
 
@@ -92,6 +93,12 @@ void AnimPlay_Draw(AnimPlay *ani,int x,int y);
 void AnimPlay_GetOffset(AnimPlay *ani,int *x,int *y);
 void AnimPlay_GetSize(AnimPlay *ani,int *w,int *h);
 
+
+/////////////////////////////
+// AnimPlay_SetPause
+//
+//
+void AnimPlay_SetPause(AnimPlay *ani,int p);
 
 /////////////////////////////
 // AnimPlay_IncTime

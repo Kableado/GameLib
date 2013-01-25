@@ -1,0 +1,69 @@
+100 100
+
+    ##################
+    ##......S1......##
+    ##..............##
+    ##..............##
+    ##..............##
+    ##mmmmll..llmmmm##
+          mm..mm
+          mm..mm
+          mm..mm
+          mm..mm
+          mm..mm
+          mm..mm
+####ll######S2######ll####
+##......................##
+##..BB..BB......BB..BB..##
+##......................##
+##LLLLLLLLrr||rrLLLLLLLL##
+##......AA......AA......##
+##mmmmmmmmll..llmmmmmmmm##
+          mm..mm
+          mm..mm
+          mm..mm
+          mm..mm
+############S3############
+##....VV..VV..........LL##
+##LLLLLLLLLLLLLLLLLL..LL##
+##LL..................LL##
+##LL..LLLLLLLLLLLLLLLLLL##
+##LL..................LL##
+##LLLLLLLLLLLLLLLLLL..LL##
+##LL..................LL##
+##LL..LLLLLLLLLLLLLLLLLL##
+##LL..........AA..AA....##
+##mmmmmmmmll..llmmmmmmmm##
+          mm..mm
+          mm..mm
+          mm..mm
+          mm..mm
+          mm..mm
+######VV##VVS4############
+##LLLLLLLLLL..LLLLLLLLLL##
+##LLLLLLLLLL..........LL##
+>>LLLLLLLLLLLLLLLLLL..LL##
+mmLL..................LL##
+mmLL..LLLLLLLLLLLLLLLLLL<<
+mmLL..................LLmm
+>>LLLLLLLLLLLLLLLLLL..LLmm
+mmLL..................LLmm
+mmLL..LLLLLLLLLLLLLLLLLL<<
+mmLL..........LLLLLLLLLLmm
+mmLLLLLLLLLL..LLLLLLLLLLmm
+mmmmmmmmmmmm..AAmmAAmmmmmm
+          ll..ll
+          mm..mm
+          mm..mm
+          mm..mm
+          mm..mm
+    ########..########
+    ##..............##
+    ##..............##
+    ##..............##
+    ##......EE......##
+    ##mmmmmmmmmmmmmm##
+
+
+
+
