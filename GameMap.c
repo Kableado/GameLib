@@ -1,216 +1,173 @@
-// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2012 Valeriano Alfonso Rodriguez (Kableado)
 
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
+#include <math.h>
 
 #include "GameLib.h"
-#include "GameEnts.h"
 
+#include "GameEnts.h"
 #include "GameMap.h"
 
-Entity GameMapAux_CreateEnt(Entity ent,int i,int j){
-	Entity e;
-	e=Entity_Copy(ent);
-	vec2_set(e->pos,16+i*32,16+j*32);
-	Entity_CalcBBox(e);
-	GameLib_AddEntity(e);
-	return(e);
-}
 
-void Aux_Linea(FILE *f,char *line){
+int ReadLine(FILE *f,char *line,int max){
 	int c;
 	int i=0;
-	memset(line,0,1024);
-	while(i<1024){
+	while(i<(max-1)){
 		c=fgetc(f);
 		if(c==EOF){
 			line[i]=0;
-			break;
+			return(-1);
 		}
 		if(c=='\r'){
 			continue;
 		}
 		if(c=='\n'){
 			line[i]=0;
-			break;
+			return(i);
 		}
 		line[i]=c;
 		i++;
 	}
+	line[i]=0;
+	return(i);
 }
 
-int _startpoint;
-int GameMapAux_CreatePlayer(Entity ent){
-	if(ent->type==Ent_SavePoint){
-		if(ent->A==_startpoint){
-			Entity e;
-			e=Entity_Copy(ent_player);
-			vec2_copy(e->pos,ent->pos);
-			GameLib_AddEntity(e);
-			return(0);
-		}
-	}
-	return(1);
+
+Entity *GameMapAux_CreateEnt(Entity *ent,int i,int j,int res){
+	Entity *e;
+	vec2 pos;
+	e=Entity_Copy(ent);
+	vec2_set(pos,(res/2)+i*res,(res/2)+j*res);
+	vec2_plus(e->pos,e->pos,pos);
+	GameLib_AddEntity(e);
+	return(e);
 }
 
-int GameMapAux_IsFloor(char c){
-	if( c=='.' ||
-		c=='#' ||
-		c=='m' ||
-		c=='B' ||
-		c=='S' ||
-		c=='E' ||
-		c=='F' ||
-		c=='A' ||
-		c=='V' ||
-		c=='<' ||
-		c=='>' ||
-		c=='r' ||
-		c=='T' ||
-		c=='D' ||
-		c=='l' )
-	{
-		return(1);
-	}
-	return(0);
-}
 
-int GameMap_CreateLevel(int level,int point){
-	char filename[128];
+#define MaxLineLen 1024
+
+int GameMap_LoadLevel(char *filename,int res){
 	FILE *file;
-	char line[1024];
-	int w,h;
-	int i,j,i2;
-	int floor;
+	char line[MaxLineLen];
+	int len,i,j;
+	int width,height;
+	char *map;
 
-	sprintf(filename,"data/level_%02d.txt",level);
-	file=fopen(filename,"r");
+
+	// Open the file
+	file=fopen(filename,"rb");
 	if(!file){
 		return(0);
 	}
 
-	GameLib_DelEnts();
-
-	Aux_Linea(file,line);
-	sscanf(line,"%d %d",&w,&h);
-	for(j=0;j<h;j++){
-		Aux_Linea(file,line);
-		for(i=0;i<w;i++){
-			i2=i*2;
-			// Prepare the floor
-			floor=0;
-			if(i>0){
-				if(GameMapAux_IsFloor(line[i2-2])){
-					floor|=4;
-				}
+	// Read the file to determine sizes
+	width=0;
+	height=0;
+	do{
+		len=ReadLine(file,line,MaxLineLen);
+		if(len>-1){
+			if(len>height){
+				height=len;
 			}
-			if(i<(w-1)){
-				if(GameMapAux_IsFloor(line[i2+2])){
-					floor|=1;
-				}
-			}
-			if(GameMapAux_IsFloor(line[i2])){
-				floor|=2;
-			}
-			if(floor==7){
-				GameMapAux_CreateEnt(ent_floor,i,j);
-			}
-			if(floor==6){
-				GameMapAux_CreateEnt(ent_floor_right,i,j);
-			}
-			if(floor==3){
-				GameMapAux_CreateEnt(ent_floor_left,i,j);
-			}
-			if(floor==2){
-				GameMapAux_CreateEnt(ent_floor_center,i,j);
-			}
+			width++;
+		}
+	}while(len>-1);
+	fseek(file,0,SEEK_SET);
 
 
-			// Put the rest of the entities
-			if(line[i2]=='.'){
-				// Floor
-			}else
-			if(line[i2]=='#'){
-				// Column
-				GameMapAux_CreateEnt(ent_column,i,j);
-			}else
-			if(line[i2]=='m'){
-				// Column faded
-				GameMapAux_CreateEnt(ent_column_faded,i,j);
-			}else
-			if(line[i2]=='r'){
-				// Rock
-				GameMapAux_CreateEnt(ent_rock,i,j);
-			}else
-			if(line[i2]=='l'){
-				// Lamp
-				GameMapAux_CreateEnt(ent_lamp,i,j);
-			}else
-			if(line[i2]=='B'){
-				// Barrel
-				GameMapAux_CreateEnt(ent_barrel,i,j);
-			}else
-			if(line[i2]=='|'){
-				// Spiked hole
-				GameMapAux_CreateEnt(ent_hole_spiked,i,j);
-			}else
-			if(line[i2]=='L'){
-				// Lava hole
-				GameMapAux_CreateEnt(ent_hole_lava,i,j);
-			}else
-			if(line[i2]=='S'){
-				Entity e;
-				// Save point
-				e=GameMapAux_CreateEnt(ent_savepoint,i,j);
-				e->A=line[i2+1]-'0';
-			}else
-			if(line[i2]=='E'){
-				// Exit point
-				GameMapAux_CreateEnt(ent_exitpoint,i,j);
-			}else
-			if(line[i2]=='F'){
-				// End point
-				GameMapAux_CreateEnt(ent_endpoint,i,j);
-			}else
-			if(line[i2]=='>'){
-				// ArrowShooter right
-				GameMapAux_CreateEnt(ent_arrowshooter_right,i,j);
-			}else
-			if(line[i2]=='<'){
-				// ArrowShooter left
-				GameMapAux_CreateEnt(ent_arrowshooter_left,i,j);
-			}else
-			if(line[i2]=='V'){
-				// ArrowShooter down
-				GameMapAux_CreateEnt(ent_arrowshooter_down,i,j);
-			}else
-			if(line[i2]=='A'){
-				// ArrowShooter up
-				GameMapAux_CreateEnt(ent_arrowshooter_up,i,j);
-			}else
-			/*if(line[i2]=='T'){
-				// Teleporter
-				Entity ent=GameMapAux_CreateEnt(ent_teleporter,i,j);
-				ent->A=line[i2+1]-'0';
-			}else
-			if(line[i2]=='D'){
-				// Teleporter Destination
-				Entity ent=GameMapAux_CreateEnt(ent_teleporter_dest,i,j);
-				ent->A=line[i2+1]-'0';
-			}else
-*/
-			{}
+	// Build the map
+	map=malloc(sizeof(char)*width*height);
+	memset(map,0,width*height);
+	#define MAP(x,y) map[(x)+((y)*width)]
+	j=0;
+	do{
+		len=ReadLine(file,line,MaxLineLen);
+		for(i=0;i<len;i++){
+			MAP(j,(height-1)-i)=line[i];
+		}
+		j++;
+	}while(len>-1);
+
+
+	// Close the file
+	fclose(file);
+
+
+	// Parse the map
+	for(j=0;j<height;j++){
+		for(i=0;i<width;i++){
+			Entity *ent;
+
+
+
+			if(MAP(i,j)=='P'){
+				// Player
+				GameMapAux_CreateEnt(ent_Wizard,i,j,res);
+			}
+			if(MAP(i,j)=='#'){
+				// Earth
+				int x,y;
+				int up,down,left,right;
+
+				ent=GameMapAux_CreateEnt(ent_Earth,i,j,res);
+
+				x=i;y=j-1;if(y<0)y=0;
+				up=MAP(x,y)=='#'?0:1;
+				x=i;y=j+1;if(y>=height)y=height-1;
+				down=MAP(x,y)=='#'?0:1;
+				x=i-1;y=j;if(x<0)x=0;
+				left=MAP(x,y)=='#'?0:1;
+				x=i+1;y=j;if(x>=width)x=width-1;
+				right=MAP(x,y)=='#'?0:1;
+
+				EntEarth_Init(ent,up,down,left,right);
+			}
+			if(MAP(i,j)=='R'){
+				// StoneBrick
+				int x,y;
+				int up,down,left,right;
+
+				ent=GameMapAux_CreateEnt(ent_StoneBrick,i,j,res);
+
+				x=i;y=j-1;if(y<0)y=0;
+				up=MAP(x,y)=='R'?0:1;
+				x=i;y=j+1;if(y>=height)y=height-1;
+				down=MAP(x,y)=='R'?0:1;
+				x=i-1;y=j;if(x<0)x=0;
+				left=MAP(x,y)=='R'?0:1;
+				x=i+1;y=j;if(x>=width)x=width-1;
+				right=MAP(x,y)=='R'?0:1;
+
+				EntStoneBrick_Init(ent,up,down,left,right);
+			}
+
+
+			if(MAP(i,j)=='S'){
+				// Spiked Bush
+				ent=GameMapAux_CreateEnt(ent_SpikedBush,i,j,res);
+			}
+
+			if(MAP(i,j)=='F'){
+				// Flower
+				ent=GameMapAux_CreateEnt(ent_Flower[0],i,j,res);
+			}
+			if(MAP(i,j)=='f'){
+				// Flower
+				ent=GameMapAux_CreateEnt(ent_Flower[1],i,j,res);
+			}
+
+			if(MAP(i,j)=='B'){
+				// Bunny
+				ent=GameMapAux_CreateEnt(ent_Bunny,i,j,res);
+			}
 		}
 	}
 
-	fclose(file);
 
-	// Find the player start position
-	_startpoint=point;
-	GameLib_ForEachEnt(GameMapAux_CreatePlayer);
-
-	// Iluminate
-	//GameLib_Iluminate();
+	// Cleanup
+	free(map);
+	#undef MAP
 
 	return(1);
 }

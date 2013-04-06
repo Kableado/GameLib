@@ -1,5 +1,6 @@
-// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2012 Valeriano Alfonso Rodriguez (Kableado)
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -8,660 +9,746 @@ extern int gamelib_debug;
 
 #include "GameEnts.h"
 
-DrawImg img_barrel;
-DrawImg img_barrel2;
-DrawImg img_column;
-DrawImg img_column_faded;
-DrawImg img_rock;
-DrawImg img_lamp;
-DrawImg img_floor;
-DrawImg img_floor_left;
-DrawImg img_floor_right;
-DrawImg img_floor_center;
-DrawImg img_hole_spiked;
-Anim anim_hole_lava;
-DrawImg img_player_down;
-DrawImg img_player_up;
-DrawImg img_player_left;
-DrawImg img_player_right;
-DrawImg img_savepoint;
-Anim anim_savepoint_active;
-DrawImg img_endpoint;
-Anim anim_exitpoint;
-DrawImg img_arrowshooter_up;
-DrawImg img_arrowshooter_down;
-DrawImg img_arrowshooter_left;
-DrawImg img_arrowshooter_right;
-DrawImg img_arrow_up;
-DrawImg img_arrow_down;
-DrawImg img_arrow_left;
-DrawImg img_arrow_right;
-Anim anim_fire;
-DrawImg img_player_broken;
+DrawImg img_player;
+DrawImg img_platform;
+DrawImg img_block;
+
+Entity *ent_Player;
+Entity *ent_Platform;
+Entity *ent_Block;
 
 
-AudioSnd snd_arrowhit;
-AudioSnd snd_savepoint;
-AudioSnd snd_exitpoint;
-AudioSnd snd_shootarrow;
-AudioSnd snd_burn;
-AudioSnd snd_fillhole;
-AudioSnd snd_drag;
+DrawImg img_wizard[2];
+//DrawImg img_wizardWalking[2];
+//DrawImg img_wizardShoting[2];
+//DrawImg img_wizardPain[2];
+DrawImg img_magikball;
+DrawImg img_earth[16];
+//DrawImg img_earthBack[16];
+DrawImg img_stoneBrick;
+//DrawImg img_stoneBrick[16];
+//DrawImg img_stoneBrickBack[16];
+DrawImg img_spikedBush;
+DrawImg img_lavaPit;
+DrawImg img_fireball;
+DrawImg img_flower[2];
+DrawImg img_spike[2];
+DrawImg img_carnivorePlant[2];
+DrawImg img_bunny[2];
+DrawImg img_spider[2];
+DrawImg img_guard[2];
+DrawImg img_eliteGuard[2];
+DrawImg img_axe[2];
+DrawImg img_goatMan[2];
+DrawImg img_Princess[2];
 
-Entity ent_player;
-Entity ent_barrel;
-Entity ent_column;
-Entity ent_column_faded;
-Entity ent_rock;
-Entity ent_lamp;
-Entity ent_floor;
-Entity ent_floor_right;
-Entity ent_floor_left;
-Entity ent_floor_center;
-Entity ent_hole_spiked;
-Entity ent_hole_filled;
-Entity ent_hole_lava;
-Entity ent_arrowshooter_up;
-Entity ent_arrowshooter_down;
-Entity ent_arrowshooter_left;
-Entity ent_arrowshooter_right;
-Entity ent_arrow_up;
-Entity ent_arrow_down;
-Entity ent_arrow_left;
-Entity ent_arrow_right;
-Entity ent_exitpoint;
-Entity ent_endpoint;
-Entity ent_savepoint;
-Entity ent_teleporter;
-Entity ent_teleporter_dest;
-
-
-Entity ent_fire;
-Entity ent_player_broken;
-
-extern int game_level;
-extern int game_level_point;
-extern int game_level_reset;
-
-void LoadGame();
-void SaveGame();
+Entity *ent_Wizard;
+Entity *ent_MagikBall;
+Entity *ent_Earth;
+Entity *ent_EarthBack;
+Entity *ent_StoneBrick;
+Entity *ent_StoneBrickBack;
+Entity *ent_SpikedBush;
+Entity *ent_Fireball;
+Entity *ent_LavaPit;
+Entity *ent_Spike[2];
+Entity *ent_Flower[2];
+Entity *ent_CarnivorePlant[2];
+Entity *ent_Bunny;
+Entity *ent_Spider;
+Entity *ent_Axe;
+Entity *ent_Guard;
+Entity *ent_EliteGuard;
+Entity *ent_GoatMan;
+Entity *ent_Princess;
 
 
-void player_proc(Entity e,int ft){
-	vec2 vel;
-	int pos[2],size[2],delta[2];
 
-	if (gamelib_debug) {
-		if (Input_GetKey(InputKey_Jump)==InputKey_Pressed) {
-			if (!(e->flags&EntityFlag_Collision)) {
-				e->flags|=(EntityFlag_Collision|EntityFlag_Overlap);
-				GameLib_EntitySetLight(e,0.4f,0.4f,0.4f,5*32.0f);
-			}else {
-				e->flags&=~(EntityFlag_Collision|EntityFlag_Overlap);
-				GameLib_EntitySetLight(e,0.7f,0.7f,0.7f,20*32.0f);
-			}
-		}
+int EntityApplyGravity(Entity *e){
+	float grav=0.5f;
+	float vTerminal=10.0f;
+	vec2 vGrav;
+
+	// Only apply gravity to some entity types
+	if(!(
+		e->type==Ent_Player ||
+		e->type==Ent_Wizard ||
+		e->type==Ent_Fireball ||
+		e->type==Ent_Bunny ||
+		e->type==Ent_Spider ||
+		e->type==Ent_Axe ||
+		e->type==Ent_Guard ||
+		e->type==Ent_EliteGuard ||
+		e->type==Ent_GoatMan ||
+		e->type==Ent_Princess ||
+		0
+		))
+	{
+		return(1);
 	}
 
+	// Apply gravity
+	vec2_set(vGrav,0.0f,grav);
+	Entity_AddVelLimit(e,vGrav,vTerminal);
 
-	if(Input_GetDir(vel)){
-		vec2 up,right;
-		float updown,leftright;
 
-		vec2_set(up,0,-1);
-		vec2_set(right,1,0);
-		updown=vec2_dot(up,vel);
-		leftright=vec2_dot(right,vel);
-		if(fabs(updown)>=fabs(leftright)){
-			if(updown>0.0f){
-				AnimPlay_SetImg(&e->anim,img_player_up);
-			}else{
-				AnimPlay_SetImg(&e->anim,img_player_down);
-			}
-		}else{
-			if(leftright>0.0f){
-				AnimPlay_SetImg(&e->anim,img_player_right);
-			}else{
-				AnimPlay_SetImg(&e->anim,img_player_left);
-			}
-		}
-
-		vec2_scale(vel,vel,7);
-		Entity_AddVelLimit(e,vel,15.0f);
-	}
-
-	GameLib_MoveToPos(e->pos,0.3f);
-}
-
-int player_collision(Entity e1,Entity e2,float t,vec2 n){
-	if(e2->type==Ent_Barrel){
-		float vlen;
-		vec2 vdir;
-		vlen=sqrtf(vec2_dot(e1->vel,e1->vel));
-		if(vlen>0.0f){
-			vec2_scale(vdir,e1->vel,1.0f/vlen);
-			if (vec2_dot(vdir,n) < -0.9f) {
-				vec2_orthogonalize4(n);
-				Entity_CollisionResponseCircle(e2,e1,t,n);
-				return(2);
-			}
-		}
-	}
 	return(1);
 }
 
-void barrel_proc(Entity e,int ft){
-	float qvel;
-	int tnow;
 
-	qvel=vec2_dot(e->vel,e->vel);
-	if(qvel>0.0f){
-		tnow=Time_GetTime()/1000;
-		if(tnow-250>e->A){
-			GameLib_PlaySound(snd_drag,(int)e->pos[0],(int)e->pos[1]);
-			e->A=tnow;
+
+void EntEarth_Init(Entity *ent,int up,int down,int left,int right){
+	int val=up*8+right*4+down*2+left;
+
+
+	if(!up && !down && !left && !right){
+		ent->flags=0;
+	}else
+	if(up && !down && !left && !right){
+		ent->flags=EntityFlag_PlatformCollision;
+	}else{
+		ent->flags=EntityFlag_BlockCollision;
+	}
+
+	AnimPlay_SetImg(&ent->anim,img_earth[val]);
+}
+
+void EntStoneBrick_Init(Entity *ent,int up,int down,int left,int right){
+	if(!up && !down && !left && !right){
+		ent->flags=0;
+	}else
+	if(up && !down && !left && !right){
+		ent->flags=EntityFlag_PlatformCollision;
+	}else{
+		ent->flags=EntityFlag_BlockCollision;
+	}
+}
+
+
+
+
+
+
+void player_proc(Entity *e,int ft){
+	float acel=1.0f;
+	float maxVel=4.0f;
+	float jumpVel=12.0f;
+
+	if(Input_GetKey(InputKey_Jump)==InputKey_Pressed ||
+		Input_GetKey(InputKey_Up)==InputKey_Pressed){
+		vec2 jump;
+
+		// Apply jump
+		vec2_set(jump,0.0f,-jumpVel);
+		vec2_plus(e->vel,e->vel,jump);
+
+		// FIXME: play sound
+	}
+	if(Input_GetKey(InputKey_Left)){
+		vec2 left;
+
+		// Apply left movement
+		vec2_set(left,-acel,0.0f);
+		Entity_AddVelLimit(e,left,maxVel);
+	}
+	if(Input_GetKey(InputKey_Right)){
+		vec2 right;
+
+		// Apply right movement
+		vec2_set(right,acel,0.0f)
+		Entity_AddVelLimit(e,right,maxVel);
+	}
+
+
+	// Scroll View
+	GameLib_MoveToPosH(e->pos,0.1f);
+}
+
+
+
+
+
+
+
+void wizard_proc(Entity *e,int ft){
+	float acel=1.0f;
+	float maxVel=6.0f;
+	float jumpVel=8.0f;
+	float shootVel=10.0f;
+
+	if(Input_GetKey(InputKey_Jump)==InputKey_Pressed ||
+		Input_GetKey(InputKey_Up)==InputKey_Pressed)
+	{
+		vec2 jump;
+
+		// Apply jump
+		vec2_set(jump,0.0f,-(jumpVel+fabs(e->vel[0])));
+		vec2_plus(e->vel,e->vel,jump);
+
+		// FIXME: play sound
+	}
+	if(Input_GetKey(InputKey_Left)){
+		vec2 left;
+
+		// Apply left movement
+		vec2_set(left,-acel,0.0f);
+		Entity_AddVelLimit(e,left,maxVel);
+
+
+		AnimPlay_SetImg(&e->anim,img_wizard[0]);
+		e->A=0;
+	}
+	if(Input_GetKey(InputKey_Right)){
+		vec2 right;
+
+		// Apply right movement
+		vec2_set(right,acel,0.0f)
+		Entity_AddVelLimit(e,right,maxVel);
+
+		AnimPlay_SetImg(&e->anim,img_wizard[1]);
+
+		e->A=1;
+	}
+	if(Input_GetKey(InputKey_Action1)==InputKey_Pressed ||
+		Input_GetKey(InputKey_Action2)==InputKey_Pressed)
+	{
+		Entity *e2;
+
+		// Create child entity
+		e2=Entity_Copy(e->child);
+		vec2_plus(e2->pos,e2->pos,e->pos);
+		if(e->A==0){
+			vec2_set(e2->vel,-shootVel,0);
+		}else
+		if(e->A==1){
+			vec2_set(e2->vel,shootVel,0);
 		}
+		GameLib_AddEntity(e2);
+
 	}
+
+
+	// Scroll View
+	GameLib_MoveToPosH(e->pos,0.1f);
 }
 
 
-void hole_spiked_overlap(Entity e1,Entity e2){
-	Entity e;
-
-	if(e2->type==Ent_Barrel){
-		Entity e;
-
-		// Disable future overlaps
-		e1->overlap=NULL;
-
-		// "Fill the hole"
-		e=Entity_Copy(ent_hole_filled);
-		vec2_copy(e->pos,e1->pos);
-		GameLib_AddEntity(e);
-		GameLib_PlaySound(snd_fillhole,(int)e2->pos[0],(int)e2->pos[1]);
-
-		// Remove the two entities
-		GameLib_DelEntity(e1);
-		GameLib_DelEntity(e2);
-
-	}
-	if(e2->type==Ent_Player){
-		// "Kill the player"
-
-		// Broken player
-		e=Entity_Copy(ent_player_broken);
-		vec2_copy(e->pos,e2->pos);
-		GameLib_AddEntity(e);
-
-		GameLib_PlaySound(snd_burn,(int)e2->pos[0],(int)e2->pos[1]);
-		GameLib_DelEntity(e2);
-
-		// HACK
-		game_level_reset=1;
-	}
-}
 
 
-void hole_lava_oncopy(Entity ent){
-	AnimPlay_IncTime(&ent->anim,rand()%1000);
-}
 
-void hole_lava_overlap(Entity e1,Entity e2){
-	Entity e;
-
-	if(e2->type==Ent_Barrel){
-		// "Burn the barrel"
-
-		// Make fire
-		e=Entity_Copy(ent_fire);
-		vec2_copy(e->pos,e2->pos);
-		GameLib_AddEntity(e);
-
-		GameLib_PlaySound(snd_burn,(int)e2->pos[0],(int)e2->pos[1]);
-		GameLib_DelEntity(e2);
-	}
-	if(e2->type==Ent_Player){
-		// "Burn the player"
-
-		// Make fire
-		e=Entity_Copy(ent_fire);
-		vec2_copy(e->pos,e2->pos);
-		GameLib_AddEntity(e);
-
-		// Broken player
-		e=Entity_Copy(ent_player_broken);
-		vec2_copy(e->pos,e2->pos);
-		GameLib_AddEntity(e);
-
-		GameLib_PlaySound(snd_burn,(int)e2->pos[0],(int)e2->pos[1]);
-		GameLib_DelEntity(e2);
-		game_level_reset=1;
-	}
-}
-
-
-int arrow_collision(Entity e1,Entity e2,float t,vec2 n){
-	Entity e;
-
-	if(e1->postproc)
+int magikball_collision(Entity *ent,Entity *ent2,float t,vec2 n){
+	if(ent->A==1)
 		return(0);
 
-	if(e2->type==Ent_ArrowShooter)
-		return(0);
-	if(e2->type==Ent_Arrow)
-		return(0);
+	if(ent2->type==Ent_Flower){
+		Entity *e2;
+		// Convert a flower
 
-	if(e2->type==Ent_Player){
-		// KILL the player
-		e=Entity_Copy(ent_player_broken);
-		vec2_copy(e->pos,e2->pos);
-		GameLib_AddEntity(e);
-		GameLib_DelEntity(e2);
-		GameLib_PlaySound(snd_burn,(int)e2->pos[0],(int)e2->pos[1]);
-		game_level_reset=1;
+		// Create replacemente entity
+		e2=Entity_Copy(ent_CarnivorePlant[ent2->D]);
+		vec2_plus(e2->pos,e2->pos,ent2->pos);
+		GameLib_AddEntity(e2);
+
+		// Delete original entity
+		GameLib_DelEntity(ent2);
 	}
-	GameLib_DelEntity(e1);
-	GameLib_PlaySound(snd_arrowhit,(int)e1->pos[0],(int)e1->pos[1]);
+	if(ent2->type==Ent_Bunny){
+		Entity *e2;
+		// Convert a bunny
+		printf("Bunny\n");
+
+		// Create replacemente entity
+		e2=Entity_Copy(ent_Spider);
+		vec2_plus(e2->pos,e2->pos,ent2->pos);
+		GameLib_AddEntity(e2);
+
+		// Copy direction
+		e2->A=ent2->A;
+
+		// Delete original entity
+		GameLib_DelEntity(ent2);
+	}
+
+	// Selfdestroy
+	GameLib_DelEntity(ent);
+	ent->A=1;
+
+	// FIXME: play sound
 
 	return(0);
 }
 
-void arrowshooter_oncopy(Entity e){
-	e->A=(rand()%15);
+
+void spikedentity_overlap(Entity *e,Entity *e2){
+	// FIXME: damage player
+	printf("FIXME: damage player\n");
 }
 
-void arrowshooter_proc(Entity e,int ft){
-	if(e->A==0){
-		Entity e2;
 
-		e2=Entity_Copy(e->child);
-		vec2_copy(e2->pos,e->pos);
+int spike_collision(Entity *ent,Entity *ent2,float t,vec2 n){
+	if(ent->A==1)
+		return(0);
+
+	if(ent2->type==Ent_Player ||
+		ent2->type==Ent_Wizard)
+	{
+		// FIXME: damage player
+		printf("FIXME: damage player\n");
+	}
+
+	// Selfdestroy
+	GameLib_DelEntity(ent);
+	ent->A=1;
+
+	// FIXME: play sound
+
+	return(0);
+}
+
+void flower_oncopy(Entity *ent){
+	ent->A=rand()%ent->C;
+}
+
+void flower_proc(Entity *ent,int ft){
+	if(ent->A==0){
+		Entity *e2;
+
+		// Create child entity
+		e2=Entity_Copy(ent->child);
+		vec2_plus(e2->pos,e2->pos,ent->pos);
 		GameLib_AddEntity(e2);
-		GameLib_PlaySound(snd_shootarrow,(int)e->pos[0],(int)e->pos[1]);
 
-		e->A=15;
+
+		// FIXME: play sound
+
+		ent->A=ent->B;
 	}else{
-		e->A--;
+		ent->A--;
 	}
 }
 
-Entity _savepoint=NULL;
-void savepoint_ondelete(Entity e){
-	if(_savepoint==e){
-		_savepoint=NULL;
+
+
+
+
+
+void bunny_proc(Entity *e,int ft){
+	float acel=1.0f;
+	float maxVel=4.0f;
+	float jumpVel=5.0f;
+
+	if(e->B==0){
+		vec2 jump;
+
+		// Apply jump
+		vec2_set(jump,0.0f,-jumpVel);
+		vec2_plus(e->vel,e->vel,jump);
+
+		// FIXME: play sound
+
+		e->B=e->C;
+	}else{
+		e->B--;
 	}
-}
-void savepoint_overlap(Entity e1,Entity e2){
-	if(e2->type==Ent_Player){
-		// Save the point
-		if(game_level_point!=e1->A){
-			game_level_point=e1->A;
-			GameLib_PlaySound(snd_savepoint,(int)e1->pos[0],(int)e1->pos[1]);
-			SaveGame();
-		}
-		if(e1!=_savepoint){
-			AnimPlay_SetAnim(&e1->anim,anim_savepoint_active);
-			GameLib_EntitySetLight(e1,0.0f,0.0f,0.5f,4*32.0f);
-			if(_savepoint){
-				AnimPlay_SetImg(&_savepoint->anim,img_savepoint);
-				GameLib_EntitySetLight(_savepoint,0.0f,0.0f,0.5f,2*32.0f);
-			}
-			_savepoint=e1;
-		}
-	}
-}
-
-void exitpoint_overlap(Entity e1,Entity e2){
-	if(e2->type==Ent_Player){
-		// Exit the level
-		game_level++;
-		game_level_point=1;
-		game_level_reset=2;
-
-		// HACK: Delete the player
-		GameLib_DelEntity(e2);
-
-		GameLib_PlaySound(snd_exitpoint,(int)e1->pos[0],(int)e1->pos[1]);
-		SaveGame();
-	}
-}
-
-void endpoint_overlap(Entity e1,Entity e2){
-	if(e2->type==Ent_Player){
-		// Go to end
-		game_level_reset=3;
-
-		// HACK: Delete the player
-		GameLib_DelEntity(e2);
-
-		GameLib_PlaySound(snd_exitpoint,(int)e1->pos[0],(int)e1->pos[1]);
-		SaveGame();
-	}
-}
-
-void timeoutent_proc(Entity e,int ft){
 	if(e->A==0){
-		GameLib_DelEntity(e);
+		vec2 left;
+
+		// Apply left movement
+		vec2_set(left,-acel,0.0f);
+		Entity_AddVelLimit(e,left,maxVel);
+
+
+		AnimPlay_SetImg(&e->anim,img_bunny[0]);
+	}
+	if(e->A==1){
+		vec2 right;
+
+		// Apply right movement
+		vec2_set(right,acel,0.0f)
+		Entity_AddVelLimit(e,right,maxVel);
+
+		AnimPlay_SetImg(&e->anim,img_bunny[1]);
+	}
+}
+int bunny_collision(Entity *ent,Entity *ent2,float t,vec2 n){
+	if(n[0]>0.5f){
+		ent->A=1;
+	}else
+	if(n[0]<-0.5f){
+		ent->A=0;
+	}
+
+
+	if(ent2->type==Ent_Player ||
+		ent2->type==Ent_Wizard)
+	{
+		// FIXME: damage player
+		printf("FIXME: damage player\n");
+	}
+
+	return(1);
+}
+
+
+
+void spider_proc(Entity *e,int ft){
+	float acel=1.0f;
+	float maxVel=4.0f;
+	float jumpVel=5.0f;
+
+	if(e->B==0){
+		vec2 jump;
+
+		// Apply jump
+		vec2_set(jump,0.0f,-jumpVel);
+		vec2_plus(e->vel,e->vel,jump);
+
+		// FIXME: play sound
+
+		e->B=e->C;
 	}else{
-		e->A--;
+		e->B--;
+	}
+	if(e->A==0){
+		vec2 left;
+
+		// Apply left movement
+		vec2_set(left,-acel,0.0f);
+		Entity_AddVelLimit(e,left,maxVel);
+
+
+		AnimPlay_SetImg(&e->anim,img_spider[0]);
+	}
+	if(e->A==1){
+		vec2 right;
+
+		// Apply right movement
+		vec2_set(right,acel,0.0f)
+		Entity_AddVelLimit(e,right,maxVel);
+
+		AnimPlay_SetImg(&e->anim,img_spider[1]);
 	}
 }
-
-int teleporter_searchdest(Entity ent,void *d){
-	int a=*(int*)d;
-	if(ent->type!=Ent_Teleporter_Dest){
-		return 0;
+int spider_collision(Entity *ent,Entity *ent2,float t,vec2 n){
+	if(n[0]>0.5f){
+		ent->A=1;
+	}else
+	if(n[0]<-0.5f){
+		ent->A=0;
 	}
 
-	if(ent->A==a){
-		return 1;
-	}
-	return 0;
+	return(1);
 }
 
-void teleporter_overlap(Entity e1,Entity e2){
-	Entity dest=NULL;
 
-	// Search the destination
-	dest=GameLib_SearchEnt(teleporter_searchdest,&e1->A);
 
-	if(dest){
-		vec2_copy(e2->pos,dest->pos);
-	}
-}
+
 
 
 void GameEnts_Init(){
-	Entity ent;
-
-	//////////////////////////////
-	// Load Resources
-
-	img_barrel=Draw_LoadImage("data/barrel.png");
-	Draw_SetOffset(img_barrel,-16,-32);
-
-	img_barrel2=Draw_LoadImage("data/barrel2.png");
-	Draw_SetOffset(img_barrel2,-16,-16);
-
-	img_floor=Draw_LoadImage("data/floor.png");
-	Draw_SetOffset(img_floor,-16,-16);
-	img_floor_left=Draw_LoadImage("data/floor_left.png");
-	Draw_SetOffset(img_floor_left,-16,-16);
-	img_floor_right=Draw_LoadImage("data/floor_right.png");
-	Draw_SetOffset(img_floor_right,-16,-16);
-	img_floor_center=Draw_LoadImage("data/floor_center.png");
-	Draw_SetOffset(img_floor_center,-16,-16);
-
-	img_column=Draw_LoadImage("data/column.png");
-	Draw_SetOffset(img_column,-16,-80);
-	img_column_faded=Draw_LoadImage("data/column_faded.png");
-	Draw_SetOffset(img_column_faded,-16,-80);
-	img_rock=Draw_LoadImage("data/rock.png");
-	Draw_SetOffset(img_rock,-16,-32);
-	img_lamp=Draw_LoadImage("data/lamp.png");
-	Draw_SetOffset(img_lamp,-16,-48);
-
-	img_hole_spiked=Draw_LoadImage("data/hole_spiked.png");
-	Draw_SetOffset(img_hole_spiked,-16,-16);
-
-	anim_hole_lava=Anim_LoadAnim("data/hole_lava.png",32,2,5);
-	Anim_SetOffset(anim_hole_lava,-16,-16);
-
-	img_player_up=Draw_LoadImage("data/player_up.png");
-	Draw_SetOffset(img_player_up,-16,-48);
-	img_player_down=Draw_LoadImage("data/player_down.png");
-	Draw_SetOffset(img_player_down,-16,-48);
-	img_player_left=Draw_LoadImage("data/player_left.png");
-	Draw_SetOffset(img_player_left,-16,-48);
-	img_player_right=Draw_LoadImage("data/player_right.png");
-	Draw_SetOffset(img_player_right,-16,-48);
-
-	img_savepoint=Draw_LoadImage("data/save_point.png");
-	Draw_SetOffset(img_savepoint,-16,-16);
-
-	anim_savepoint_active=Anim_LoadAnim("data/save_point_active.png",32,2,5);
-	Anim_SetOffset(anim_savepoint_active,-16,-16);
-
-	anim_exitpoint=Anim_LoadAnim("data/exit_point.png",32,2,10);
-	Anim_SetOffset(anim_exitpoint,-16,-48);
-
-	img_endpoint=Draw_LoadImage("data/end_point.png");
-	Draw_SetOffset(img_endpoint,-16,-32);
-
-	img_arrowshooter_up=Draw_LoadImage("data/arrowshooter_up.png");
-	Draw_SetOffset(img_arrowshooter_up,-16,-16);
-	img_arrowshooter_down=Draw_LoadImage("data/arrowshooter_down.png");
-	Draw_SetOffset(img_arrowshooter_down,-16,-16);
-	img_arrowshooter_left=Draw_LoadImage("data/arrowshooter_left.png");
-	Draw_SetOffset(img_arrowshooter_left,-16,-16);
-	img_arrowshooter_right=Draw_LoadImage("data/arrowshooter_right.png");
-	Draw_SetOffset(img_arrowshooter_right,-16,-16);
-
-	img_arrow_up=Draw_LoadImage("data/arrow_up.png");
-	Draw_SetOffset(img_arrow_up,-16,-16);
-	img_arrow_down=Draw_LoadImage("data/arrow_down.png");
-	Draw_SetOffset(img_arrow_down,-16,-16);
-	img_arrow_left=Draw_LoadImage("data/arrow_left.png");
-	Draw_SetOffset(img_arrow_left,-16,-16);
-	img_arrow_right=Draw_LoadImage("data/arrow_right.png");
-	Draw_SetOffset(img_arrow_right,-16,-16);
-
-	anim_fire=Anim_LoadAnim("data/fire.png",32,3,5);
-	Anim_SetOffset(anim_fire,-16,-48);
-
-	img_player_broken=Draw_LoadImage("data/player_broken.png");
-	Draw_SetOffset(img_player_broken,-16,-48);
 
 
+	/////////////////////////////
+	// Load and initialize media.
+	//
 
-	snd_arrowhit=Audio_LoadSound("data/Hit_Hurt10.wav");
-	snd_exitpoint=Audio_LoadSound("data/Powerup10.wav");
-	snd_savepoint=Audio_LoadSound("data/Powerup30.wav");
-	snd_shootarrow=Audio_LoadSound("data/Laser_Shoot2.wav");
-	snd_burn=Audio_LoadSound("data/Explosion2.wav");
-	snd_fillhole=Audio_LoadSound("data/Hit_Hurt16.wav");
-	snd_drag=Audio_LoadSound("data/Explosion16.wav");
+	img_player=Draw_LoadImage("data/player.bmp");
+	img_platform=Draw_LoadImage("data/platform.bmp");
+	img_block=Draw_LoadImage("data/block.bmp");
 
+	// Wizard
+	img_wizard[0]=Draw_LoadImage("data/wizard_left.bmp");
+	img_wizard[1]=Draw_LoadImage("data/wizard_right.bmp");
 
+	// Magik Ball
+	img_magikball=Draw_LoadImage("data/magikball.bmp");
 
+	// Load the earth images
+	img_earth[ 0]=Draw_LoadImage("data/earth/0.bmp");
+	img_earth[ 1]=Draw_LoadImage("data/earth/1.bmp");
+	img_earth[ 2]=Draw_LoadImage("data/earth/2.bmp");
+	img_earth[ 3]=Draw_LoadImage("data/earth/3.bmp");
+	img_earth[ 4]=Draw_LoadImage("data/earth/4.bmp");
+	img_earth[ 5]=Draw_LoadImage("data/earth/5.bmp");
+	img_earth[ 6]=Draw_LoadImage("data/earth/6.bmp");
+	img_earth[ 7]=Draw_LoadImage("data/earth/7.bmp");
+	img_earth[ 8]=Draw_LoadImage("data/earth/8.bmp");
+	img_earth[ 9]=Draw_LoadImage("data/earth/9.bmp");
+	img_earth[10]=Draw_LoadImage("data/earth/A.bmp");
+	img_earth[11]=Draw_LoadImage("data/earth/B.bmp");
+	img_earth[12]=Draw_LoadImage("data/earth/C.bmp");
+	img_earth[13]=Draw_LoadImage("data/earth/D.bmp");
+	img_earth[14]=Draw_LoadImage("data/earth/E.bmp");
+	img_earth[15]=Draw_LoadImage("data/earth/F.bmp");
 
+	// FIXME: Earth back
 
+	// Stone Brick
+	img_stoneBrick=Draw_LoadImage("data/rock.bmp");
 
-	///////////////////////////////////////
-	//  Create the entity templates
+	// FIXME: Stone Brick back
 
-	ent=Entity_New();
-	ent->mass=-1.0f;
-	ent->flags=0;
-	//Entity_SetLight(ent,0.2f,0.2f,0.2f,1.0f);
-	Entity_SetLight(ent,0,0,0,1);
+	// Spiked Bush
+	img_spikedBush=Draw_LoadImage("data/spikedbush.bmp");
 
+	// FIXME: Lava Pit
 
-	ent_player=Entity_Copy(ent);
-	ent_player->type=Ent_Player;
-	ent_player->radius=16.0f;
-	ent_player->width=24;
-	ent_player->height=24;
-	ent_player->mass=30.0f;
-	ent_player->backFric_static=2.5f;
-	ent_player->backFric_dynamic=0.3f;
-	ent_player->flags=
-		EntityFlag_Collision|EntityFlag_Overlap|EntityFlag_Light;
-	Entity_SetLight(ent_player,0.4f,0.4f,0.4f,3*32.0f);
-	AnimPlay_SetImg(&ent_player->anim,img_player_down);
-	ent_player->proc=player_proc;
-	ent_player->collision=player_collision;
+	// FIXME: Fireball
 
+	// Flower
+	img_flower[0]=Draw_LoadImage("data/flower_left.bmp");
+	img_flower[1]=Draw_LoadImage("data/flower_right.bmp");
 
-	ent_barrel=Entity_Copy(ent);
-	ent_barrel->type=Ent_Barrel;
-	ent_barrel->flags=
-		EntityFlag_Collision|EntityFlag_Overlap;
-	ent_barrel->radius=16.0f;
-	ent_barrel->width=24;
-	ent_barrel->height=24;
-	ent_barrel->mass=25.0f;
-	ent_barrel->backFric_static=2.0f;
-	ent_barrel->backFric_dynamic=0.5f;
-	ent_barrel->proc=barrel_proc;
-	AnimPlay_SetImg(&ent_barrel->anim,img_barrel);
+	// Spike
+	img_spike[0]=Draw_LoadImage("data/spike_left.bmp");
+	img_spike[1]=Draw_LoadImage("data/spike_right.bmp");
 
+	// Carnivore Plant
+	img_carnivorePlant[0]=Draw_LoadImage("data/carnivoreplant_left.bmp");
+	img_carnivorePlant[1]=Draw_LoadImage("data/carnivoreplant_right.bmp");
 
-	ent_column=Entity_Copy(ent);
-	ent_column->type=Ent_Column;
-	//ent_column->flags=EntityFlag_BlockCollision;
-	ent_column->flags=EntityFlag_Collision;
-	ent_column->radius=12;
-	ent_column->width=24;
-	ent_column->height=24;
-	AnimPlay_SetImg(&ent_column->anim,img_column);
-	ent_column_faded=Entity_Copy(ent_column);
-	AnimPlay_SetImg(&ent_column_faded->anim,img_column_faded);
-	ent_rock=Entity_Copy(ent_column);
-	AnimPlay_SetImg(&ent_rock->anim,img_rock);
-	ent_rock->flags=EntityFlag_Collision;
-	ent_lamp=Entity_Copy(ent_rock);
-	AnimPlay_SetImg(&ent_lamp->anim,img_lamp);
-	ent_lamp->flags=
-		EntityFlag_Collision|EntityFlag_Light;
-	Entity_SetLight(ent_lamp,0.4f,0.4f,0.4f,5*32.0f);
+	// Bunny
+	img_bunny[0]=Draw_LoadImage("data/bunny_left.bmp");
+	img_bunny[1]=Draw_LoadImage("data/bunny_right.bmp");
 
+	// Spider
+	img_spider[0]=Draw_LoadImage("data/spider_left.bmp");
+	img_spider[1]=Draw_LoadImage("data/spider_right.bmp");
 
+	// FIXME: Guard
 
-	ent_floor=Entity_Copy(ent);
-	ent_floor->type=Ent_Floor;
-	ent_floor->zorder=-1;
-	ent_floor->flags=0;
-	AnimPlay_SetImg(&ent_floor->anim,img_floor);
-	ent_floor_left=Entity_Copy(ent_floor);
-	AnimPlay_SetImg(&ent_floor_left->anim,img_floor_left);
-	ent_floor_right=Entity_Copy(ent_floor);
-	AnimPlay_SetImg(&ent_floor_right->anim,img_floor_right);
-	ent_floor_center=Entity_Copy(ent_floor);
-	AnimPlay_SetImg(&ent_floor_center->anim,img_floor_center);
+	// FIXME: Elite Guard
 
-	ent_hole_spiked=Entity_Copy(ent);
-	ent_hole_spiked->type=Ent_Hole_Spiked;
-	ent_hole_spiked->zorder=-1;
-	ent_hole_spiked->flags=EntityFlag_Overlap;
-	ent_hole_spiked->radius=18;
-	AnimPlay_SetImg(&ent_hole_spiked->anim,img_hole_spiked);
-	ent_hole_spiked->overlap=hole_spiked_overlap;
+	// FIXEM: Axe
 
-	ent_hole_filled=Entity_Copy(ent);
-	ent_hole_filled->type=Ent_Hole_Filled;
-	ent_hole_filled->zorder=-1;
-	ent_hole_filled->flags=0;
-	AnimPlay_SetImg(&ent_hole_filled->anim,img_barrel2);
+	// FIXME: GoatMan
 
-	ent_hole_lava=Entity_Copy(ent);
-	ent_hole_lava->type=Ent_Hole_Lava;
-	ent_hole_lava->zorder=-1;
-	ent_hole_lava->flags=EntityFlag_Overlap|EntityFlag_Light;
-	ent_hole_lava->radius=18;
-	AnimPlay_SetAnim(&ent_hole_lava->anim,anim_hole_lava);
-	Entity_SetLight(ent_hole_lava,1.0f,0.0f,0.0f,4*32.0f);
-	ent_hole_lava->oncopy=hole_lava_oncopy;
-	ent_hole_lava->overlap=hole_lava_overlap;
+	// FIXME: Princess
 
 
-	ent_arrow_up=Entity_Copy(ent);
-	ent_arrow_up->type=Ent_Arrow;
-	//ent_arrow_up->flags=EntityFlag_Collision;
-	ent_arrow_up->flags=EntityFlag_Collision|EntityFlag_Light;
-	Entity_SetLight(ent_arrow_up,0.2f,0.2f,0.2f,2*32.0f);
-	ent_arrow_up->radius=4;
-	ent_arrow_up->mass=0.1f;
-	ent_arrow_up->collision=arrow_collision;
-	ent_arrow_up->proc=timeoutent_proc;
-	ent_arrow_up->A=120;
-	AnimPlay_SetImg(&ent_arrow_up->anim,img_arrow_up);
-	vec2_set(ent_arrow_up->vel,0,-16);
-	ent_arrow_down=Entity_Copy(ent_arrow_up);
-	AnimPlay_SetImg(&ent_arrow_down->anim,img_arrow_down);
-	vec2_set(ent_arrow_down->vel,0,16);
-	ent_arrow_left=Entity_Copy(ent_arrow_up);
-	AnimPlay_SetImg(&ent_arrow_left->anim,img_arrow_left);
-	vec2_set(ent_arrow_left->vel,-16,0);
-	ent_arrow_right=Entity_Copy(ent_arrow_up);
-	AnimPlay_SetImg(&ent_arrow_right->anim,img_arrow_right);
-	vec2_set(ent_arrow_right->vel,16,0);
+	/////////////////////////
+	// Initialize entity types.
+	//
 
+	ent_Player=Entity_New();
+	ent_Player->type=Ent_Player;
+	//ent_Player->flags=EntityFlag_Light;
+	//Entity_SetLight(ent_Player,.2,.2,.2,200);
+	ent_Player->flags=EntityFlag_Collision|EntityFlag_Overlap;
+	ent_Player->zorder=0;
+	AnimPlay_SetImg(&ent_Player->anim,img_player);
+	ent_Player->proc=player_proc;
+	ent_Player->mass=1.0f;
+	ent_Player->radius=12;
+	ent_Player->width=24;
+	ent_Player->height=24;
+	ent_Player->fric_static=0.0f;
+	ent_Player->fric_dynamic=0.2f;
 
-	ent_arrowshooter_up=Entity_Copy(ent);
-	ent_arrowshooter_up->type=Ent_ArrowShooter;
-	ent_arrowshooter_up->flags=EntityFlag_Collision;
-	ent_arrowshooter_up->radius=15;
-	ent_arrowshooter_up->oncopy=arrowshooter_oncopy;
-	ent_arrowshooter_up->proc=arrowshooter_proc;
-	AnimPlay_SetImg(&ent_arrowshooter_up->anim,img_arrowshooter_up);
-	ent_arrowshooter_up->child=ent_arrow_up;
-	ent_arrowshooter_down=Entity_Copy(ent_arrowshooter_up);
-	AnimPlay_SetImg(&ent_arrowshooter_down->anim,img_arrowshooter_down);
-	ent_arrowshooter_down->child=ent_arrow_down;
-	ent_arrowshooter_left=Entity_Copy(ent_arrowshooter_up);
-	AnimPlay_SetImg(&ent_arrowshooter_left->anim,img_arrowshooter_left);
-	ent_arrowshooter_left->child=ent_arrow_left;
-	ent_arrowshooter_right=Entity_Copy(ent_arrowshooter_up);
-	AnimPlay_SetImg(&ent_arrowshooter_right->anim,img_arrowshooter_right);
-	ent_arrowshooter_right->child=ent_arrow_right;
+	ent_Platform=Entity_New();
+	ent_Platform->type=Ent_Platform;
+	ent_Platform->flags=EntityFlag_PlatformCollision;
+	ent_Platform->zorder=-1;
+	AnimPlay_SetImg(&ent_Platform->anim,img_platform);
+	ent_Platform->mass=0.0f;
+	ent_Platform->radius=12;
+	ent_Platform->width=64;
+	ent_Platform->height=16;
+	ent_Platform->fric_static=0.0f;
+	ent_Platform->fric_dynamic=0.2f;
 
-
-	ent_savepoint=Entity_Copy(ent);
-	ent_savepoint->type=Ent_SavePoint;
-	ent_savepoint->sortYOffset=-5;
-	ent_savepoint->flags=EntityFlag_Overlap|EntityFlag_Light;
-	ent_savepoint->radius=20;
-	Entity_SetLight(ent_savepoint,0.0f,0.0f,0.5f,2*32.0f);
-	AnimPlay_SetImg(&ent_savepoint->anim,img_savepoint);
-	ent_savepoint->overlap=savepoint_overlap;
-	ent_savepoint->ondelete=savepoint_ondelete;
-
-
-	ent_exitpoint=Entity_Copy(ent);
-	ent_exitpoint->type=Ent_ExitPoint;
-	ent_exitpoint->flags=EntityFlag_Overlap|EntityFlag_Light;
-	Entity_SetLight(ent_exitpoint,0.5f,0.5f,0.5f,5*32.0f);
-	ent_exitpoint->radius=20;
-	AnimPlay_SetAnim(&ent_exitpoint->anim,anim_exitpoint);
-	ent_exitpoint->overlap=exitpoint_overlap;
-	ent_endpoint=Entity_Copy(ent_exitpoint);
-	AnimPlay_SetImg(&ent_endpoint->anim,img_endpoint);
-	ent_endpoint->overlap=endpoint_overlap;
-
-	ent_teleporter=Entity_Copy(ent);
-	ent_teleporter->zorder=0;
-	ent_teleporter->type=Ent_Teleporter;
-	ent_teleporter->flags=EntityFlag_Overlap|EntityFlag_Light;
-	Entity_SetLight(ent_teleporter,0.5f,0.5f,0.5f,5*32.0f);
-	ent_teleporter->radius=20;
-	AnimPlay_SetImg(&ent_teleporter->anim,img_savepoint);
-	ent_teleporter->overlap=teleporter_overlap;
-
-	ent_teleporter_dest=Entity_Copy(ent);
-	ent_teleporter_dest->zorder=0;
-	ent_teleporter_dest->type=Ent_Teleporter_Dest;
-	ent_teleporter_dest->flags=0;
-	AnimPlay_SetImg(&ent_teleporter_dest->anim,img_savepoint);
+	ent_Block=Entity_New();
+	ent_Block->type=Ent_Block;
+	ent_Block->flags=EntityFlag_BlockCollision;
+	ent_Block->zorder=-1;
+	AnimPlay_SetImg(&ent_Block->anim,img_block);
+	ent_Block->mass=0.0f;
+	ent_Block->radius=32;
+	ent_Block->width=64;
+	ent_Block->height=64;
+	ent_Block->fric_static=0.0f;
+	ent_Block->fric_dynamic=0.2f;
 
 
 
 
+	// Magik Ball
+	ent_MagikBall=Entity_New();
+	ent_MagikBall->type=Ent_Spike;
+	ent_MagikBall->flags=EntityFlag_Collision;
+	ent_MagikBall->zorder=0;
+	AnimPlay_SetImg(&ent_MagikBall->anim,img_magikball);
+	ent_MagikBall->mass=1.0f;
+	ent_MagikBall->radius=5;
+	ent_MagikBall->width=10;
+	ent_MagikBall->height=10;
+	ent_MagikBall->collision=magikball_collision;
 
-	ent_fire=Entity_Copy(ent);
-	ent_fire->type=Ent_Effect;
-	ent_fire->flags=EntityFlag_Light;
-	Entity_SetLight(ent_fire,1.0f,0.0f,0.0f,3*32.0f);
-	AnimPlay_SetAnim(&ent_fire->anim,anim_fire);
-	ent_fire->proc=timeoutent_proc;
-	ent_fire->A=15;
-	ent_fire->sortYOffset=1;
+	// Wizard
+	ent_Wizard=Entity_New();
+	ent_Wizard->type=Ent_Wizard;
+	ent_Wizard->flags=EntityFlag_Collision|EntityFlag_Overlap;
+	ent_Wizard->zorder=0;
+	AnimPlay_SetImg(&ent_Wizard->anim,img_wizard[0]);
+	ent_Wizard->proc=wizard_proc;
+	ent_Wizard->mass=1.0f;
+	ent_Wizard->radius=24;
+	ent_Wizard->width=24;
+	ent_Wizard->height=58;
+	ent_Wizard->fric_static=0.0f;
+	ent_Wizard->fric_dynamic=0.2f;
+	ent_Wizard->child=ent_MagikBall;
 
-	ent_player_broken=Entity_Copy(ent);
-	ent_player_broken->type=Ent_Effect;
-	ent_player_broken->flags=0;
-	AnimPlay_SetImg(&ent_player_broken->anim,img_player_broken);
+
+
+
+	// Earth
+	ent_Earth=Entity_New();
+	ent_Earth->type=Ent_Earth;
+	ent_Earth->flags=EntityFlag_BlockCollision;
+	ent_Earth->zorder=-2;
+	AnimPlay_SetImg(&ent_Earth->anim,img_earth[0]);
+	ent_Earth->mass=0.0f;
+	ent_Earth->radius=16;
+	ent_Earth->width=32;
+	ent_Earth->height=32;
+	ent_Earth->fric_static=0.0f;
+	ent_Earth->fric_dynamic=0.2f;
+
+
+	// FIXME: Earth back
+
+	// Stone Bricks
+	ent_StoneBrick=Entity_New();
+	ent_StoneBrick->type=Ent_StoneBrick;
+	ent_StoneBrick->flags=EntityFlag_BlockCollision;
+	ent_StoneBrick->zorder=-2;
+	AnimPlay_SetImg(&ent_StoneBrick->anim,img_stoneBrick);
+	ent_StoneBrick->mass=0.0f;
+	ent_StoneBrick->radius=16;
+	ent_StoneBrick->width=32;
+	ent_StoneBrick->height=32;
+	ent_StoneBrick->fric_static=0.0f;
+	ent_StoneBrick->fric_dynamic=0.2f;
+
+	// FIXME: Stone Bricks back
+
+	// Spiked Bush
+	ent_SpikedBush=Entity_New();
+	ent_SpikedBush->type=Ent_SpikedBush;
+	ent_SpikedBush->flags=EntityFlag_Overlap;
+	vec2_set(ent_SpikedBush->pos,0,8);
+	ent_SpikedBush->zorder=1;
+	AnimPlay_SetImg(&ent_SpikedBush->anim,img_spikedBush);
+	ent_SpikedBush->mass=0.0f;
+	ent_SpikedBush->radius=24;
+	ent_SpikedBush->overlap=spikedentity_overlap;
+
+	// FIXME: Fireball
+
+
+	// FIXME: Lava Pit
+
+
+	// Spikes
+	ent_Spike[0]=Entity_New();
+	ent_Spike[0]->type=Ent_Spike;
+	ent_Spike[0]->flags=EntityFlag_Collision;
+	ent_Spike[0]->zorder=0;
+	AnimPlay_SetImg(&ent_Spike[0]->anim,img_spike[0]);
+	vec2_set(ent_Spike[0]->pos,0,-16);
+	ent_Spike[0]->mass=1.0f;
+	ent_Spike[0]->radius=5;
+	ent_Spike[0]->width=10;
+	ent_Spike[0]->height=10;
+	ent_Spike[0]->collision=spike_collision;
+	vec2_set(ent_Spike[0]->vel,-3,2);
+	ent_Spike[1]=Entity_Copy(ent_Spike[0]);
+	AnimPlay_SetImg(&ent_Spike[1]->anim,img_spike[1]);
+	vec2_set(ent_Spike[1]->vel,3,2);
+
+
+	// Flower
+	ent_Flower[0]=Entity_New();
+	ent_Flower[0]->type=Ent_Flower;
+	ent_Flower[0]->flags=EntityFlag_Collision|EntityFlag_Overlap;
+	ent_Flower[0]->zorder=1;
+	AnimPlay_SetImg(&ent_Flower[0]->anim,img_flower[0]);
+	ent_Flower[0]->mass=0.0f;
+	ent_Flower[0]->radius=16;
+	ent_Flower[0]->overlap=spikedentity_overlap;
+	ent_Flower[0]->oncopy=flower_oncopy;
+	ent_Flower[0]->proc=flower_proc;
+	ent_Flower[0]->B=60;
+	ent_Flower[0]->C=60;
+	ent_Flower[0]->child=ent_Spike[0];
+	ent_Flower[0]->D=0;
+	ent_Flower[1]=Entity_Copy(ent_Flower[0]);
+	AnimPlay_SetImg(&ent_Flower[1]->anim,img_flower[1]);
+	ent_Flower[1]->child=ent_Spike[1];
+	ent_Flower[1]->D=1;
+
+
+	// Carnivore Plant
+	ent_CarnivorePlant[0]=Entity_New();
+	ent_CarnivorePlant[0]->type=Ent_CarnivorePlant;
+	ent_CarnivorePlant[0]->flags=0;
+	ent_CarnivorePlant[0]->zorder=1;
+	AnimPlay_SetImg(&ent_CarnivorePlant[0]->anim,img_carnivorePlant[0]);
+	ent_CarnivorePlant[0]->mass=0.0f;
+	ent_CarnivorePlant[0]->radius=16;
+	ent_CarnivorePlant[0]->child=ent_Spike[0];
+	ent_CarnivorePlant[1]=Entity_Copy(ent_CarnivorePlant[0]);
+	AnimPlay_SetImg(&ent_CarnivorePlant[1]->anim,img_carnivorePlant[1]);
+
+
+	// Bunny
+	ent_Bunny=Entity_New();
+	ent_Bunny->type=Ent_Bunny;
+	ent_Bunny->flags=EntityFlag_Collision;
+	ent_Bunny->zorder=0;
+	AnimPlay_SetImg(&ent_Bunny->anim,img_bunny[0]);
+	ent_Bunny->proc=bunny_proc;
+	ent_Bunny->collision=bunny_collision;
+	ent_Bunny->mass=1.0f;
+	ent_Bunny->radius=12;
+	ent_Bunny->width=24;
+	ent_Bunny->height=24;
+	ent_Bunny->fric_static=0.0f;
+	ent_Bunny->fric_dynamic=0.2f;
+	ent_Bunny->A=0;
+	ent_Bunny->B=0;
+	ent_Bunny->C=60;
+
+
+	// Spider
+	ent_Spider=Entity_New();
+	ent_Spider->type=Ent_Spider;
+	ent_Spider->flags=EntityFlag_Collision;
+	ent_Spider->zorder=0;
+	AnimPlay_SetImg(&ent_Spider->anim,img_spider[0]);
+	ent_Spider->proc=spider_proc;
+	ent_Spider->collision=spider_collision;
+	ent_Spider->mass=1.0f;
+	ent_Spider->radius=12;
+	ent_Spider->width=24;
+	ent_Spider->height=24;
+	ent_Spider->fric_static=0.0f;
+	ent_Spider->fric_dynamic=0.2f;
+	ent_Spider->A=0;
+	ent_Spider->B=0;
+	ent_Spider->C=60;
+
+	// FIXME: Guard
+
+	// FIXME: Elite Guard
+
+	// FIXEM: Axe
+
+	// FIXME: GoatMan
+
+	// FIXME: Princess
+
 
 }
-
 

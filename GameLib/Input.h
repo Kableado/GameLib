@@ -33,10 +33,6 @@ typedef enum {
 	InputKey_Right,
 	InputKey_Jump,
 	InputKey_Continue,
-	InputKey_Exit,
-
-	InputKey_DumpProfiling,
-
 	InputKey_Max
 } InputKey;
 
@@ -64,12 +60,6 @@ typedef enum {
 //
 // Reports a the status of a key.
 InputKeyStatus Input_GetKey(InputKey key);
-
-
-/////////////////////////////
-// Input_SetPointerDown
-//
-void Input_SetPointerDown(int pointerDown);
 
 
 /////////////////////////////

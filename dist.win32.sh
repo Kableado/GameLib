@@ -1,12 +1,11 @@
 #!/bin/sh
 
-DIRNAME="Lonely_Ruins"
+DIRNAME="TestGame"
 
 DATE=$(date +%Y%m%d)
 ZIPNAME="$DIRNAME.$DATE.zip"
 
-make -f Makefile.win32 clean
-make -f Makefile.win32
+make -f Makefile
 
 mkdir $DIRNAME
 cd $DIRNAME

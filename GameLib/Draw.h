@@ -12,6 +12,13 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps);
 
 
 /////////////////////////////
+// Draw_Loop
+//
+// Loops updating the game window.
+void Draw_Loop(int (*proc)(),void (*draw)());
+
+
+/////////////////////////////
 // Draw_Clean
 //
 // Cleans the game window.
@@ -21,48 +28,11 @@ void Draw_Clean(
 	unsigned char b);
 
 
-/////////////////////////////
-// Draw_Loop
-//
-// Loops updating the game window.
-void Draw_Loop(
-	void (*proc)(void *data),
-	void (*draw)(void *data,float f),
-	void *data);
-
-
-/////////////////////////////
-// Draw_BreakLoop
-//
-// Breaks the drawing loop
-void Draw_BreakLoop();
-
-
-/////////////////////////////
-// Draw_OverrideExit
-//
-// Overrides the default exit mechanism
-void Draw_OverrideExit(int override);
-
-
-/////////////////////////////
-// Draw_Flush
-//
-// Performs all the queued draw actions.
-void Draw_Flush();
-
-
 ////////////////////////////////////////////////
 // DrawImg //
 /////////////
 // Reference to a image.
 typedef void *DrawImg;
-
-
-/////////////////////////////
-// Draw_CreateImage
-//
-DrawImg Draw_CreateImage(int w,int h);
 
 
 /////////////////////////////

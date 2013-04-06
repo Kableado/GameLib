@@ -1,51 +1,70 @@
-// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2012 Valeriano Alfonso Rodriguez (Kableado)
 
 #ifndef _GAMEENTS_H_
 #define _GAMEENTS_H_
 
-void GameEnts_Init();
+
 
 enum {
 	Ent_Player,
-	Ent_Barrel,
-	Ent_Column,
-	Ent_Floor,
-	Ent_Hole_Spiked,
-	Ent_Hole_Filled,
-	Ent_Hole_Lava,
-	Ent_ArrowShooter,
-	Ent_Arrow,
-	Ent_SavePoint,
-	Ent_ExitPoint,
-	Ent_Teleporter,
-	Ent_Teleporter_Dest,
-	Ent_Effect
-} EntityType;
-extern Entity ent_player;
-extern Entity ent_barrel;
-extern Entity ent_column;
-extern Entity ent_column_faded;
-extern Entity ent_rock;
-extern Entity ent_lamp;
-extern Entity ent_floor;
-extern Entity ent_floor_right;
-extern Entity ent_floor_left;
-extern Entity ent_floor_center;
-extern Entity ent_hole_spiked;
-extern Entity ent_hole_filled;
-extern Entity ent_hole_lava;
-extern Entity ent_arrowshooter_up;
-extern Entity ent_arrowshooter_down;
-extern Entity ent_arrowshooter_left;
-extern Entity ent_arrowshooter_right;
-extern Entity ent_arrow_up;
-extern Entity ent_arrow_down;
-extern Entity ent_arrow_left;
-extern Entity ent_arrow_right;
-extern Entity ent_exitpoint;
-extern Entity ent_endpoint;
-extern Entity ent_savepoint;
-extern Entity ent_teleporter;
-extern Entity ent_teleporter_dest;
+	Ent_Platform,
+	Ent_Block,
 
-#endif
+	Ent_Wizard,
+	Ent_MagikBall,
+	Ent_Earth,
+	Ent_EarthBack,
+	Ent_StoneBrick,
+	Ent_StoneBrickBack,
+	Ent_SpikedBush,
+	Ent_LavaPit,
+	Ent_Fireball,
+	Ent_Flower,
+	Ent_Spike,
+	Ent_CarnivorePlant,
+	Ent_Bunny,
+	Ent_Spider,
+	Ent_Guard,
+	Ent_EliteGuard,
+	Ent_Axe,
+	Ent_GoatMan,
+	Ent_Princess
+} EntityType;
+
+extern Entity *ent_Player;
+extern Entity *ent_Platform;
+extern Entity *ent_Block;
+
+extern Entity *ent_Wizard;
+extern Entity *ent_MagikBall;
+extern Entity *ent_Earth;
+extern Entity *ent_EarthBack;
+extern Entity *ent_StoneBrick;
+extern Entity *ent_StoneBrickBack;
+extern Entity *ent_SpikedBush;
+extern Entity *ent_LavaPit;
+extern Entity *ent_Fireball;
+extern Entity *ent_Spike[2];
+extern Entity *ent_Flower[2];
+extern Entity *ent_CarnivorePlant[2];
+extern Entity *ent_Bunny;
+extern Entity *ent_Spider;
+extern Entity *ent_Axe;
+extern Entity *ent_Guard;
+extern Entity *ent_EliteGuard;
+extern Entity *ent_GoatMan;
+extern Entity *ent_Princess;
+
+
+int EntityApplyGravity(Entity *e);
+
+void EntEarth_Init(Entity *ent,int up,int down,int left,int right);
+
+void EntStoneBrick_Init(Entity *ent,int up,int down,int left,int right);
+
+
+void GameEnts_Init();
+
+
+
+#endif _GAMEENTS_H_

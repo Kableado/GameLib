@@ -23,21 +23,21 @@ int GameLib_Init(int w,int h,char *title,int pfps,int fps);
 // GameLib_AddEntity
 //
 // Adds an entity to the game.
-void GameLib_AddEntity(Entity e);
+void GameLib_AddEntity(Entity *e);
 
 
 /////////////////////////////
 // GameLib_UnrefEntity
 //
 // removes the reference to the entity.
-int GameLib_UnrefEntity(Entity e);
+int GameLib_UnrefEntity(Entity *e);
 
 
 /////////////////////////////
 // GameLib_DelEntity
 //
 // Adds an entity to the game.
-int GameLib_DelEntity(Entity e);
+int GameLib_DelEntity(Entity *e);
 
 
 /////////////////////////////
@@ -47,8 +47,15 @@ int GameLib_DelEntity(Entity e);
 void GameLib_Loop(
 	void (*gameproc)(),
 	void (*gamepostproc)(),
-	void (*gamepredraw)(float f),
-	void (*gamedraw)(float f));
+	void (*gamepredraw)(),
+	void (*gamedraw)());
+
+
+/////////////////////////////
+// GameLib_BreakLoop
+//
+// Breaks the game loop.
+void GameLib_BreakLoop();
 
 
 /////////////////////////////
@@ -81,17 +88,10 @@ void GameLib_DelEnts();
 
 
 /////////////////////////////
-// GameLib_ForEachEnt
+// GameLib_ForEachEn
 //
 // Iterates every entity.
-void GameLib_ForEachEnt(int (*func)(Entity ent));
-
-
-/////////////////////////////
-// GameLib_SearchEnt
-//
-// Searches throught the entities.
-Entity GameLib_SearchEnt(int (*func)(Entity ent,void *d),void *d);
+void GameLib_ForEachEnt(int (*func)(Entity *ent));
 
 
 /////////////////////////////
@@ -112,7 +112,7 @@ void GameLib_Iluminate();
 // GameLib_EntitySetLight
 //
 //
-void GameLib_EntitySetLight(Entity e,float r,float g,float b,float rad);
+void GameLib_EntitySetLight(Entity *e,float r,float g,float b,float rad);
 
 
 /////////////////////////////

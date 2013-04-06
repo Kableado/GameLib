@@ -1,8 +1,6 @@
 // Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
 
 #include <math.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include "Util.h"
 
@@ -15,60 +13,6 @@ float vec2_norm(vec2 v){
 	len=vec2_len(v);
 	vec2_scale(v,v,1.0f/len);
 	return(len);
-}
-
-void vec2_orthogonalize4(vec2 v) {
-	if (fabs(v[0]) > fabs(v[1])) {
-		if (v[0] >= 0) {
-			v[0] = 1.0f;
-			v[1] = 0.0f;
-		} else {
-			v[0] = -1.0f;
-			v[1] = 0.0f;
-		}
-	} else {
-		if (v[1] >= 0) {
-			v[1] = 1.0f;
-			v[0] = 0.0f;
-		} else {
-			v[1] = -1.0f;
-			v[0] = 0.0f;
-		}
-	}
-}
-
-void vec2_orthogonalize8(vec2 v) {
-	float diff = fabs(fabs(v[0]) - fabs(v[1]));
-	if (diff > 0.2f) {
-		if (fabs(v[0]) > fabs(v[1])) {
-			if (v[0] >= 0) {
-				v[0] = 1.0f;
-				v[1] = 0.0f;
-			} else {
-				v[0] = -1.0f;
-				v[1] = 0.0f;
-			}
-		} else {
-			if (v[1] >= 0) {
-				v[1] = 1.0f;
-				v[0] = 0.0f;
-			} else {
-				v[1] = -1.0f;
-				v[0] = 0.0f;
-			}
-		}
-	} else {
-		if (v[0] > 0.0f) {
-			v[0] = 0.707f;
-		} else {
-			v[0] = -0.707f;
-		}
-		if (v[1] > 0.0f) {
-			v[1] = 0.707f;
-		} else {
-			v[1] = -0.707f;
-		}
-	}
 }
 
 
@@ -176,9 +120,10 @@ int Colision_CircleCircle(
 	vec2_scale(cen_a,cir2,invrads);
 	if(Intersec_RayUnitCircle(orig_a,vel_a,cen_a,t)){
 		// Calculate n
-		vec2_scaleadd(temp,cir1,vel,*t);
-		vec2_minus(n,temp,cir2);
-		vec2_scale(n,n,invrads);
+		vec2_scale(temp,vel,*t);
+		vec2_plus(temp,cir1,temp);
+		vec2_minus(temp,cir2,temp);
+		vec2_scale(n,temp,1.0f/rads);
 		return(1);
 	}
 	return(0);
@@ -243,6 +188,7 @@ int absmod(int v,int d){
 		return(v%d);
 	}
 }
+
 float fabsmod(float v,int d){
 	if(v<0){
 		v+=d*((((int)(v/d))*(-1))+1);
@@ -253,30 +199,5 @@ float fabsmod(float v,int d){
 	}
 }
 
-
-/////////////////////////////
-// IsBigEndian
-//
-int IsBigEndian(){
-	union{
-		unsigned int i;
-		char c[4];
-	} bint={0x01020304};
-	return bint.c[0]==1;
-}
-
-
-/////////////////////////////
-// EndsWith
-//
-int EndsWith(char *str, char *suffix){
-    if (!str || !suffix)
-        return 0;
-    int lenStr = strlen(str);
-    int lenSuffix = strlen(suffix);
-    if (lenSuffix > lenStr)
-        return 0;
-    return strncmp(str+lenStr-lenSuffix, suffix, lenSuffix)==0;
-}
 
 

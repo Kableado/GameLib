@@ -2,20 +2,14 @@
 
 #include <math.h>
 #include <SDL/SDL.h>
-#ifdef EMSCRIPTEN
-#define SDL_GetKeyState SDL_GetKeyboardState
-#endif
 
 #include "Util.h"
 #include "Input.h"
 
 
-
 // Globals
 InputKeyStatus _keys[InputKey_Max];
-int _pointerDown=0;
 SDL_Joystick *_joy;
-
 
 /////////////////////////////
 // Input_Init
@@ -62,10 +56,8 @@ int Input_Init(){
 void Input_Frame(){
 	Uint8* keys;
 
-	// Get keyboard state
-	keys=(Uint8 *)SDL_GetKeyState(NULL);
-
 	// Process Keys
+	keys=SDL_GetKeyState(NULL);
 	Input_SetKey(InputKey_Action1,keys[SDLK_z]);
 	Input_SetKey(InputKey_Action2,keys[SDLK_x]);
 	Input_SetKey(InputKey_Up,keys[SDLK_UP]);
@@ -73,9 +65,7 @@ void Input_Frame(){
 	Input_SetKey(InputKey_Left,keys[SDLK_LEFT]);
 	Input_SetKey(InputKey_Right,keys[SDLK_RIGHT]);
 	Input_SetKey(InputKey_Jump,keys[SDLK_SPACE]);
-	Input_SetKey(InputKey_Continue,keys[SDLK_RETURN]|keys[SDLK_KP_ENTER]|_pointerDown);
-
-	Input_SetKey(InputKey_DumpProfiling,keys[SDLK_p]);
+	Input_SetKey(InputKey_Continue,keys[SDLK_RETURN]|keys[SDLK_KP_ENTER]);
 }
 
 
@@ -102,14 +92,6 @@ void Input_SetKey(InputKey key,int status){
 // Reports a the status of a key.
 InputKeyStatus Input_GetKey(InputKey key){
 	return(_keys[key]);
-}
-
-
-/////////////////////////////
-// Input_SetPointerDown
-//
-void Input_SetPointerDown(int pointerDown){
-	_pointerDown=pointerDown;
 }
 
 

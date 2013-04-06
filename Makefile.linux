@@ -1,10 +1,7 @@
-CC=gcc
-LAUNCHER=
-RM=rm -rf
-
 LIBS= -lSDL -lpthread -L/usr/X11R6/lib -L/usr/lib -lm -lGL -lX11
 CFLAGS= -Wall -g  -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/
-LDFLAGS=
+CC=gcc
+RM=rm -rf
 
 RESULT=game
 BUILDDIR=build-linux

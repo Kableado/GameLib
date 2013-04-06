@@ -1,10 +1,8 @@
-// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
-
+// Copyright (C) 2012 Valeriano Alfonso Rodriguez (Kableado)
 #ifndef _GAMEMAP_H_
 #define _GAMEMAP_H_
 
-int GameMap_CreateLevel(int level,int point);
+int GameMap_LoadLevel(char *filename,int res);
 
 
-#endif
-
+#endif _GAMEMAP_H_

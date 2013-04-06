@@ -1,4 +1,4 @@
-// Copyright (C) 2011-2014 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,12 +17,12 @@
 // Entity_New
 //
 //
-Entity _free_entity=NULL;
-Entity Entity_New(){
-	Entity e;
+Entity *_free_entity=NULL;
+Entity *Entity_New(){
+	Entity *e;
 
 	if(!_free_entity){
-		e=malloc(sizeof(TEntity));
+		e=malloc(sizeof(Entity));
 	}else{
 		e=_free_entity;
 		_free_entity=e->next;
@@ -30,11 +30,9 @@ Entity Entity_New(){
 
 	e->base=NULL;
 	e->type=0;
-	vec2_set(e->pos0,0.0f,0.0f);
 	vec2_set(e->pos,0.0f,0.0f);
 	e->flags=EntityFlag_Collision|EntityFlag_Overlap;
 	e->zorder=1;
-	e->sortYOffset=0;
 
 	vec2_set(e->dir,0.0f,0.0f);
 
@@ -77,7 +75,7 @@ Entity Entity_New(){
 // Entity_Destroy
 //
 //
-void Entity_Destroy(Entity e){
+void Entity_Destroy(Entity *e){
 	if(e->ondelete){
 		e->ondelete(e);
 	}
@@ -90,8 +88,8 @@ void Entity_Destroy(Entity e){
 // Entity_Copy
 //
 //
-Entity Entity_Copy(Entity e){
-	Entity n;
+Entity *Entity_Copy(Entity *e){
+	Entity *n;
 
 	n=Entity_New();
 
@@ -100,7 +98,6 @@ Entity Entity_Copy(Entity e){
 	vec2_set(n->pos,e->pos[0],e->pos[1]);
 	n->flags=e->flags;
 	n->zorder=e->zorder;
-	n->sortYOffset=e->sortYOffset;
 
 	vec2_set(n->vel,e->vel[0],e->vel[1]);
 	n->radius=e->radius;
@@ -136,8 +133,6 @@ Entity Entity_Copy(Entity e){
 	n->D=e->D;
 	n->child=e->child;
 
-	Entity_CalcBBox(n);
-
 	// Call the copy event
 	if(n->oncopy){
 		n->oncopy(n);
@@ -148,66 +143,21 @@ Entity Entity_Copy(Entity e){
 
 
 /////////////////////////////
-// Entity_CalcBBox
-//
-//
-#define BBox_ExtraMargin 10
-#define max(a,b) ((a)>(b)?(a):(b))
-void Entity_CalcBBox(Entity e){
-	float hHeight=(max(e->height,e->radius)/2)+BBox_ExtraMargin;
-	float hWidth=(max(e->width,e->radius)/2)+BBox_ExtraMargin;
-	if(e->vel[0]>0){
-		e->maxX=e->pos[0]+e->vel[0]+hWidth;
-		e->minX=e->pos[0]-hWidth;
-	}else{
-		e->minX=(e->pos[0]+e->vel[0])-hWidth;
-		e->maxX=e->pos[0]+hWidth;
-	}
-	if(e->vel[1]>0){
-		e->maxY=e->pos[1]+e->vel[1]+hHeight;
-		e->minY=e->pos[1]-hHeight;
-	}else{
-		e->minY=(e->pos[1]+e->vel[1])-hHeight;
-		e->maxY=e->pos[1]+hHeight;
-	}
-}
-
-
-/////////////////////////////
-// Entity_BBoxIntersect
-//
-//
-int Entity_BBoxIntersect(Entity ent1,Entity ent2){
-	if( ent1->maxX>=ent2->minX && ent1->minX<=ent2->maxX &&
-		ent1->maxY>=ent2->minY && ent1->minY<=ent2->maxY )
-	{
-		return(1);
-	}
-	return(0);
-}
-
-
-/////////////////////////////
 // Entity_Draw
 //
 //
-void Entity_Draw(Entity e,int x,int y,float f){
-	vec2 fPos;
+void Entity_Draw(Entity *e,int x,int y){
 	Draw_SetColor(e->color[0],e->color[1],e->color[2],e->color[3]);
-	if(e->flags&EntityFlag_UpdatedPos){
-		vec2_interpol(fPos,e->pos0,e->pos,f);
-		AnimPlay_Draw(&e->anim,fPos[0]+x,fPos[1]+y);
-	}else{
-		AnimPlay_Draw(&e->anim,e->pos[0]+x,e->pos[1]+y);
-	}
+	AnimPlay_Draw(&e->anim,e->pos[0]+x,e->pos[1]+y);
 }
+
 
 
 /////////////////////////////
 // Entity_IsVisible
 //
 //
-int Entity_IsVisible(Entity e,int x,int y,int w,int h){
+int Entity_IsVisible(Entity *e,int x,int y,int w,int h){
 	int xmax,xmin;
 	int ymax,ymin;
 	int ih,iw;
@@ -235,7 +185,7 @@ int Entity_IsVisible(Entity e,int x,int y,int w,int h){
 // Entity_Process
 //
 //
-void Entity_Process(Entity b,int ft){
+void Entity_Process(Entity *b,int ft){
 	b->flags&=~EntityFlag_UpdatedPos;
 
 	// Launch method
@@ -249,10 +199,8 @@ void Entity_Process(Entity b,int ft){
 // Entity_PostProcess
 //
 //
-void Entity_PostProcess(Entity e,int ft){
+void Entity_PostProcess(Entity *e,int ft){
 	float qlen,len;
-
-	vec2_copy(e->pos0,e->pos);
 
 	// Determine if there is movement
 	qlen=vec2_dot(e->vel,e->vel);
@@ -275,8 +223,6 @@ void Entity_PostProcess(Entity e,int ft){
 		// Mark the update of the position.
 		vec2_copy(e->oldpos,e->pos);
 		e->flags|=EntityFlag_UpdatedPos;
-
-		Entity_CalcBBox(e);
 	}
 
 	// Launch method
@@ -290,122 +236,130 @@ void Entity_PostProcess(Entity e,int ft){
 
 
 /////////////////////////////
-// CollisionInfo_New
+// Entity_CollisionResponseClircle
 //
-//
-CollisionInfo _free_collInfo=NULL;
-CollisionInfo CollisionInfo_New(int responseType,Entity ent1,Entity ent2,float t,vec2 n,int applyFriction){
-	CollisionInfo collInfo;
-
-	if(!_free_collInfo){
-		collInfo=malloc(sizeof(TCollisionInfo));
-	}else{
-		collInfo=_free_collInfo;
-		_free_collInfo=collInfo->next;
-	}
-	collInfo->next=NULL;
-
-	collInfo->responseType=responseType;
-	collInfo->ent1=ent1;
-	collInfo->ent2=ent2;
-	collInfo->t=t;
-	vec2_copy(collInfo->n,n);
-	collInfo->applyFriction=applyFriction;
-
-	return collInfo;
-}
-
-
-/////////////////////////////
-// CollisionInfo_Destroy
-//
-//
-void CollisionInfo_Destroy(CollisionInfo *collInfoRef){
-	if(collInfoRef==NULL || collInfoRef[0]==NULL){return;}
-
-	CollisionInfo collInfo=collInfoRef[0];
-	CollisionInfo nextCollInfo;
-	while(collInfo!=NULL){
-		nextCollInfo=collInfo->next;
-		collInfo->next=_free_collInfo;
-		_free_collInfo=collInfo;
-		collInfo=nextCollInfo;
-	}
-	collInfoRef[0]=NULL;
-}
-
-
-/////////////////////////////
-// CollisionInfo_Add
-//
-//
-void CollisionInfo_Add(CollisionInfo *collInfoRef,
-	int responseType,Entity ent1,Entity ent2,float t,vec2 n,int applyFriction)
+// Normal response to a collision between circles.
+void Entity_CollisionResponseCircle(
+	Entity *b1,Entity *b2,float t,vec2 n)
 {
-	if(collInfoRef==NULL){return;}
-	CollisionInfo prevCollInfo=NULL;
-	CollisionInfo collInfo=collInfoRef[0];
-	CollisionInfo newCollInfo=CollisionInfo_New(responseType,ent1,ent2,t,n,applyFriction);
+	float moment;
+	vec2 temp;
+	float elast;
 
-	while(collInfo!=NULL && collInfo->t<t){
-		prevCollInfo=collInfo;
-		collInfo=collInfo->next;
-	}
-	if(prevCollInfo==NULL){
-		collInfoRef[0]=newCollInfo;
+	if(b1->mass>0.0f && b2->mass>0.0f){
+		// Calculate elasticity
+		elast=(b1->mass*b1->elast+b2->mass*b2->elast)/
+			(b1->mass+b2->mass);
+
+		// Collision between two massed balls
+		moment=((1.0f+elast)*b1->mass*b2->mass*
+					(fabs(vec2_dot(b1->vel,n))+fabs(vec2_dot(b2->vel,n))))
+				/(b1->mass+b2->mass);
+		vec2_scale(temp,n,moment/b1->mass);
+		vec2_minus(b1->vel,b1->vel,temp);
+		vec2_scale(temp,n,moment/b2->mass);
+		vec2_plus(b2->vel,b2->vel,temp);
+	}else
+	if(b1->mass>0.0f && b2->mass<=0.0f){
+		// Collision between a massed ball and a fixed ball
+		moment=(1.0f+b1->elast)*
+					(vec2_dot(b1->vel,n));
+		vec2_scale(temp,n,moment);
+		vec2_minus(b1->vel,b1->vel,temp);
+	}else
+	if(b1->mass<=0.0f && b2->mass>0.0f){
+		// Collision between a massed ball and a fixed ball
+		// (imposible, but better safe)
+		moment=(1.0f+b2->elast)*
+					(vec2_dot(b2->vel,n));
+		vec2_scale(temp,n,moment);
+		vec2_plus(b2->vel,b2->vel,temp);
 	}else{
-		prevCollInfo->next=newCollInfo;
+		// Collision between 2 fixed balls
+		// (imposible, but better safe)
+		vec2_set(b1->vel,0,0);
+		vec2_set(b2->vel,0,0);
 	}
-	newCollInfo->next=collInfo;
 }
 
 
 /////////////////////////////
-// CollisionInfo_CheckRepetition
+// Entity_CollisionResponseLine
 //
-//
-int CollisionInfo_CheckRepetition(CollisionInfo collInfo,Entity ent1,Entity ent2)
+// Normal response to a collision with a line.
+void Entity_CollisionResponseLine(
+	Entity *ent,Entity *ent2,float t,vec2 norm,int applyFriction)
 {
-	while(collInfo!=NULL){
-		if((collInfo->ent1==ent1 && collInfo->ent2==ent2) ||
-			(collInfo->ent1==ent2 && collInfo->ent2==ent1))
-		{
-			return(1);
+	vec2 pos2,vel2,velFric,intersection;
+	float dist,fric_static,fric_dynamic,fricLen;
+
+	// Calculate friction
+	fric_static=(ent->fric_static+ent2->fric_static)/2;
+	fric_dynamic=(ent->fric_dynamic+ent2->fric_dynamic)/2;
+
+	// Calculate end position
+	vec2_scale(vel2,ent->vel,1.0f-t);
+	dist=-vec2_dot(norm,vel2);
+	vec2_plus(pos2,ent->pos,ent->vel);
+	vec2_scaleadd(pos2,pos2,norm,dist);
+
+	// Calculate intersection
+	vec2_scaleadd(intersection,ent->pos,ent->vel,t);
+
+	if(applyFriction){
+		// Apply friction
+		vec2_minus(velFric,pos2,intersection);
+		fricLen=sqrtf(vec2_dot(velFric,velFric));
+		if(fricLen<fric_static){
+			// Apply static friction
+			vec2_copy(pos2,intersection);
+		}else{
+			// Apply dynamic friction
+			if(fricLen>0.0f){
+				vec2_scaleadd(pos2,intersection,velFric,
+					1.0f-(fric_dynamic+(fric_static/fricLen)));
+			}else{
+				vec2_scaleadd(pos2,intersection,velFric,
+					1.0f-fric_dynamic);
+			}
 		}
-		collInfo=collInfo->next;
 	}
-	return(0);
+
+	// Apply to velocity
+	vec2_scaleadd(pos2,pos2,norm,0.1f);
+	vec2_minus(ent->vel,pos2,ent->pos);
 }
 
 
 /////////////////////////////
-// Entity_CheckCollisions
+// Entity_Collide
 //
 //
-int Entity_CheckCollision(Entity ent1,Entity ent2,CollisionInfo *collInfoRef){
+int Entity_Collide(Entity *b1,Entity *b2){
 	float t;
 	vec2 n,p;
 	vec2 vel;
-	int flags=ent1->flags|ent2->flags;
+	int flags=b1->flags|b2->flags;
 
 	if(flags&EntityFlag_Platform && !(flags&EntityFlag_Block)){
 		// One of the entities is a platform and none is a block
-		Entity ent,ent_plat;
+		Entity *ent,*ent_plat;
 		float plat_width;
 		vec2 p;
 
 		// Decide who is the platform and who is the ent
-		if(ent1->mass<=0.0f && ent2->mass>0.0f){
-			ent=ent2;
-			ent_plat=ent1;
+		if(b1->mass<=0.0f && b2->mass>0.0f){
+			ent=b2;
+			ent_plat=b1;
 		}else
-		if(ent2->mass<=0.0f && ent1->mass>0.0f){
-			ent=ent1;
-			ent_plat=ent2;
+		if(b2->mass<=0.0f && b1->mass>0.0f){
+			ent=b1;
+			ent_plat=b2;
 		}else{
 			// Two static or two dinamic entities?!?
 			return(0);
 		}
+
 
 		// Check Top
 		vec2_set(n,0,-1);
@@ -414,10 +368,36 @@ int Entity_CheckCollision(Entity ent1,Entity ent2,CollisionInfo *collInfoRef){
 		if(Intersect_RayEdge(ent->pos,ent->vel,
 			n,p,plat_width,&t))
 		{
-			// Keep colision info
-			CollisionInfo_Add(collInfoRef,
-				CollisionResponse_Line,ent,ent_plat,t,n,1);
-			return(1);
+			int response=1;
+			int rc;
+
+			// Check the collision methods
+			if(ent->collision){
+				rc=ent->collision(ent,ent_plat,t,n);
+				if (rc==0)
+					response=0;
+				if (rc>1)
+					response=2;
+			}
+			if(ent_plat->collision){
+				vec2 n2;
+				vec2_scale(n2,n,-1.0f);
+				rc=ent_plat->collision(ent_plat,ent,t,n2);
+				if (rc==0)
+					response=0;
+				if (rc>1)
+					response=2;
+			}
+
+			// Collision response
+			if(response==1){
+				Entity_CollisionResponseLine(ent,ent_plat,t,n,1);
+				return(1);
+			}
+			if (response==2) {
+				return(1);
+			}
+			return(0);
 		}
 
 		return(0);
@@ -425,19 +405,19 @@ int Entity_CheckCollision(Entity ent1,Entity ent2,CollisionInfo *collInfoRef){
 
 	if(flags&EntityFlag_Block && !(flags&EntityFlag_Platform)){
 		// One of the entities is a block and none is a platform
-		Entity ent,ent_block;
+		Entity *ent,*ent_block;
 		float auxT,block_len;
 		vec2 auxN,p;
 		int applyFriction;
 
-		// Decide who is the platform and who is the ent
-		if(ent1->mass<=0.0f && ent2->mass>0.0f){
-			ent=ent2;
-			ent_block=ent1;
+		// Decide who is the block and who is the ent
+		if(b1->mass<=0.0f && b2->mass>0.0f){
+			ent=b2;
+			ent_block=b1;
 		}else
-		if(ent2->mass<=0.0f && ent1->mass>0.0f){
-			ent=ent1;
-			ent_block=ent2;
+		if(b2->mass<=0.0f && b1->mass>0.0f){
+			ent=b1;
+			ent_block=b2;
 		}else{
 			// Two static or two dinamic entities?!?
 			return(0);
@@ -504,155 +484,61 @@ int Entity_CheckCollision(Entity ent1,Entity ent2,CollisionInfo *collInfoRef){
 		}
 
 		if(t<1.0f){
-			// Keep colision info
- 			CollisionInfo_Add(collInfoRef,
-				CollisionResponse_Line,ent,ent_block,t,n,applyFriction);
-			return(1);
+			// Handle colision
+			int response=1;
+			int rc;
+
+			// Check the collision methods
+			if(ent->collision){
+				rc=ent->collision(ent,ent_block,t,n);
+				if (rc==0)
+					response=0;
+				if (rc>1)
+					response=2;
+			}
+			if(ent_block->collision){
+				vec2 n2;
+				vec2_scale(n2,n,-1.0f);
+				rc=ent_block->collision(ent_block,ent,t,n2);
+				if (rc==0)
+					response=0;
+				if (rc>1)
+					response=2;
+			}
+
+			// Collision response
+			if(response==1){
+				Entity_CollisionResponseLine(ent,ent_block,t,n,applyFriction);
+				return(1);
+			}
+			if (response==2) {
+				return(1);
+			}
+			return(0);
 		}
 
 		return(0);
 	}
 
-	// Test relative to ent1
-	vec2_minus(vel,ent1->vel,ent2->vel);
-	if(Colision_CircleCircle(ent1->pos,ent1->radius,vel,ent2->pos,ent2->radius,&t,n)){
-		// Keep colision info
-		CollisionInfo_Add(collInfoRef,
-			CollisionResponse_Circle,ent1,ent2,t,n,0);
-		return(1);
-	}
-	return(0);
-}
 
-
-/////////////////////////////
-// Entity_CollisionResponseCircle
-//
-// Normal response to a collision between circles.
-void Entity_CollisionResponseCircle(
-	Entity b1,Entity b2,float t,vec2 n)
-{
-	float moment;
-	vec2 temp;
-	float elast;
-
-	if(b1->mass>0.0f && b2->mass>0.0f){
-		// Calculate elasticity
-		elast=(b1->mass*b1->elast+b2->mass*b2->elast)/
-			(b1->mass+b2->mass);
-
-		// Collision between two massed balls
-		moment=((1.0f+elast)*b1->mass*b2->mass*
-					(fabs(vec2_dot(b1->vel,n))+fabs(vec2_dot(b2->vel,n))))
-				/(b1->mass+b2->mass);
-		vec2_scale(temp,n,moment/b1->mass);
-		vec2_minus(b1->vel,b1->vel,temp);
-		Entity_CalcBBox(b1);
-		vec2_scale(temp,n,moment/b2->mass);
-		vec2_plus(b2->vel,b2->vel,temp);
-		Entity_CalcBBox(b2);
-	}else
-	if(b1->mass>0.0f && b2->mass<=0.0f){
-		// Collision between a massed ball and a fixed ball
-		moment=(1.0f+b1->elast)*
-					(vec2_dot(b1->vel,n));
-		vec2_scale(temp,n,moment);
-		vec2_minus(b1->vel,b1->vel,temp);
-		Entity_CalcBBox(b1);
-	}else
-	if(b1->mass<=0.0f && b2->mass>0.0f){
-		// Collision between a massed ball and a fixed ball
-		// (imposible, but better safe)
-		moment=(1.0f+b2->elast)*
-					(vec2_dot(b2->vel,n));
-		vec2_scale(temp,n,moment);
-		vec2_plus(b2->vel,b2->vel,temp);
-		Entity_CalcBBox(b2);
-	}else{
-		// Collision between 2 fixed balls
-		// (imposible, but better safe)
-		vec2_set(b1->vel,0,0);
-		Entity_CalcBBox(b1);
-		vec2_set(b2->vel,0,0);
-		Entity_CalcBBox(b2);
-	}
-}
-
-
-/////////////////////////////
-// Entity_CollisionResponseLine
-//
-// Normal response to a collision with a line.
-void Entity_CollisionResponseLine(
-	Entity ent,Entity ent2,float t,vec2 norm,int applyFriction)
-{
-	vec2 pos2,vel2,velFric,intersection;
-	float dist,fric_static,fric_dynamic,fricLen;
-
-	// Calculate friction
-	fric_static=(ent->fric_static+ent2->fric_static)/2;
-	fric_dynamic=(ent->fric_dynamic+ent2->fric_dynamic)/2;
-
-	// Calculate end position
-	vec2_scale(vel2,ent->vel,1.0f-t);
-	dist=-vec2_dot(norm,vel2);
-	vec2_plus(pos2,ent->pos,ent->vel);
-	vec2_scaleadd(pos2,pos2,norm,dist);
-
-	// Calculate intersection
-	vec2_scaleadd(intersection,ent->pos,ent->vel,t);
-
-	if(applyFriction){
-		// Apply friction
-		vec2_minus(velFric,pos2,intersection);
-		fricLen=sqrtf(vec2_dot(velFric,velFric));
-		if(fricLen<fric_static){
-			// Apply static friction
-			vec2_copy(pos2,intersection);
-		}else{
-			// Apply dynamic friction
-			if(fricLen>0.0f){
-				vec2_scaleadd(pos2,intersection,velFric,
-					1.0f-(fric_dynamic+(fric_static/fricLen)));
-			}else{
-				vec2_scaleadd(pos2,intersection,velFric,
-					1.0f-fric_dynamic);
-			}
-		}
-	}
-
-	// Apply to velocity
-	vec2_scaleadd(pos2,pos2,norm,0.1f);
-	vec2_minus(ent->vel,pos2,ent->pos);
-
-	Entity_CalcBBox(ent);
-}
-
-
-/////////////////////////////
-// Entity_CollisionInfoResponse
-//
-//
-int Entity_CollisionInfoResponse(CollisionInfo collInfo){
-	while(collInfo!=NULL){
-		// Handle colision
+	// Test relative to b1
+	vec2_minus(vel,b1->vel,b2->vel);
+	if(Colision_CircleCircle(b1->pos,b1->radius,vel,b2->pos,b2->radius,&t,n)){
 		int response=1;
 		int rc;
-		vec2 n1;
 		vec2 n2;
-		vec2_copy(n1,collInfo->n);
-		vec2_scale(n2,collInfo->n,-1.0f);
+		vec2_scale(n2,n,-1.0f);
 
 		// Check the collision methods
-		if(collInfo->ent1->collision){
-			rc=collInfo->ent1->collision(collInfo->ent1,collInfo->ent2,collInfo->t,n1);
+		if(b1->collision){
+			rc=b1->collision(b1,b2,t,n2);
 			if (rc==0)
 				response=0;
 			if (rc>1)
 				response=2;
 		}
-		if(collInfo->ent2->collision){
-			rc=collInfo->ent2->collision(collInfo->ent2,collInfo->ent1,collInfo->t,n2);
+		if(b2->collision){
+			rc=b2->collision(b2,b1,t,n);
 			if (rc==0)
 				response=0;
 			if (rc>1)
@@ -661,26 +547,17 @@ int Entity_CollisionInfoResponse(CollisionInfo collInfo){
 
 		// Collision response
 		if(response==1){
-			if(collInfo->responseType==CollisionResponse_Line){
-				Entity_CollisionResponseLine(
-					collInfo->ent1,collInfo->ent2,collInfo->t,collInfo->n,collInfo->applyFriction);
-			}else
-			if(collInfo->responseType==CollisionResponse_Circle){
-				if(vec2_dot(collInfo->ent1->vel,collInfo->ent1->vel)>
-					vec2_dot(collInfo->ent2->vel,collInfo->ent2->vel))
-				{
-					Entity_CollisionResponseCircle(collInfo->ent1,collInfo->ent2,collInfo->t,n2);
-				}else{
-					Entity_CollisionResponseCircle(collInfo->ent2,collInfo->ent1,collInfo->t,n1);
-				}
+			if(vec2_dot(b1->vel,b1->vel)>vec2_dot(b2->vel,b2->vel)){
+				Entity_CollisionResponseCircle(b1,b2,t,n);
+			}else{
+				Entity_CollisionResponseCircle(b2,b1,t,n);
 			}
 			return(1);
 		}
 		if (response==2) {
 			return(1);
 		}
-
-		collInfo=collInfo->next;
+		return(0);
 	}
 	return(0);
 }
@@ -690,7 +567,7 @@ int Entity_CollisionInfoResponse(CollisionInfo collInfo){
 // Entity_Overlaps
 //
 //
-void Entity_Overlaps(Entity b1,Entity b2){
+void Entity_Overlaps(Entity *b1,Entity *b2){
 	vec2 len;
 
 	vec2_minus(len,b1->pos,b2->pos);
@@ -717,7 +594,7 @@ void Entity_Overlaps(Entity b1,Entity b2){
 // Entity_GetPos
 //
 //
-void Entity_GetPos(Entity e,vec2 pos){
+void Entity_GetPos(Entity *e,vec2 pos){
 	vec2_copy(pos,e->pos);
 }
 
@@ -725,7 +602,7 @@ void Entity_GetPos(Entity e,vec2 pos){
 // Entity_UpdatePos
 //
 //
-void Entity_UpdatePos(Entity e,vec2 pos){
+void Entity_UpdatePos(Entity *e,vec2 pos){
 
 	// Mark the update of the position.
 	vec2_copy(e->oldpos,e->pos);
@@ -738,7 +615,7 @@ void Entity_UpdatePos(Entity e,vec2 pos){
 // Entity_AddVelLimit
 //
 //
-void Entity_AddVelLimit(Entity e,vec2 vel,float limit){
+void Entity_AddVelLimit(Entity *e,vec2 vel,float limit){
 	float vlen_orig,vlen;
 	vec2 dir,vel_temp;
 
@@ -756,7 +633,6 @@ void Entity_AddVelLimit(Entity e,vec2 vel,float limit){
 		vec2_scale(vel_temp,dir,vlen);
 		vec2_plus(e->vel,e->vel,vel_temp);
 	}
-	Entity_CalcBBox(e);
 }
 
 
@@ -764,7 +640,7 @@ void Entity_AddVelLimit(Entity e,vec2 vel,float limit){
 // Entity_SetColor
 //
 //
-void Entity_SetColor(Entity e,float r,float g,float b,float a){
+void Entity_SetColor(Entity *e,float r,float g,float b,float a){
 	e->color[0]=r;
 	e->color[1]=g;
 	e->color[2]=b;
@@ -776,7 +652,7 @@ void Entity_SetColor(Entity e,float r,float g,float b,float a){
 // Entity_AddColor
 //
 //
-void Entity_AddColor(Entity e,float r,float g,float b,float a){
+void Entity_AddColor(Entity *e,float r,float g,float b,float a){
 	e->color[0]+=r;
 	if(e->color[0]>1.0f)
 		e->color[0]=1.0f;
@@ -796,7 +672,7 @@ void Entity_AddColor(Entity e,float r,float g,float b,float a){
 // Entity_SetLight
 //
 //
-void Entity_SetLight(Entity e,float r,float g,float b,float rad){
+void Entity_SetLight(Entity *e,float r,float g,float b,float rad){
 	e->light[0]=r;
 	e->light[1]=g;
 	e->light[2]=b;
@@ -809,7 +685,7 @@ void Entity_SetLight(Entity e,float r,float g,float b,float rad){
 // Entity_Iluminate
 //
 //
-void Entity_Iluminate(Entity e,Entity *elist,int n){
+void Entity_Iluminate(Entity *e,Entity **elist,int n){
 	int i;
 	vec2 vdist;
 	float qdist,f;
@@ -849,7 +725,7 @@ void Entity_Iluminate(Entity e,Entity *elist,int n){
 // Entity_MarkUpdateLight
 //
 //
-void Entity_MarkUpdateLight(Entity e,Entity *elist,int n){
+void Entity_MarkUpdateLight(Entity *e,Entity **elist,int n){
 	if(e->flags&EntityFlag_Light){
 		int i;
 		vec2 max,min;
