@@ -5,4 +5,4 @@
 int GameMap_LoadLevel(char *filename,int res);
 
 
-#endif _GAMEMAP_H_
+#endif

@@ -67,4 +67,5 @@ void GameEnts_Init();
 
 
 
-#endif _GAMEENTS_H_
+#endif
+

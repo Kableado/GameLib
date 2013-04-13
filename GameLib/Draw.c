@@ -24,9 +24,8 @@
 
 #include "Time.h"
 #include "Util.h"
+#include "QuadArray2D.h"
 #include "Draw.h"
-#include "Input.h"
-#include "Audio.h"
 
 
 // Globals
@@ -35,6 +34,9 @@ int _width;
 int _height;
 long long proc_t_frame=33333;
 long long draw_t_frame=16667;
+QuadArray2D *_quadArray=NULL;
+GLuint _tex=-1;
+float _color[4];
 
 /////////////////////////////
 // Draw_Init
@@ -88,7 +90,7 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 
 	// Set the desired state
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-	glEnable(GL_CULL_FACE);
+	glDisable(GL_CULL_FACE);
 	glEnable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_DEPTH_TEST);
@@ -125,6 +127,11 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 	// Enable Alpha blending
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
+	// Initialize the triangle array
+	_quadArray=QuadArray2D_Create(400);
+
+	Draw_SetColor(1.0f,1.0f,1.0f,1.0f);
 
 	return(1);
 }
@@ -184,6 +191,7 @@ void Draw_Loop(int (*proc)(),void (*draw)()){
 		}
 		if(draw){
 			draw();
+			Draw_Flush();
 		}
 
 		// Measure time
@@ -370,12 +378,43 @@ void Draw_GetOffset(DrawImg img,int *x,int *y){
 
 
 /////////////////////////////
+// Draw_Flush
+//
+// Performs all the queued draw actions.
+void Draw_Flush(){
+
+	// Draw the quad array
+	glBindTexture(GL_TEXTURE_2D, _tex);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_VERTEX_ARRAY);
+
+	glColorPointer( 4, GL_FLOAT, Vertex2D_Length*sizeof(float),
+		(GLvoid *)(_quadArray->vertexData+4) );
+	glTexCoordPointer( 2, GL_FLOAT, Vertex2D_Length*sizeof(float),
+		(GLvoid *)(_quadArray->vertexData+2) );
+	glVertexPointer( 2, GL_FLOAT, Vertex2D_Length*sizeof(float),
+		(GLvoid *)(_quadArray->vertexData) );
+
+	glDrawArrays(GL_QUADS,0,_quadArray->nVertex);
+
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+
+
+	// Empty it
+	QuadArray2D_Clean(_quadArray);
+}
+
+
+/////////////////////////////
 // Draw_DrawImg
 //
 // Draws an image.
 void Draw_DrawImg(DrawImg img,int x,int y){
 	DrawImage *image=img;
-	int x1,x2,y1,y2;
+	float x1,x2,y1,y2;
 
 	// Prepare
 	x1=x+image->x;
@@ -384,20 +423,14 @@ void Draw_DrawImg(DrawImg img,int x,int y){
 	y2=_height-((y+image->y)+image->surf->h);
 
 	// Draw a quad
-	glBindTexture(GL_TEXTURE_2D, image->tex);
-	glBegin (GL_QUADS);
-		glTexCoord2f (1, 0);
-		glVertex2i (x2, y1);
-
-		glTexCoord2f (0, 0);
-		glVertex2i (x1, y1);
-
-		glTexCoord2f (0, 1);
-		glVertex2i (x1, y2);
-
-		glTexCoord2f (1, 1);
-		glVertex2i (x2, y2);
-	glEnd ();
+	if(_tex!=image->tex){
+		Draw_Flush();
+		_tex=image->tex;
+	}
+	QuadArray2D_AddQuad(_quadArray,
+		x1,y1,0.0f,0.0f,
+		x2,y2,1.0f,1.0f,
+		_color);
 }
 
 
@@ -416,20 +449,14 @@ void Draw_DrawImgResized(DrawImg img,int x,int y,float w,float h){
 	y2=_height-((y+image->y)+h);
 
 	// Draw a quad
-	glBindTexture(GL_TEXTURE_2D, image->tex);
-	glBegin (GL_QUADS);
-		glTexCoord2f (1, 0);
-		glVertex2i (x2, y1);
-
-		glTexCoord2f (0, 0);
-		glVertex2i (x1, y1);
-
-		glTexCoord2f (0, 1);
-		glVertex2i (x1, y2);
-
-		glTexCoord2f (1, 1);
-		glVertex2i (x2, y2);
-	glEnd ();
+	if(_tex!=image->tex){
+		Draw_Flush();
+		_tex=image->tex;
+	}
+	QuadArray2D_AddQuad(_quadArray,
+		x1,y1,0.0f,0.0f,
+		x2,y2,1.0f,1.0f,
+		_color);
 }
 
 
@@ -453,20 +480,14 @@ void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int i){
 	u2=u1+us*w;
 
 	// Draw a quad
-	glBindTexture(GL_TEXTURE_2D, image->tex);
-	glBegin (GL_QUADS);
-		glTexCoord2f (u2, 0);
-		glVertex2i (x2, y1);
-
-		glTexCoord2f (u1, 0);
-		glVertex2i (x1, y1);
-
-		glTexCoord2f (u1, 1);
-		glVertex2i (x1, y2);
-
-		glTexCoord2f (u2, 1);
-		glVertex2i (x2, y2);
-	glEnd ();
+	if(_tex!=image->tex){
+		Draw_Flush();
+		_tex=image->tex;
+	}
+	QuadArray2D_AddQuad(_quadArray,
+		x1,y1,u1,0.0f,
+		x2,y2,u2,1.0f,
+		_color);
 }
 
 
@@ -476,6 +497,10 @@ void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int i){
 //
 void Draw_SetColor(float r,float g,float b,float a){
 	glColor4f(r,g,b,a);
+	_color[0]=r;
+	_color[1]=g;
+	_color[2]=b;
+	_color[3]=a;
 }
 
 
@@ -517,7 +542,7 @@ SDL_Surface *Draw_DefaultFontSurface(
 	color2=SDL_MapRGBA(surf->format,b,g,r,0);
 
 	// Draw the font
-	SDL_LockSurface(surf);
+	//SDL_LockSurface(surf);
 	for(c=0;c<256;c++){
 		for(y=0;y<8;y++){
 			for(x=0;x<8;x++){
@@ -533,7 +558,7 @@ SDL_Surface *Draw_DefaultFontSurface(
 			}
 		}
 	}
-	SDL_UnlockSurface(surf);
+	//SDL_UnlockSurface(surf);
 
 	return(surf);
 }
