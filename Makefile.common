@@ -7,6 +7,7 @@ CFLAGS += -IGameLib
 HEADS= \
 	GameLib/Time.h \
 	GameLib/Util.h \
+	GameLib/QuadArray2D.h \
 	GameLib/Draw.h \
 	GameLib/Input.h \
 	GameLib/Audio.h \
@@ -16,6 +17,7 @@ HEADS= \
 OBJS= \
 	$(BUILDDIR)/GameLib/Time.o \
 	$(BUILDDIR)/GameLib/Util.o \
+	$(BUILDDIR)/GameLib/QuadArray2D.o \
 	$(BUILDDIR)/GameLib/Draw.o \
 	$(BUILDDIR)/GameLib/Input.o \
 	$(BUILDDIR)/GameLib/Audio.o \
@@ -67,6 +69,8 @@ $(BUILDDIR)/GameLib/Time.o: GameLib/Time.c $(HEADS)
 	$(CC) -c GameLib/Time.c -o $(BUILDDIR)/GameLib/Time.o $(CFLAGS)
 $(BUILDDIR)/GameLib/Util.o: GameLib/Util.c $(HEADS)
 	$(CC) -c GameLib/Util.c -o $(BUILDDIR)/GameLib/Util.o $(CFLAGS)
+$(BUILDDIR)/GameLib/QuadArray2D.o: GameLib/QuadArray2D.c $(HEADS)
+	$(CC) -c GameLib/QuadArray2D.c -o $(BUILDDIR)/GameLib/QuadArray2D.o $(CFLAGS)
 $(BUILDDIR)/GameLib/Draw.o: GameLib/Draw.c $(HEADS)
 	$(CC) -c GameLib/Draw.c -o $(BUILDDIR)/GameLib/Draw.o $(CFLAGS)
 $(BUILDDIR)/GameLib/Input.o: GameLib/Input.c $(HEADS)

@@ -28,6 +28,12 @@ void Draw_Clean(
 	unsigned char b);
 
 
+/////////////////////////////
+// Draw_Flush
+//
+// Performs all the queued draw actions.
+void Draw_Flush();
+
 ////////////////////////////////////////////////
 // DrawImg //
 /////////////
@@ -56,6 +62,7 @@ void Draw_GetSize(DrawImg img,int *w,int *h);
 // Sets and Gets the image offset.
 void Draw_SetOffset(DrawImg img,int  x,int  y);
 void Draw_GetOffset(DrawImg img,int *x,int *y);
+
 
 
 /////////////////////////////
