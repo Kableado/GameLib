@@ -23,11 +23,12 @@ int _entities_lock=0;
 int _entities_compactate=0;
 void (*_gameproc)()=NULL;
 void (*_gamepostproc)()=NULL;
-void (*_gamepredraw)()=NULL;
-void (*_gamedraw)()=NULL;
+void (*_gamepredraw)(float f)=NULL;
+void (*_gamedraw)(float f)=NULL;
 int _ft;
 int _game_size[2];
-int _game_pos[2];
+int _game_pos0[2];
+int _game_pos1[2];
 
 long long t_proc;
 long long t_col;
@@ -55,8 +56,10 @@ int GameLib_Init(int w,int h,char *title,int pfps,int fps){
 
 	_game_size[0]=w;
 	_game_size[1]=h;
-	_game_pos[0]=0;
-	_game_pos[1]=0;
+	_game_pos0[0]=0;
+	_game_pos0[1]=0;
+	_game_pos1[0]=0;
+	_game_pos1[1]=0;
 
 	_ft=1000/fps;
 
@@ -177,6 +180,7 @@ void GameLib_Compactate(){
 	_entities_lock=0;
 }
 
+
 /////////////////////////////
 // GameLib_ProcLoop
 //
@@ -186,6 +190,9 @@ int GameLib_ProcLoop(){
 	int repeat,count;
 	long long time;
 
+	// Step the gamePosition
+	_game_pos0[0]=_game_pos1[0];
+	_game_pos0[0]=_game_pos1[0];
 
 	// Process
 	time=Time_GetTime();
@@ -200,7 +207,6 @@ int GameLib_ProcLoop(){
 	}
 	GameLib_Compactate();
 	t_proc+=Time_GetTime()-time;
-
 
 	// Colisions between entities
 	time=Time_GetTime();
@@ -221,6 +227,7 @@ int GameLib_ProcLoop(){
 		}
 		count++;
 	}while(repeat && count<10);
+
 	// Stop remaining collisions
 	if(count==10){
 		for(i=0;i<_n_entities;i++){
@@ -284,7 +291,6 @@ int GameLib_ProcLoop(){
 		n=n2;
 	}while(n>0);
 
-
 	// PostProcess
 	time=Time_GetTime();
 	GameLib_Compactate();_entities_lock=1;
@@ -310,20 +316,19 @@ int GameLib_ProcLoop(){
 // GameLib_DrawLoop
 //
 //
-void GameLib_DrawLoop(){
+void GameLib_DrawLoop(float f){
 	long long time;
 	int i;
+	int game_pos[2];
+
+	game_pos[0]=_game_pos0[0]+f*(_game_pos1[0]-_game_pos0[0]);
+	game_pos[1]=_game_pos0[1]+f*(_game_pos1[1]-_game_pos0[1]);
 
 	time=Time_GetTime();
 
-	// Update Lights
-	//GameLib_UpdateIlumination();
-
-
-
 	// Predibujado
 	if(_gamepredraw){
-		_gamepredraw();
+		_gamepredraw(f);
 	}else{
 		// Limpiar pantalla
 		Draw_Clean(0,0,0);
@@ -336,7 +341,7 @@ void GameLib_DrawLoop(){
 
 		// Check visivility
 		if(!Entity_IsVisible(e,
-			_game_pos[0],_game_pos[1],
+			game_pos[0],game_pos[1],
 			_game_size[0],_game_size[1]))
 		{
 			continue;
@@ -348,14 +353,13 @@ void GameLib_DrawLoop(){
 			e->flags&=~EntityFlag_UpdateLight;
 		}
 
-		Entity_Draw(e,-_game_pos[0],-_game_pos[1]);
+		Entity_Draw(e,-game_pos[0],-game_pos[1],f);
 	}
 	Draw_SetColor(1,1,1,1);
 	if(_gamedraw){
-		_gamedraw();
+		_gamedraw(f);
 	}
 	GameLib_Compactate();
-
 
 	t_draw+=Time_GetTime()-time;
 
@@ -370,8 +374,8 @@ void GameLib_DrawLoop(){
 void GameLib_Loop(
 	void (*gameproc)(),
 	void (*gamepostproc)(),
-	void (*gamepredraw)(),
-	void (*gamedraw)())
+	void (*gamepredraw)(float f),
+	void (*gamedraw)(float f))
 {
 	_running=1;
 
@@ -411,16 +415,23 @@ void GameLib_BreakLoop(){
 /////////////////////////////
 // GameLib_GetPos
 // GameLib_SetPos
+// GameLib_UpdatePos
 // GameLib_SetPos
 //
 //
 void GameLib_GetPos(int pos[2]){
-	pos[0]=_game_pos[0];
-	pos[1]=_game_pos[1];
+	pos[0]=_game_pos1[0];
+	pos[1]=_game_pos1[1];
 }
 void GameLib_SetPos(int pos[2]){
-	_game_pos[0]=pos[0];
-	_game_pos[1]=pos[1];
+	_game_pos0[0]=pos[0];
+	_game_pos0[1]=pos[1];
+	_game_pos1[0]=pos[0];
+	_game_pos1[1]=pos[1];
+}
+void GameLib_UpdatePos(int pos[2]){
+	_game_pos1[0]=pos[0];
+	_game_pos1[1]=pos[1];
 }
 void GameLib_GetSize(int size[2]){
 	size[0]=_game_size[0];
@@ -441,10 +452,10 @@ void GameLib_MoveToPos(vec2 pos,float f){
 	GameLib_MoveToPosV(pos,f);
 }
 void GameLib_MoveToPosH(vec2 pos,float f){
-	_game_pos[0]=_game_pos[0]+(pos[0]-(_game_pos[0]+(_game_size[0]/2.0f)))*f;
+	_game_pos1[0]=_game_pos1[0]+(pos[0]-(_game_pos1[0]+(_game_size[0]/2.0f)))*f;
 }
 void GameLib_MoveToPosV(vec2 pos,float f){
-	_game_pos[1]=_game_pos[1]+(pos[1]-(_game_pos[1]+(_game_size[1]/2.0f)))*f;
+	_game_pos1[1]=_game_pos1[1]+(pos[1]-(_game_pos1[1]+(_game_size[1]/2.0f)))*f;
 }
 
 
@@ -491,8 +502,8 @@ void GameLib_PlaySound(AudioSnd snd,int x,int y){
 	int r,cx,cy,off;
 
 	// Get the screen context
-	cx=_game_pos[0]+_game_size[0]/2;
-	cy=_game_pos[1]+_game_size[1]/2;
+	cx=_game_pos1[0]+_game_size[0]/2;
+	cy=_game_pos1[1]+_game_size[1]/2;
 	if(_game_size[0]>_game_size[1]){
 		r=_game_size[0]/2;
 	}else{

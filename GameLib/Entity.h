@@ -26,6 +26,7 @@ typedef struct Tag_Entity {
 
 	int type;
 	vec2 oldpos;
+	vec2 pos0;
 	vec2 pos;
 	int flags;
 	int zorder;
@@ -96,7 +97,7 @@ Entity *Entity_Copy(Entity *e);
 // Entity_Draw
 //
 //
-void Entity_Draw(Entity *e,int x,int y);
+void Entity_Draw(Entity *e,int x,int y,float f);
 
 /////////////////////////////
 // Entity_IsVisible

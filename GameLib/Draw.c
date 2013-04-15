@@ -71,7 +71,6 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 	SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE, 8);
 	SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute (SDL_GL_STENCIL_SIZE, 8);
-	SDL_GL_SetAttribute (SDL_GL_SWAP_CONTROL, 0);
 	SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
 
 
@@ -137,19 +136,21 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 }
 
 
+
 /////////////////////////////
 // Draw_Loop
 //
 // Loops updating the game window.
-void Draw_Loop(int (*proc)(),void (*draw)()){
+void Draw_Loop(int (*proc)(),void (*draw)(float f)){
 	int done=0;
 	SDL_Event event;
 	Uint8* keys;
-	long long time,time2,timed;
-	long long t_frame=0;
+	long long newTime,accTime;
+	long long procTime1,procTime2,drawTime1,drawTime2,waitTime;
+	float frameFactor=0.0f;
 
-	t_frame=proc_t_frame;
-	time=Time_GetTime();
+	accTime=proc_t_frame;
+	procTime1=drawTime1=Time_GetTime();
 	while(!done){
 
 		// Update screen
@@ -177,39 +178,38 @@ void Draw_Loop(int (*proc)(),void (*draw)()){
 		// Sound Frame
 		Audio_Frame();
 
-
-		// Process and draw
+		// Process
 		if(proc){
-			while(t_frame>=proc_t_frame && !done){
+			if(accTime>100000){
+				accTime=100000;
+			}
+			while(accTime>=proc_t_frame && !done){
 				Input_Frame();
 				if(!proc()){
 					done=1;
 				}
-				t_frame-=proc_t_frame;
-
+				accTime-=proc_t_frame;
 			}
 		}
+
+		// Draw
 		if(draw){
-			draw();
+			frameFactor=(float)accTime/(float)proc_t_frame;
+			draw(frameFactor);
 			Draw_Flush();
 		}
 
-		// Measure time
-		time2=Time_GetTime();
-		timed=time2-time;
-		if(timed<draw_t_frame){
-			Time_Pause(draw_t_frame-timed);
-			time2=Time_GetTime();
-			t_frame+=time2-time;
-		}else{
-			t_frame+=timed;
-		}
-		time=time2;
+		// Wait to round draw_t_frame
+		drawTime2=Time_GetTime();
+		waitTime=draw_t_frame-(drawTime2-drawTime1);
+		Time_Pause(waitTime);
+		drawTime2=Time_GetTime();
+		drawTime1=drawTime2;
 
-		// FIX: Limit process frame rate
-		if(t_frame>50000){
-			t_frame=50000;
-		}
+		// Update time
+		procTime2=Time_GetTime();
+		accTime+=procTime2-procTime1;
+		procTime1=procTime2;
 	}
 }
 
