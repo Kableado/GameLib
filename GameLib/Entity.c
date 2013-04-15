@@ -30,6 +30,7 @@ Entity *Entity_New(){
 
 	e->base=NULL;
 	e->type=0;
+	vec2_set(e->pos0,0.0f,0.0f);
 	vec2_set(e->pos,0.0f,0.0f);
 	e->flags=EntityFlag_Collision|EntityFlag_Overlap;
 	e->zorder=1;
@@ -146,9 +147,15 @@ Entity *Entity_Copy(Entity *e){
 // Entity_Draw
 //
 //
-void Entity_Draw(Entity *e,int x,int y){
+void Entity_Draw(Entity *e,int x,int y,float f){
+	vec2 fPos;
 	Draw_SetColor(e->color[0],e->color[1],e->color[2],e->color[3]);
-	AnimPlay_Draw(&e->anim,e->pos[0]+x,e->pos[1]+y);
+	if(e->flags&EntityFlag_UpdatedPos){
+		vec2_interpol(fPos,e->pos0,e->pos,f);
+		AnimPlay_Draw(&e->anim,fPos[0]+x,fPos[1]+y);
+	}else{
+		AnimPlay_Draw(&e->anim,e->pos[0]+x,e->pos[1]+y);
+	}
 }
 
 
@@ -201,6 +208,8 @@ void Entity_Process(Entity *b,int ft){
 //
 void Entity_PostProcess(Entity *e,int ft){
 	float qlen,len;
+
+	vec2_copy(e->pos0,e->pos);
 
 	// Determine if there is movement
 	qlen=vec2_dot(e->vel,e->vel);
