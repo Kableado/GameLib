@@ -23,21 +23,21 @@ int GameLib_Init(int w,int h,char *title,int pfps,int fps);
 // GameLib_AddEntity
 //
 // Adds an entity to the game.
-void GameLib_AddEntity(Entity *e);
+void GameLib_AddEntity(Entity e);
 
 
 /////////////////////////////
 // GameLib_UnrefEntity
 //
 // removes the reference to the entity.
-int GameLib_UnrefEntity(Entity *e);
+int GameLib_UnrefEntity(Entity e);
 
 
 /////////////////////////////
 // GameLib_DelEntity
 //
 // Adds an entity to the game.
-int GameLib_DelEntity(Entity *e);
+int GameLib_DelEntity(Entity e);
 
 
 /////////////////////////////
@@ -91,7 +91,7 @@ void GameLib_DelEnts();
 // GameLib_ForEachEn
 //
 // Iterates every entity.
-void GameLib_ForEachEnt(int (*func)(Entity *ent));
+void GameLib_ForEachEnt(int (*func)(Entity ent));
 
 
 /////////////////////////////
@@ -112,7 +112,7 @@ void GameLib_Iluminate();
 // GameLib_EntitySetLight
 //
 //
-void GameLib_EntitySetLight(Entity *e,float r,float g,float b,float rad);
+void GameLib_EntitySetLight(Entity e,float r,float g,float b,float rad);
 
 
 /////////////////////////////

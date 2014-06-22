@@ -26,7 +26,6 @@ OBJS= \
 	$(BUILDDIR)/GameLib/GameLib.o \
 
 
-
 #####################
 # Game Declarations #
 #####################
@@ -36,11 +35,6 @@ OBJS+= \
 	$(BUILDDIR)/GameEnts.o \
 	$(BUILDDIR)/GameMap.o \
 	$(BUILDDIR)/main.o
-
-
-
-
-
 
 
 #################
@@ -57,9 +51,6 @@ clean:
 
 run: $(BUILDDIR)/$(RESULT)
 	./$(BUILDDIR)/$(RESULT) debug
-
-
-
 
 
 #################
@@ -85,7 +76,6 @@ $(BUILDDIR)/GameLib/GameLib.o: GameLib/GameLib.c $(HEADS)
 	$(CC) -c GameLib/GameLib.c -o $(BUILDDIR)/GameLib/GameLib.o $(CFLAGS)
 
 
-
 ##############
 # Game Rules #
 ##############
@@ -98,6 +88,11 @@ $(BUILDDIR)/GameMap.o: GameMap.c $(HEADS)
 
 $(BUILDDIR)/main.o: main.c $(HEADS)
 	$(CC) -c main.c -o $(BUILDDIR)/main.o $(CFLAGS)
+
+
+################
+# Result Rules #
+################
 
 $(BUILDDIR)/$(RESULT): $(OBJS)
 	$(CC) -o $(BUILDDIR)/$(RESULT) $(OBJS) $(LIBS) $(CFLAGS)

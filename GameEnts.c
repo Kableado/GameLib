@@ -13,9 +13,9 @@ DrawImg img_player;
 DrawImg img_platform;
 DrawImg img_block;
 
-Entity *ent_Player;
-Entity *ent_Platform;
-Entity *ent_Block;
+Entity ent_Player;
+Entity ent_Platform;
+Entity ent_Block;
 
 
 DrawImg img_wizard[2];
@@ -42,31 +42,31 @@ DrawImg img_axe[2];
 DrawImg img_goatMan[2];
 DrawImg img_Princess[2];
 
-Entity *ent_Wizard;
-Entity *ent_MagikBall;
-Entity *ent_Earth;
-Entity *ent_EarthBack;
-Entity *ent_StoneBrick;
-Entity *ent_StoneBrickBack;
-Entity *ent_SpikedBush;
-Entity *ent_Fireball;
-Entity *ent_LavaPit;
-Entity *ent_Spike[2];
-Entity *ent_Flower[2];
-Entity *ent_CarnivorePlant[2];
-Entity *ent_Bunny;
-Entity *ent_Spider;
-Entity *ent_Axe;
-Entity *ent_Guard;
-Entity *ent_EliteGuard;
-Entity *ent_GoatMan;
-Entity *ent_Princess;
-
-
-
-int EntityApplyGravity(Entity *e){
 	float grav=0.5f;
 	float vTerminal=10.0f;
+Entity ent_Wizard;
+Entity ent_MagikBall;
+Entity ent_Earth;
+Entity ent_EarthBack;
+Entity ent_StoneBrick;
+Entity ent_StoneBrickBack;
+Entity ent_SpikedBush;
+Entity ent_Fireball;
+Entity ent_LavaPit;
+Entity ent_Spike[2];
+Entity ent_Flower[2];
+Entity ent_CarnivorePlant[2];
+Entity ent_Bunny;
+Entity ent_Spider;
+Entity ent_Axe;
+Entity ent_Guard;
+Entity ent_EliteGuard;
+Entity ent_GoatMan;
+Entity ent_Princess;
+
+
+
+int EntityApplyGravity(Entity e){
 	vec2 vGrav;
 
 	// Only apply gravity to some entity types
@@ -97,7 +97,7 @@ int EntityApplyGravity(Entity *e){
 
 
 
-void EntEarth_Init(Entity *ent,int up,int down,int left,int right){
+void EntEarth_Init(Entity ent,int up,int down,int left,int right){
 	int val=up*8+right*4+down*2+left;
 
 
@@ -113,7 +113,7 @@ void EntEarth_Init(Entity *ent,int up,int down,int left,int right){
 	AnimPlay_SetImg(&ent->anim,img_earth[val]);
 }
 
-void EntStoneBrick_Init(Entity *ent,int up,int down,int left,int right){
+void EntStoneBrick_Init(Entity ent,int up,int down,int left,int right){
 	if(!up && !down && !left && !right){
 		ent->flags=0;
 	}else
@@ -129,7 +129,7 @@ void EntStoneBrick_Init(Entity *ent,int up,int down,int left,int right){
 
 
 
-void player_proc(Entity *e,int ft){
+void player_proc(Entity e,int ft){
 	float acel=1.0f;
 	float maxVel=4.0f;
 	float jumpVel=12.0f;
@@ -170,11 +170,11 @@ void player_proc(Entity *e,int ft){
 
 
 
-void wizard_proc(Entity *e,int ft){
 	float acel=1.0f;
 	float maxVel=6.0f;
 	float jumpVel=8.0f;
 	float shootVel=10.0f;
+void wizard_proc(Entity e,int ft){
 
 	if(Input_GetKey(InputKey_Jump)==InputKey_Pressed ||
 		Input_GetKey(InputKey_Up)==InputKey_Pressed)
@@ -212,7 +212,7 @@ void wizard_proc(Entity *e,int ft){
 	if(Input_GetKey(InputKey_Action1)==InputKey_Pressed ||
 		Input_GetKey(InputKey_Action2)==InputKey_Pressed)
 	{
-		Entity *e2;
+		Entity e2;
 
 		// Create child entity
 		e2=Entity_Copy(e->child);
@@ -236,12 +236,12 @@ void wizard_proc(Entity *e,int ft){
 
 
 
-int magikball_collision(Entity *ent,Entity *ent2,float t,vec2 n){
+int magikball_collision(Entity ent,Entity ent2,float t,vec2 n){
 	if(ent->A==1)
 		return(0);
 
 	if(ent2->type==Ent_Flower){
-		Entity *e2;
+		Entity e2;
 		// Convert a flower
 
 		// Create replacemente entity
@@ -253,7 +253,7 @@ int magikball_collision(Entity *ent,Entity *ent2,float t,vec2 n){
 		GameLib_DelEntity(ent2);
 	}
 	if(ent2->type==Ent_Bunny){
-		Entity *e2;
+		Entity e2;
 		// Convert a bunny
 		printf("Bunny\n");
 
@@ -279,13 +279,13 @@ int magikball_collision(Entity *ent,Entity *ent2,float t,vec2 n){
 }
 
 
-void spikedentity_overlap(Entity *e,Entity *e2){
+void spikedentity_overlap(Entity e,Entity e2){
 	// FIXME: damage player
 	printf("FIXME: damage player\n");
 }
 
 
-int spike_collision(Entity *ent,Entity *ent2,float t,vec2 n){
+int spike_collision(Entity ent,Entity ent2,float t,vec2 n){
 	if(ent->A==1)
 		return(0);
 
@@ -305,13 +305,13 @@ int spike_collision(Entity *ent,Entity *ent2,float t,vec2 n){
 	return(0);
 }
 
-void flower_oncopy(Entity *ent){
+void flower_oncopy(Entity ent){
 	ent->A=rand()%ent->C;
 }
 
-void flower_proc(Entity *ent,int ft){
+void flower_proc(Entity ent,int ft){
 	if(ent->A==0){
-		Entity *e2;
+		Entity e2;
 
 		// Create child entity
 		e2=Entity_Copy(ent->child);
@@ -332,7 +332,7 @@ void flower_proc(Entity *ent,int ft){
 
 
 
-void bunny_proc(Entity *e,int ft){
+void bunny_proc(Entity e,int ft){
 	float acel=1.0f;
 	float maxVel=4.0f;
 	float jumpVel=5.0f;
@@ -370,7 +370,7 @@ void bunny_proc(Entity *e,int ft){
 		AnimPlay_SetImg(&e->anim,img_bunny[1]);
 	}
 }
-int bunny_collision(Entity *ent,Entity *ent2,float t,vec2 n){
+int bunny_collision(Entity ent,Entity ent2,float t,vec2 n){
 	if(n[0]>0.5f){
 		ent->A=1;
 	}else
@@ -391,7 +391,7 @@ int bunny_collision(Entity *ent,Entity *ent2,float t,vec2 n){
 
 
 
-void spider_proc(Entity *e,int ft){
+void spider_proc(Entity e,int ft){
 	float acel=1.0f;
 	float maxVel=4.0f;
 	float jumpVel=5.0f;
@@ -429,7 +429,7 @@ void spider_proc(Entity *e,int ft){
 		AnimPlay_SetImg(&e->anim,img_spider[1]);
 	}
 }
-int spider_collision(Entity *ent,Entity *ent2,float t,vec2 n){
+int spider_collision(Entity ent,Entity ent2,float t,vec2 n){
 	if(n[0]>0.5f){
 		ent->A=1;
 	}else
@@ -613,7 +613,7 @@ void GameEnts_Init(){
 	ent_Earth->width=32;
 	ent_Earth->height=32;
 	ent_Earth->fric_static=0.0f;
-	ent_Earth->fric_dynamic=0.2f;
+	ent_Earth->fric_dynamic=0.6f;
 
 
 	// FIXME: Earth back
