@@ -17,12 +17,12 @@
 // Entity_New
 //
 //
-Entity *_free_entity=NULL;
-Entity *Entity_New(){
-	Entity *e;
+Entity _free_entity=NULL;
+Entity Entity_New(){
+	Entity e;
 
 	if(!_free_entity){
-		e=malloc(sizeof(Entity));
+		e=malloc(sizeof(TEntity));
 	}else{
 		e=_free_entity;
 		_free_entity=e->next;
@@ -76,7 +76,7 @@ Entity *Entity_New(){
 // Entity_Destroy
 //
 //
-void Entity_Destroy(Entity *e){
+void Entity_Destroy(Entity e){
 	if(e->ondelete){
 		e->ondelete(e);
 	}
@@ -89,8 +89,8 @@ void Entity_Destroy(Entity *e){
 // Entity_Copy
 //
 //
-Entity *Entity_Copy(Entity *e){
-	Entity *n;
+Entity Entity_Copy(Entity e){
+	Entity n;
 
 	n=Entity_New();
 
@@ -147,7 +147,7 @@ Entity *Entity_Copy(Entity *e){
 // Entity_Draw
 //
 //
-void Entity_Draw(Entity *e,int x,int y,float f){
+void Entity_Draw(Entity e,int x,int y,float f){
 	vec2 fPos;
 	Draw_SetColor(e->color[0],e->color[1],e->color[2],e->color[3]);
 	if(e->flags&EntityFlag_UpdatedPos){
@@ -164,7 +164,7 @@ void Entity_Draw(Entity *e,int x,int y,float f){
 // Entity_IsVisible
 //
 //
-int Entity_IsVisible(Entity *e,int x,int y,int w,int h){
+int Entity_IsVisible(Entity e,int x,int y,int w,int h){
 	int xmax,xmin;
 	int ymax,ymin;
 	int ih,iw;
@@ -192,7 +192,7 @@ int Entity_IsVisible(Entity *e,int x,int y,int w,int h){
 // Entity_Process
 //
 //
-void Entity_Process(Entity *b,int ft){
+void Entity_Process(Entity b,int ft){
 	b->flags&=~EntityFlag_UpdatedPos;
 
 	// Launch method
@@ -206,7 +206,7 @@ void Entity_Process(Entity *b,int ft){
 // Entity_PostProcess
 //
 //
-void Entity_PostProcess(Entity *e,int ft){
+void Entity_PostProcess(Entity e,int ft){
 	float qlen,len;
 
 	vec2_copy(e->pos0,e->pos);
@@ -249,7 +249,7 @@ void Entity_PostProcess(Entity *e,int ft){
 //
 // Normal response to a collision between circles.
 void Entity_CollisionResponseCircle(
-	Entity *b1,Entity *b2,float t,vec2 n)
+	Entity b1,Entity b2,float t,vec2 n)
 {
 	float moment;
 	vec2 temp;
@@ -297,7 +297,7 @@ void Entity_CollisionResponseCircle(
 //
 // Normal response to a collision with a line.
 void Entity_CollisionResponseLine(
-	Entity *ent,Entity *ent2,float t,vec2 norm,int applyFriction)
+	Entity ent,Entity ent2,float t,vec2 norm,int applyFriction)
 {
 	vec2 pos2,vel2,velFric,intersection;
 	float dist,fric_static,fric_dynamic,fricLen;
@@ -344,7 +344,7 @@ void Entity_CollisionResponseLine(
 // Entity_Collide
 //
 //
-int Entity_Collide(Entity *b1,Entity *b2){
+int Entity_Collide(Entity b1,Entity b2){
 	float t;
 	vec2 n,p;
 	vec2 vel;
@@ -352,7 +352,7 @@ int Entity_Collide(Entity *b1,Entity *b2){
 
 	if(flags&EntityFlag_Platform && !(flags&EntityFlag_Block)){
 		// One of the entities is a platform and none is a block
-		Entity *ent,*ent_plat;
+		Entity ent,ent_plat;
 		float plat_width;
 		vec2 p;
 
@@ -414,7 +414,7 @@ int Entity_Collide(Entity *b1,Entity *b2){
 
 	if(flags&EntityFlag_Block && !(flags&EntityFlag_Platform)){
 		// One of the entities is a block and none is a platform
-		Entity *ent,*ent_block;
+		Entity ent,ent_block;
 		float auxT,block_len;
 		vec2 auxN,p;
 		int applyFriction;
@@ -576,7 +576,7 @@ int Entity_Collide(Entity *b1,Entity *b2){
 // Entity_Overlaps
 //
 //
-void Entity_Overlaps(Entity *b1,Entity *b2){
+void Entity_Overlaps(Entity b1,Entity b2){
 	vec2 len;
 
 	vec2_minus(len,b1->pos,b2->pos);
@@ -603,7 +603,7 @@ void Entity_Overlaps(Entity *b1,Entity *b2){
 // Entity_GetPos
 //
 //
-void Entity_GetPos(Entity *e,vec2 pos){
+void Entity_GetPos(Entity e,vec2 pos){
 	vec2_copy(pos,e->pos);
 }
 
@@ -611,7 +611,7 @@ void Entity_GetPos(Entity *e,vec2 pos){
 // Entity_UpdatePos
 //
 //
-void Entity_UpdatePos(Entity *e,vec2 pos){
+void Entity_UpdatePos(Entity e,vec2 pos){
 
 	// Mark the update of the position.
 	vec2_copy(e->oldpos,e->pos);
@@ -624,7 +624,7 @@ void Entity_UpdatePos(Entity *e,vec2 pos){
 // Entity_AddVelLimit
 //
 //
-void Entity_AddVelLimit(Entity *e,vec2 vel,float limit){
+void Entity_AddVelLimit(Entity e,vec2 vel,float limit){
 	float vlen_orig,vlen;
 	vec2 dir,vel_temp;
 
@@ -649,7 +649,7 @@ void Entity_AddVelLimit(Entity *e,vec2 vel,float limit){
 // Entity_SetColor
 //
 //
-void Entity_SetColor(Entity *e,float r,float g,float b,float a){
+void Entity_SetColor(Entity e,float r,float g,float b,float a){
 	e->color[0]=r;
 	e->color[1]=g;
 	e->color[2]=b;
@@ -661,7 +661,7 @@ void Entity_SetColor(Entity *e,float r,float g,float b,float a){
 // Entity_AddColor
 //
 //
-void Entity_AddColor(Entity *e,float r,float g,float b,float a){
+void Entity_AddColor(Entity e,float r,float g,float b,float a){
 	e->color[0]+=r;
 	if(e->color[0]>1.0f)
 		e->color[0]=1.0f;
@@ -681,7 +681,7 @@ void Entity_AddColor(Entity *e,float r,float g,float b,float a){
 // Entity_SetLight
 //
 //
-void Entity_SetLight(Entity *e,float r,float g,float b,float rad){
+void Entity_SetLight(Entity e,float r,float g,float b,float rad){
 	e->light[0]=r;
 	e->light[1]=g;
 	e->light[2]=b;
@@ -694,7 +694,7 @@ void Entity_SetLight(Entity *e,float r,float g,float b,float rad){
 // Entity_Iluminate
 //
 //
-void Entity_Iluminate(Entity *e,Entity **elist,int n){
+void Entity_Iluminate(Entity e,Entity *elist,int n){
 	int i;
 	vec2 vdist;
 	float qdist,f;
@@ -734,7 +734,7 @@ void Entity_Iluminate(Entity *e,Entity **elist,int n){
 // Entity_MarkUpdateLight
 //
 //
-void Entity_MarkUpdateLight(Entity *e,Entity **elist,int n){
+void Entity_MarkUpdateLight(Entity e,Entity *elist,int n){
 	if(e->flags&EntityFlag_Light){
 		int i;
 		vec2 max,min;

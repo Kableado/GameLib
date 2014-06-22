@@ -9,8 +9,7 @@
 
 
 ////////////////////////////////////////////////
-// Entity //
-////////////
+// Entity
 //
 #define EntityFlag_Collision 1
 #define EntityFlag_Platform 2
@@ -21,8 +20,9 @@
 #define EntityFlag_Light 16
 #define EntityFlag_UpdateLight 32
 #define EntityFlag_UpdatedPos 64
-typedef struct Tag_Entity {
-	struct Tag_Entity *base;
+typedef struct TEntity TEntity, *Entity;
+struct TEntity {
+	Entity base;
 
 	int type;
 	vec2 oldpos;
@@ -50,72 +50,60 @@ typedef struct Tag_Entity {
 	float color[4];
 	float light[4];
 
-	void (*oncopy)(struct Tag_Entity *ent);
-	void (*ondelete)(struct Tag_Entity *ent);
-	void (*proc)(struct Tag_Entity *ent,int ft);
-	void (*postproc)(struct Tag_Entity *ent,int ft);
-	int (*collision)(
-		struct Tag_Entity *ent,
-		struct Tag_Entity *ent2,
-		float t,vec2 n);
-	void (*overlap)(
-		struct Tag_Entity *ent,
-		struct Tag_Entity *ent2);
+	void (*oncopy)(Entity ent);
+	void (*ondelete)(Entity ent);
+	void (*proc)(Entity ent,int ft);
+	void (*postproc)(Entity ent,int ft);
+	int (*collision)(Entity ent, Entity ent2, float t,vec2 n);
+	void (*overlap)(Entity ent, Entity ent2);
 
 	int A;
 	int B;
 	int C;
 	int D;
-	struct Tag_Entity *child;
+	Entity child;
 
 	void *next;
-} Entity;
+};
 
 
 /////////////////////////////
 // Entity_New
 //
-//
-Entity *Entity_New();
+Entity Entity_New();
 
 
 /////////////////////////////
 // Entity_Destroy
 //
-//
-void Entity_Destroy(Entity *e);
+void Entity_Destroy(Entity e);
 
 
 /////////////////////////////
 // Entity_Copy
 //
-//
-Entity *Entity_Copy(Entity *e);
+Entity Entity_Copy(Entity e);
 
 
 /////////////////////////////
 // Entity_Draw
 //
-//
-void Entity_Draw(Entity *e,int x,int y,float f);
+void Entity_Draw(Entity e,int x,int y,float f);
 
 /////////////////////////////
 // Entity_IsVisible
 //
-//
-int Entity_IsVisible(Entity *e,int x,int y,int w,int h);
+int Entity_IsVisible(Entity e,int x,int y,int w,int h);
 
 /////////////////////////////
 // Entity_Process
 //
-//
-void Entity_Process(Entity *e,int ft);
+void Entity_Process(Entity e,int ft);
 
 /////////////////////////////
 // Entity_PostProcess
 //
-//
-void Entity_PostProcess(Entity *e,int ft);
+void Entity_PostProcess(Entity e,int ft);
 
 
 /////////////////////////////
@@ -123,7 +111,7 @@ void Entity_PostProcess(Entity *e,int ft);
 //
 // Normal response to a collision of spheres.
 void Entity_CollisionResponseCircle(
-	Entity *b1,Entity *b2,float t,vec2 n);
+	Entity b1,Entity b2,float t,vec2 n);
 
 
 /////////////////////////////
@@ -131,75 +119,65 @@ void Entity_CollisionResponseCircle(
 //
 // Normal response to a collision with a line.
 void Entity_CollisionResponseLine(
-	Entity *ent,Entity *ent2,float t,vec2 n,int applyFriction);
+	Entity ent,Entity ent2,float t,vec2 n,int applyFriction);
 
 
 /////////////////////////////
 // Entity_Collide
 //
-//
-int Entity_Collide(Entity *b1,Entity *b2);
+int Entity_Collide(Entity b1,Entity b2);
 
 
 /////////////////////////////
 // Entity_Overlaps
 //
-//
-void Entity_Overlaps(Entity *b1,Entity *b2);
+void Entity_Overlaps(Entity b1,Entity b2);
 
 
 /////////////////////////////
 // Entity_GetPos
 //
-//
-void Entity_GetPos(Entity *e,vec2 pos);
+void Entity_GetPos(Entity e,vec2 pos);
 
 
 /////////////////////////////
 // Entity_UpdatePos
 //
-//
-void Entity_UpdatePos(Entity *e,vec2 pos);
+void Entity_UpdatePos(Entity e,vec2 pos);
 
 
 /////////////////////////////
 // Entity_AddVelLimit
 //
-//
-void Entity_AddVelLimit(Entity *e,vec2 vel,float limit);
+void Entity_AddVelLimit(Entity e,vec2 vel,float limit);
 
 
 /////////////////////////////
 // Entity_SetColor
 //
-//
-void Entity_SetColor(Entity *e,float r,float g,float b,float a);
+void Entity_SetColor(Entity e,float r,float g,float b,float a);
 
 
 /////////////////////////////
 // Entity_AddColor
 //
-//
-void Entity_AddColor(Entity *e,float r,float g,float b,float a);
+void Entity_AddColor(Entity e,float r,float g,float b,float a);
 
 
 /////////////////////////////
 // Entity_AddColor
 //
-//
-void Entity_SetLight(Entity *e,float r,float g,float b,float rad);
+void Entity_SetLight(Entity e,float r,float g,float b,float rad);
 
 /////////////////////////////
 // Entity_AddColor
 //
-//
-void Entity_Iluminate(Entity *e,Entity **elist,int n);
+void Entity_Iluminate(Entity e,Entity *elist,int n);
 
 /////////////////////////////
 // Entity_MarkUpdateLight
 //
-//
-void Entity_MarkUpdateLight(Entity *e,Entity **elist,int n);
+void Entity_MarkUpdateLight(Entity e,Entity *elist,int n);
 
 #endif
 

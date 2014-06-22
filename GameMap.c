@@ -35,8 +35,8 @@ int ReadLine(FILE *f,char *line,int max){
 }
 
 
-Entity *GameMapAux_CreateEnt(Entity *ent,int i,int j,int res){
-	Entity *e;
+Entity GameMapAux_CreateEnt(Entity ent,int i,int j,int res){
+	Entity e;
 	vec2 pos;
 	e=Entity_Copy(ent);
 	vec2_set(pos,(res/2)+i*res,(res/2)+j*res);
@@ -98,7 +98,7 @@ int GameMap_LoadLevel(char *filename,int res){
 	// Parse the map
 	for(j=0;j<height;j++){
 		for(i=0;i<width;i++){
-			Entity *ent;
+			Entity ent;
 
 
 

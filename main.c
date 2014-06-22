@@ -26,13 +26,13 @@ void PostProcGame(){
 	GameLib_ForEachEnt(EntityApplyGravity);
 }
 
-void PreDrawGame(){
+void PreDrawGame(float f){
 	//Draw_Clean(128,128,128);
 	Draw_SetColor(1.0f,1.0f,1.0f,1.0f);
 	Draw_DrawImgResized(img_background,0,0,640,480);
 }
 
-void DrawGame(){
+void DrawGame(float f){
 	char cadena[128];
 
 	// Watermark

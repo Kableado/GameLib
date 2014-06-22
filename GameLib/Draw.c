@@ -34,7 +34,7 @@ int _width;
 int _height;
 long long proc_t_frame=33333;
 long long draw_t_frame=16667;
-QuadArray2D *_quadArray=NULL;
+QuadArray2D _quadArray=NULL;
 GLuint _tex=-1;
 float _color[4];
 

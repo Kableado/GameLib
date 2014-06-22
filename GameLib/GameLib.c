@@ -15,7 +15,7 @@
 
 // Globals
 int _running;
-Entity **_entity=NULL;
+Entity *_entity=NULL;
 int *_entity_flag=NULL;
 int _n_entities=0;
 int _n_entities_res=0;
@@ -71,9 +71,9 @@ int GameLib_Init(int w,int h,char *title,int pfps,int fps){
 // GameLib_AddEntity
 //
 // Adds an entity to the game.
-void GameLib_AddEntity(Entity *e){
+void GameLib_AddEntity(Entity e){
 	if(_n_entities>=_n_entities_res){
-		Entity **entity_aux;
+		Entity *entity_aux;
 		int *entity_flag_aux;
 		int i;
 
@@ -82,7 +82,7 @@ void GameLib_AddEntity(Entity *e){
 			_n_entities_res=32;
 		else
 			_n_entities_res*=2;
-		entity_aux=malloc(sizeof(Entity *)*_n_entities_res);
+		entity_aux=malloc(sizeof(Entity)*_n_entities_res);
 		entity_flag_aux=malloc(sizeof(int)*_n_entities_res);
 		for(i=0;i<_n_entities;i++){
 			entity_aux[i]=_entity[i];
@@ -110,7 +110,7 @@ void GameLib_AddEntity(Entity *e){
 // GameLib_UnrefEntity
 //
 // removes the reference to the entity.
-int GameLib_UnrefEntity(Entity *e){
+int GameLib_UnrefEntity(Entity e){
 	int i;
 	for(i=0;i<_n_entities;i++){
 		if(e==_entity[i]){
@@ -136,7 +136,7 @@ int GameLib_UnrefEntity(Entity *e){
 // GameLib_DelEntity
 //
 // Adds an entity to the game.
-int GameLib_DelEntity(Entity *e){
+int GameLib_DelEntity(Entity e){
 	int i;
 	if((i=GameLib_UnrefEntity(e))==-1){
 		return(0);
@@ -281,7 +281,7 @@ int GameLib_ProcLoop(){
 				}
 			}
 			if(swap){
-				Entity *ent;
+				Entity ent;
 				ent=_entity[i];
 				_entity[i]=_entity[i-1];
 				_entity[i-1]=ent;
@@ -337,7 +337,7 @@ void GameLib_DrawLoop(float f){
 	// Draw entities
 	GameLib_Compactate();_entities_lock=1;
 	for(i=0;i<_n_entities;i++){
-		Entity *e=_entity[i];
+		Entity e=_entity[i];
 
 		// Check visivility
 		if(!Entity_IsVisible(e,
@@ -481,7 +481,7 @@ void GameLib_DelEnts(){
 // GameLib_ForEachEn
 //
 // Iterates every entity.
-void GameLib_ForEachEnt(int (*func)(Entity *ent)){
+void GameLib_ForEachEnt(int (*func)(Entity ent)){
 	int i;
 	for(i=0;i<_n_entities;i++){
 		if(!_entity[i])
@@ -551,7 +551,7 @@ void GameLib_Iluminate(){
 // GameLib_EntitySetLight
 //
 //
-void GameLib_EntitySetLight(Entity *e,float r,float g,float b,float rad){
+void GameLib_EntitySetLight(Entity e,float r,float g,float b,float rad){
 	if(e->flags&EntityFlag_Light){
 		Entity_MarkUpdateLight(e,_entity,_n_entities);
 		Entity_SetLight(e,r,g,b,rad);
