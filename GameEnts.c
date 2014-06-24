@@ -141,6 +141,7 @@ void player_proc(Entity e,int ft){
 		// Apply jump
 		vec2_set(jump,0.0f,-jumpVel);
 		vec2_plus(e->vel,e->vel,jump);
+		Entity_CalcBBox(e);
 
 		// FIXME: play sound
 	}
@@ -182,8 +183,10 @@ void wizard_proc(Entity e,int ft){
 		vec2 jump;
 
 		// Apply jump
-		vec2_set(jump,0.0f,-(jumpVel+fabs(e->vel[0])));
-		vec2_plus(e->vel,e->vel,jump);
+		if(e->vel[1]>(-jumpVel)){
+			e->vel[1]=-jumpVel;
+		}
+		Entity_CalcBBox(e);
 
 		// FIXME: play sound
 	}
@@ -223,6 +226,7 @@ void wizard_proc(Entity e,int ft){
 		if(e->A==1){
 			vec2_set(e2->vel,shootVel,0);
 		}
+		Entity_CalcBBox(e2);
 		GameLib_AddEntity(e2);
 
 	}
@@ -343,6 +347,7 @@ void bunny_proc(Entity e,int ft){
 		// Apply jump
 		vec2_set(jump,0.0f,-jumpVel);
 		vec2_plus(e->vel,e->vel,jump);
+		Entity_CalcBBox(e);
 
 		// FIXME: play sound
 
@@ -402,6 +407,7 @@ void spider_proc(Entity e,int ft){
 		// Apply jump
 		vec2_set(jump,0.0f,-jumpVel);
 		vec2_plus(e->vel,e->vel,jump);
+		Entity_CalcBBox(e);
 
 		// FIXME: play sound
 

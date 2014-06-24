@@ -120,10 +120,9 @@ int Colision_CircleCircle(
 	vec2_scale(cen_a,cir2,invrads);
 	if(Intersec_RayUnitCircle(orig_a,vel_a,cen_a,t)){
 		// Calculate n
-		vec2_scale(temp,vel,*t);
-		vec2_plus(temp,cir1,temp);
-		vec2_minus(temp,cir2,temp);
-		vec2_scale(n,temp,1.0f/rads);
+		vec2_scaleadd(temp,cir1,vel,*t);
+		vec2_minus(n,temp,cir2);
+		vec2_scale(n,n,invrads);
 		return(1);
 	}
 	return(0);
