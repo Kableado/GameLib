@@ -1,4 +1,4 @@
-// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011-2014 Valeriano Alfonso Rodriguez (Kableado)
 
 #ifndef _ENTITY_H_
 #define _ENTITY_H_
@@ -63,7 +63,10 @@ struct TEntity {
 	int D;
 	Entity child;
 
-	void *next;
+	int maxX,minX;
+	int maxY,minY;
+
+	Entity next;
 };
 
 
@@ -86,24 +89,88 @@ Entity Entity_Copy(Entity e);
 
 
 /////////////////////////////
+// Entity_CalcBBox
+//
+//
+void Entity_CalcBBox(Entity e);
+
+
+/////////////////////////////
+// Entity_BBoxIntersect
+//
+//
+int Entity_BBoxIntersect(Entity ent1,Entity ent2);
+
+
+/////////////////////////////
 // Entity_Draw
 //
 void Entity_Draw(Entity e,int x,int y,float f);
+
 
 /////////////////////////////
 // Entity_IsVisible
 //
 int Entity_IsVisible(Entity e,int x,int y,int w,int h);
 
+
 /////////////////////////////
 // Entity_Process
 //
 void Entity_Process(Entity e,int ft);
 
+
 /////////////////////////////
 // Entity_PostProcess
 //
 void Entity_PostProcess(Entity e,int ft);
+
+
+////////////////////////////////////////////////
+// CollisionInfo
+//
+#define CollisionResponse_Circle 1
+#define CollisionResponse_Line 2
+typedef struct TCollisionInfo TCollisionInfo,*CollisionInfo;
+struct TCollisionInfo {
+	int responseType;
+	Entity ent1;
+	Entity ent2;
+	float t;
+	vec2 n;
+	int applyFriction;
+
+	CollisionInfo next;
+};
+
+
+/////////////////////////////
+// CollisionInfo_New
+//
+//
+CollisionInfo CollisionInfo_New(int responseType,Entity ent1,Entity ent2,float t,vec2 n,int applyFriction);
+
+
+/////////////////////////////
+// CollisionInfo_Free
+//
+//
+void CollisionInfo_Free(CollisionInfo *collInfoRef);
+
+
+/////////////////////////////
+// CollisionInfo_Add
+//
+//
+void CollisionInfo_Add(CollisionInfo *collInfo,
+	int responseType,Entity ent1,Entity ent2,float t,vec2 n,int applyFriction);
+
+
+/////////////////////////////
+// Entity_CheckCollision
+//
+//
+int Entity_CheckCollision(Entity ent1,Entity ent2,CollisionInfo *collInfoRef);
 
 
 /////////////////////////////
@@ -123,9 +190,10 @@ void Entity_CollisionResponseLine(
 
 
 /////////////////////////////
-// Entity_Collide
+// Entity_CollisionInfoResponse
 //
-int Entity_Collide(Entity b1,Entity b2);
+//
+int Entity_CollisionInfoResponse(CollisionInfo collInfo);
 
 
 /////////////////////////////
@@ -169,15 +237,18 @@ void Entity_AddColor(Entity e,float r,float g,float b,float a);
 //
 void Entity_SetLight(Entity e,float r,float g,float b,float rad);
 
+
 /////////////////////////////
 // Entity_AddColor
 //
 void Entity_Iluminate(Entity e,Entity *elist,int n);
 
+
 /////////////////////////////
 // Entity_MarkUpdateLight
 //
 void Entity_MarkUpdateLight(Entity e,Entity *elist,int n);
+
 
 #endif
 

@@ -214,19 +214,24 @@ int GameLib_ProcLoop(){
 	count=0;
 	do{
 		repeat=0;
-		for(i=0;i<_n_entities;i++){
+		CollisionInfo collInfo=NULL;
+		for(i=0;i<(_n_entities-1);i++){
 			if(!(_entity[i]->flags&EntityFlag_Collision) || _entity[i]->mass<0.0f)
 				continue;
-			for(j=0;j<_n_entities;j++){
-				if(!(_entity[j]->flags&EntityFlag_Collision) || i==j)
+			for(j=i;j<_n_entities;j++){
+				if(!(_entity[j]->flags&EntityFlag_Collision))
 					continue;
-				if(Entity_Collide(_entity[i],_entity[j])){
-					repeat=1;
-				}
+				if(!Entity_BBoxIntersect(_entity[i],_entity[j]))
+					continue;
+				Entity_CheckCollision(_entity[i],_entity[j],&collInfo);
 			}
 		}
+		if(Entity_CollisionInfoResponse(collInfo)){
+			repeat=1;
+		}
+		CollisionInfo_Destroy(&collInfo);
 		count++;
-	}while(repeat && count<10);
+	}while(repeat && count<50);
 
 	// Stop remaining collisions
 	if(count==10){
@@ -236,9 +241,11 @@ int GameLib_ProcLoop(){
 			for(j=0;j<_n_entities;j++){
 				if(!(_entity[j]->flags&EntityFlag_Collision) || i==j)
 					continue;
-				if(Entity_Collide(_entity[i],_entity[j])){
+				if(Entity_CheckCollision(_entity[i],_entity[j],NULL)){
 					vec2_set(_entity[i]->vel,0,0);
+					Entity_CalcBBox(_entity[i]);
 					vec2_set(_entity[j]->vel,0,0);
+					Entity_CalcBBox(_entity[j]);
 				}
 			}
 		}
