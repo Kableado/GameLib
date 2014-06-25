@@ -358,6 +358,24 @@ void CollisionInfo_Add(CollisionInfo *collInfoRef,
 
 
 /////////////////////////////
+// CollisionInfo_CheckRepetition
+//
+//
+int CollisionInfo_CheckRepetition(CollisionInfo collInfo,Entity ent1,Entity ent2)
+{
+	while(collInfo!=NULL){
+		if((collInfo->ent1==ent1 && collInfo->ent2==ent2) ||
+			(collInfo->ent1==ent2 && collInfo->ent2==ent1))
+		{
+			return(1);
+		}
+		collInfo=collInfo->next;
+	}
+	return(0);
+}
+
+
+/////////////////////////////
 // Entity_CheckCollisions
 //
 //

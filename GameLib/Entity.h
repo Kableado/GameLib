@@ -167,6 +167,13 @@ void CollisionInfo_Add(CollisionInfo *collInfo,
 
 
 /////////////////////////////
+// CollisionInfo_CheckRepetition
+//
+//
+int CollisionInfo_CheckRepetition(CollisionInfo collInfo,Entity ent1,Entity ent2);
+
+
+/////////////////////////////
 // Entity_CheckCollision
 //
 //
