@@ -215,14 +215,21 @@ int GameLib_ProcLoop(){
 	do{
 		repeat=0;
 		CollisionInfo collInfo=NULL;
-		for(i=0;i<(_n_entities-1);i++){
+		for(i=0;i<_n_entities;i++){
 			if(!(_entity[i]->flags&EntityFlag_Collision) || _entity[i]->mass<0.0f)
 				continue;
-			for(j=i;j<_n_entities;j++){
-				if(!(_entity[j]->flags&EntityFlag_Collision))
+			if(_entity[i]->vel[0]<=0.0f && _entity[i]->vel[0]>=-0.0f &&
+				_entity[i]->vel[1]<=0.0f && _entity[i]->vel[1]>=-0.0f)
+			{
+				continue;
+			}
+			for(j=0;j<_n_entities;j++){
+				if(!(_entity[j]->flags&EntityFlag_Collision) ||
+					!Entity_BBoxIntersect(_entity[i],_entity[j]) ||
+					CollisionInfo_CheckRepetition(collInfo,_entity[i],_entity[j]))
+				{
 					continue;
-				if(!Entity_BBoxIntersect(_entity[i],_entity[j]))
-					continue;
+				}
 				Entity_CheckCollision(_entity[i],_entity[j],&collInfo);
 			}
 		}
