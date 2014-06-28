@@ -88,10 +88,17 @@ void GameLib_DelEnts();
 
 
 /////////////////////////////
-// GameLib_ForEachEn
+// GameLib_ForEachEnt
 //
 // Iterates every entity.
 void GameLib_ForEachEnt(int (*func)(Entity ent));
+
+
+/////////////////////////////
+// GameLib_SearchEnt
+//
+// Searches throught the entities.
+Entity GameLib_SearchEnt(int (*func)(Entity ent,void *d),void *d);
 
 
 /////////////////////////////

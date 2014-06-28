@@ -508,6 +508,25 @@ void GameLib_ForEachEnt(int (*func)(Entity ent)){
 
 
 /////////////////////////////
+// GameLib_SearchEnt
+//
+// Searches throught the entities.
+Entity GameLib_SearchEnt(int (*func)(Entity ent,void *d),void *d){
+	int i;
+	Entity ent=NULL;
+	for(i=0;i<_n_entities;i++){
+		if(!_entity[i])
+			continue;
+		if(func(_entity[i],d)){
+			ent=_entity[i];
+			break;
+		}
+	}
+	return ent;
+}
+
+
+/////////////////////////////
 // GameLib_PlaySound
 //
 //
