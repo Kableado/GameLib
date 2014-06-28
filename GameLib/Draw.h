@@ -64,7 +64,6 @@ void Draw_SetOffset(DrawImg img,int  x,int  y);
 void Draw_GetOffset(DrawImg img,int *x,int *y);
 
 
-
 /////////////////////////////
 // Draw_DrawImg
 //

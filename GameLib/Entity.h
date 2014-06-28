@@ -63,8 +63,8 @@ struct TEntity {
 	int D;
 	Entity child;
 
-	int maxX,minX;
-	int maxY,minY;
+	float maxX,minX;
+	float maxY,minY;
 
 	Entity next;
 };
