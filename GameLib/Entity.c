@@ -149,10 +149,11 @@ Entity Entity_Copy(Entity e){
 // Entity_CalcBBox
 //
 //
+#define BBox_ExtraMargin 10
 #define max(a,b) ((a)>(b)?(a):(b))
 void Entity_CalcBBox(Entity e){
-	int hHeight=(max(e->height,e->radius)/2)+2;
-	int hWidth=(max(e->width,e->radius)/2)+2;
+	float hHeight=(max(e->height,e->radius)/2)+BBox_ExtraMargin;
+	float hWidth=(max(e->width,e->radius)/2)+BBox_ExtraMargin;
 	if(e->vel[0]>0){
 		e->maxX=e->pos[0]+e->vel[0]+hWidth;
 		e->minX=e->pos[0]-hWidth;
