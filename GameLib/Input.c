@@ -57,7 +57,7 @@ void Input_Frame(){
 	Uint8* keys;
 
 	// Process Keys
-	keys=SDL_GetKeyState(NULL);
+	keys=(Uint8 *)SDL_GetKeyState(NULL);
 	Input_SetKey(InputKey_Action1,keys[SDLK_z]);
 	Input_SetKey(InputKey_Action2,keys[SDLK_x]);
 	Input_SetKey(InputKey_Up,keys[SDLK_UP]);

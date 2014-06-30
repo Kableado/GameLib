@@ -1,0 +1,14 @@
+CC= python /c/Program\ Files/Emscripten/emscripten/1.7.8/emcc
+LAUNCHER= start
+RM=rm -rf
+
+LIBS=
+CFLAGS= -s LEGACY_GL_EMULATION=1 -s ASM_JS=1 -O1
+LDFLAGS= --preload-file data
+
+RESULT=game.html
+BUILDDIR=build-emscripten
+
+include Makefile.common
+
+

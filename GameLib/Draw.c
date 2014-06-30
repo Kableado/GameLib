@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #ifdef WIN32
@@ -20,12 +21,17 @@
 	#include <GL/gl.h>
 #endif
 #endif
+#ifdef EMSCRIPTEN
+	#include <emscripten.h>
+#endif
 #include "lodepng.c"
 #include <SDL/SDL.h>
 
 #include "Time.h"
 #include "Util.h"
 #include "QuadArray2D.h"
+#include "Audio.h"
+#include "Input.h"
 #include "Draw.h"
 
 
@@ -40,6 +46,7 @@ struct TDrawImage {
 	int w,h;
 	GLuint tex;
 };
+
 
 
 // Globals
@@ -155,68 +162,96 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 }
 
 
+/////////////////////////////
+// Draw_LoopIteration
+//
+// One iteracion of the loop updating the game window.
+int (*_proc_func)()=NULL;
+void (*_draw_func)(float f)=NULL;
+long long _accTime;
+int Draw_LoopIteration(){
+	SDL_Event event;
+	Uint8* keys;
+	int done=0;
+	// Update screen
+	SDL_GL_SwapBuffers();
+
+	// Process Events
+	while(SDL_PollEvent(&event) ){
+		if(event.type == SDL_QUIT ){
+			done=1;
+		}
+		if(event.type == SDL_KEYDOWN ){
+			if(event.key.keysym.sym == SDLK_ESCAPE ) {
+				done=1;
+			}
+		}
+	}
+
+#ifndef EMSCRIPTEN
+	// Process keys for Draw
+	keys=(Uint8 *)SDL_GetKeyState(NULL);
+	if(keys[SDLK_F12]){
+		// Screenshot key
+		Draw_SaveScreenshoot("shot.bmp");
+	}
+#endif
+
+	// Sound Frame
+	Audio_Frame();
+
+	// Process
+	if(_proc_func){
+		if(_accTime>100000){
+			_accTime=100000;
+		}
+		while(_accTime>=proc_t_frame && !done){
+			Input_Frame();
+			if(!_proc_func()){
+				done=1;
+			}
+			_accTime-=proc_t_frame;
+		}
+	}
+
+	// Draw
+	if(_draw_func){
+		float frameFactor=0.0f;
+		frameFactor=(float)_accTime/(float)proc_t_frame;
+		_draw_func(frameFactor);
+		Draw_Flush();
+	}
+
+	return done;
+}
+
+#ifdef EMSCRIPTEN
+long long _procTime1;
+long long _procTime2;
+void Draw_LoopIterationAux(){
+	Draw_LoopIteration();
+
+	// Update time
+	_procTime2=Time_GetTime();
+	_accTime+=_procTime2-_procTime1;
+	_procTime1=_procTime2;
+}
+#endif
 
 /////////////////////////////
 // Draw_Loop
 //
 // Loops updating the game window.
 void Draw_Loop(int (*proc)(),void (*draw)(float f)){
-	int done=0;
-	SDL_Event event;
-	Uint8* keys;
-	long long newTime,accTime;
+	long long newTime;
 	long long procTime1,procTime2,drawTime1,drawTime2,waitTime;
-	float frameFactor=0.0f;
 
-	accTime=proc_t_frame;
+	_proc_func=proc;
+	_draw_func=draw;
+#ifndef EMSCRIPTEN
+	_accTime=proc_t_frame;
 	procTime1=drawTime1=Time_GetTime();
-	while(!done){
-
-		// Update screen
-		SDL_GL_SwapBuffers();
-
-		// Process Events
-		while(SDL_PollEvent(&event) ){
-			if(event.type == SDL_QUIT ){
-				done=1;
-			}
-			if(event.type == SDL_KEYDOWN ){
-				if(event.key.keysym.sym == SDLK_ESCAPE ) {
-					done=1;
-				}
-			}
-		}
-
-		// Process keys for Draw
-		keys=SDL_GetKeyState(NULL);
-		if(keys[SDLK_F12]){
-			// Screenshot key
-			Draw_SaveScreenshoot("shot.bmp");
-		}
-
-		// Sound Frame
-		Audio_Frame();
-
-		// Process
-		if(proc){
-			if(accTime>100000){
-				accTime=100000;
-			}
-			while(accTime>=proc_t_frame && !done){
-				Input_Frame();
-				if(!proc()){
-					done=1;
-				}
-				accTime-=proc_t_frame;
-			}
-		}
-
-		// Draw
-		if(draw){
-			frameFactor=(float)accTime/(float)proc_t_frame;
-			draw(frameFactor);
-			Draw_Flush();
-		}
+	while(!Draw_LoopIteration()){
 
 		// Wait to round draw_t_frame
 		drawTime2=Time_GetTime();
@@ -227,9 +262,14 @@ void Draw_Loop(int (*proc)(),void (*draw)(float f)){
 
 		// Update time
 		procTime2=Time_GetTime();
-		accTime+=procTime2-procTime1;
+		_accTime+=procTime2-procTime1;
 		procTime1=procTime2;
 	}
+#else
+	_accTime=proc_t_frame;
+	_procTime1=Time_GetTime();
+	emscripten_set_main_loop(Draw_LoopIterationAux, _fps, 1);
+#endif
 }
 
 

@@ -1,6 +1,9 @@
 // Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
 
 #include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <SDL/SDL.h>
 
 #include "Time.h"

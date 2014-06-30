@@ -50,8 +50,9 @@ clean:
 	rm -f $(OBJS) $(BUILDDIR)/$(RESULT)
 
 run: $(BUILDDIR)/$(RESULT)
-	./$(BUILDDIR)/$(RESULT) debug
+	$(LAUNCHER) ./$(BUILDDIR)/$(RESULT) debug
 
+rebuild: clean all
 
 #################
 # GameLib Rules #
@@ -95,7 +96,7 @@ $(BUILDDIR)/main.o: main.c $(HEADS)
 ################
 
 $(BUILDDIR)/$(RESULT): $(OBJS)
-	$(CC) -o $(BUILDDIR)/$(RESULT) $(OBJS) $(LIBS) $(CFLAGS)
+	$(CC) -o $(BUILDDIR)/$(RESULT) $(OBJS) $(LIBS) $(CFLAGS) $(LDFLAGS)
 
 
 
