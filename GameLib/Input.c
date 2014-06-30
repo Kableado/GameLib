@@ -66,6 +66,8 @@ void Input_Frame(){
 	Input_SetKey(InputKey_Right,keys[SDLK_RIGHT]);
 	Input_SetKey(InputKey_Jump,keys[SDLK_SPACE]);
 	Input_SetKey(InputKey_Continue,keys[SDLK_RETURN]|keys[SDLK_KP_ENTER]);
+
+	Input_SetKey(InputKey_DumpProfiling,keys[SDLK_p]);
 }
 
 
