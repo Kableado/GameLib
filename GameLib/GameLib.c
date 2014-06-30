@@ -378,6 +378,26 @@ void GameLib_DrawLoop(float f){
 	t_draw+=Time_GetTime()-time;
 
 	fdraw_count++;
+
+	if(Input_GetKey(InputKey_DumpProfiling)==InputKey_Pressed){
+		printf("Profiling:::::::::\n");
+		if(fproc_count>0){
+			printf("t_proc.....:%6lld\n",t_proc/fproc_count);
+			printf("t_col......:%6lld\n",t_col/fproc_count);
+			printf("t_over.....:%6lld\n",t_over/fproc_count);
+			printf("t_postproc.:%6lld\n",t_postproc/fproc_count);
+		}
+		if(fdraw_count>0){
+			printf("t_draw.....:%6lld\n",t_draw/fdraw_count);
+		}
+		t_proc=0;
+		t_col=0;
+		t_over=0;
+		t_postproc=0;
+		t_draw=0;
+		fproc_count=0;
+		fdraw_count=0;
+	}
 }
 
 
@@ -405,15 +425,6 @@ void GameLib_Loop(
 	fproc_count=0;
 	fdraw_count=0;
 	Draw_Loop(GameLib_ProcLoop,GameLib_DrawLoop);
-
-	if (gamelib_debug) {
-		printf("Profiling:::::::::\n");
-		printf("t_proc.....:%6lld\n",t_proc/fproc_count);
-		printf("t_col......:%6lld\n",t_col/fproc_count);
-		printf("t_over.....:%6lld\n",t_over/fproc_count);
-		printf("t_postproc.:%6lld\n",t_postproc/fproc_count);
-		printf("t_draw.....:%6lld\n",t_draw/fdraw_count);
-	}
 }
 
 
