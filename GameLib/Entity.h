@@ -152,10 +152,10 @@ CollisionInfo CollisionInfo_New(int responseType,Entity ent1,Entity ent2,float t
 
 
 /////////////////////////////
-// CollisionInfo_Free
+// CollisionInfo_Destroy
 //
 //
-void CollisionInfo_Free(CollisionInfo *collInfoRef);
+void CollisionInfo_Destroy(CollisionInfo *collInfoRef);
 
 
 /////////////////////////////

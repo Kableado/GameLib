@@ -200,3 +200,17 @@ float fabsmod(float v,int d){
 
 
 
+/////////////////////////////
+// EndsWith
+//
+int EndsWith(char *str, char *suffix){
+    if (!str || !suffix)
+        return 0;
+    int lenStr = strlen(str);
+    int lenSuffix = strlen(suffix);
+    if (lenSuffix > lenStr)
+        return 0;
+    return strncmp(str+lenStr-lenSuffix, suffix, lenSuffix)==0;
+}
+
+

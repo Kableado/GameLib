@@ -69,7 +69,7 @@ int main(int argc,char *argv[]){
 	font=Draw_DefaultFont(255,255,255,255);
 	font_shad=Draw_DefaultFont(0,0,0,127);
 
-	img_background=Draw_LoadImage("data/heaven.bmp");
+	img_background=Draw_LoadImage("data/heaven.png");
 	Draw_SetOffset(img_background,0,0);
 
 	GameEnts_Init();
