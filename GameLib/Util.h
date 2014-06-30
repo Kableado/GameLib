@@ -37,6 +37,7 @@ float vec2_norm(vec2 v);
 // Intersection between a ray and a Unit Circle.
 int Intersec_RayUnitCircle(vec2 orig,vec2 vel,vec2 center,float *t);
 
+
 /////////////////////////////
 // Intersect_CircleCircle
 //
@@ -45,6 +46,7 @@ int Colision_CircleCircle(
 	vec2 cir1,float ra,vec2 vel,
 	vec2 cb,float rb,
 	float *t,vec2 n);
+
 
 /////////////////////////////
 // Intersect_RayEdge
@@ -56,12 +58,18 @@ int Intersect_RayEdge(
 	float *t);
 
 
-
 /////////////////////////////
 // absmod
 //
 int absmod(int v,int d);
 float fabsmod(float v,int d);
+
+
+
+/////////////////////////////
+// EndsWith
+//
+int EndsWith(char *str, char *suffix);
 
 
 #endif

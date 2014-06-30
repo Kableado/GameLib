@@ -20,6 +20,7 @@
 	#include <GL/gl.h>
 #endif
 #endif
+#include "lodepng.c"
 #include <SDL/SDL.h>
 
 #include "Time.h"
@@ -28,15 +29,32 @@
 #include "Draw.h"
 
 
+////////////////////////////////////////////////
+// DrawImage //
+///////////////
+// Image container.
+typedef struct TDrawImage TDrawImage, *DrawImage;
+struct TDrawImage {
+	unsigned char *data;
+	int x,y;
+	int w,h;
+	GLuint tex;
+};
+
+
 // Globals
 SDL_Surface *_screen=NULL;
 int _width;
 int _height;
 long long proc_t_frame=33333;
 long long draw_t_frame=16667;
+int _fps=60;
 QuadArray2D _quadArray=NULL;
-GLuint _tex=-1;
+DrawImage _currentImg=NULL;
 float _color[4];
+
+
+
 
 /////////////////////////////
 // Draw_Init
@@ -84,6 +102,7 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 	SDL_WM_SetCaption(title, NULL);
 	proc_t_frame=1000000/pfps;
 	draw_t_frame=1000000/fps;
+	_fps=fps;
 	_width=width;
 	_height=height;
 
@@ -228,88 +247,49 @@ void Draw_Clean(
 }
 
 
-
-////////////////////////////////////////////////
-// DrawImage //
-///////////////
-// Image container.
-typedef struct Tag_DrawImage {
-	SDL_Surface *surf;
-	GLuint tex;
-	int x,y;
-} DrawImage;
-
-
-/////////////////////////////
-// Draw_LoadSurface
-//
-// Loads a surface.
-SDL_Surface *Draw_LoadSurface(char *filename){
-	SDL_Surface *surf;
-
-	// Load the BMP as a surface
-	surf=SDL_LoadBMP(filename);
-	if(surf == NULL){
-		printf("Draw_LoadImage: Failure Loading image: %s\n",filename);
-		printf("Draw_LoadImage: SDL Error: %s\n",SDL_GetError());
-		return(NULL);
-	}
-
-	if (surf->format->BytesPerPixel==4) {
-		// Swap RGB to BGR
-		Uint32 *ptr,*ptr_end;
-		ptr=(Uint32 *)surf->pixels;
-		ptr_end=ptr+(surf->w*surf->h);
-		while (ptr<ptr_end) {
-			unsigned char temp;
-			unsigned char *pixel;
-			pixel=(unsigned char *)ptr;
-			temp=pixel[2];
-			pixel[2]=pixel[0];
-			pixel[0]=temp;
-			ptr++;
-		}
-	}
-
-	return(surf);
-}
-
-
 /////////////////////////////
 // Draw_UploadGLTexture
 //
 // Uploads a OpenGL texture.
-GLuint Draw_UploadGLTexture(SDL_Surface *surf){
+GLuint Draw_UploadGLTexture(int w, int h, unsigned char *pixels){
 	GLuint tex;
 
 	// Generate OpenGL texture
 	glGenTextures(1, &tex);
 	glBindTexture(GL_TEXTURE_2D, tex);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
 
 	// Load OpenGL texture
 	glBindTexture(GL_TEXTURE_2D, tex);
-	glPixelStorei( GL_UNPACK_ROW_LENGTH, surf->w );
+	glPixelStorei( GL_UNPACK_ROW_LENGTH, w );
 	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,
-	//			 surf->w, surf->h, 0,
-	//			 GL_RGBA, GL_UNSIGNED_BYTE, surf->pixels);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-				 surf->w, surf->h, 0,
-				 GL_RGBA, GL_UNSIGNED_BYTE, surf->pixels);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8,
-	//			imagen->ancho, imagen->alto, 0,
-	//			GL_RGB, GL_UNSIGNED_BYTE, imagen->data);
+				 w, h, 0,
+				 GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
 	return(tex);
+}
+
+
+/////////////////////////////
+// Draw_CreateImage
+//
+DrawImg Draw_CreateImage(int w,int h){
+	DrawImage image;
+
+	// Create the image container
+	image=malloc(sizeof(TDrawImage));
+	image->data=malloc(w*h*4);
+	image->x=0;
+	image->y=0;
+	image->w=w;
+	image->h=h;
+	image->tex=-1;
+
+	return((DrawImg)image);
 }
 
 
@@ -318,28 +298,28 @@ GLuint Draw_UploadGLTexture(SDL_Surface *surf){
 //
 // Loads a image, giving a reference.
 DrawImg Draw_LoadImage(char *filename){
-	DrawImage *image;
-	SDL_Surface *surf;
+	DrawImage image;
 
-
-	// Loads the surface
-	surf=Draw_LoadSurface(filename);
-	if(surf == NULL){
-		return(NULL);
+	// Try loading PNG images
+	if(EndsWith(filename,".png") || EndsWith(filename,".PNG")){
+		image=malloc(sizeof(TDrawImage));
+		unsigned error = lodepng_decode32_file(
+			&image->data,
+			(unsigned*)&image->w,
+			(unsigned*)&image->h,
+			filename);
+		if(error){
+			printf("Draw_LoadImage: PNG decoder error %u: %s\n", error, lodepng_error_text(error));
+			return(NULL);
+		}
+		image->x=-(int)(image->w/2);
+		image->y=-(int)(image->h/2);
+		image->tex=-1;
+		return (DrawImg)image;
 	}
 
-
-	// Create the image container
-	image=malloc(sizeof(DrawImage));
-	image->surf=surf;
-	image->tex=Draw_UploadGLTexture(surf);
-	//image->x=0;
-	//image->y=0;
-	image->x=-(surf->w/2);
-	image->y=-(surf->h/2);
-
-
-	return((DrawImg)image);
+	printf("Draw_LoadImage: Image type not supported: %s\n",filename);
+	return(NULL);
 }
 
 
@@ -348,11 +328,11 @@ DrawImg Draw_LoadImage(char *filename){
 //
 // Gets the image size.
 void Draw_GetSize(DrawImg img,int *w,int *h){
-	DrawImage *image=img;
+	DrawImage image=img;
 
 	// Gets the image size
-	*w=image->surf->w;
-	*h=image->surf->h;
+	*w=image->w;
+	*h=image->h;
 }
 
 
@@ -362,14 +342,14 @@ void Draw_GetSize(DrawImg img,int *w,int *h){
 //
 // Sets and Gets the image offset.
 void Draw_SetOffset(DrawImg img,int  x,int  y){
-	DrawImage *image=img;
+	DrawImage image=img;
 
 	// Sets the image offset
 	image->x=x;
 	image->y=y;
 }
 void Draw_GetOffset(DrawImg img,int *x,int *y){
-	DrawImage *image=img;
+	DrawImage image=img;
 
 	// Gets the image offset
 	*x=image->x;
@@ -382,9 +362,15 @@ void Draw_GetOffset(DrawImg img,int *x,int *y){
 //
 // Performs all the queued draw actions.
 void Draw_Flush(){
+	if(_currentImg==NULL){
+		return;
+	}
+	if(_currentImg->tex==-1){
+		_currentImg->tex=Draw_UploadGLTexture(_currentImg->w, _currentImg->h, _currentImg->data);
+	}
 
 	// Draw the quad array
-	glBindTexture(GL_TEXTURE_2D, _tex);
+	glBindTexture(GL_TEXTURE_2D, _currentImg->tex);
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_VERTEX_ARRAY);
@@ -402,7 +388,6 @@ void Draw_Flush(){
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
-
 	// Empty it
 	QuadArray2D_Clean(_quadArray);
 }
@@ -413,19 +398,19 @@ void Draw_Flush(){
 //
 // Draws an image.
 void Draw_DrawImg(DrawImg img,int x,int y){
-	DrawImage *image=img;
+	DrawImage image=img;
 	float x1,x2,y1,y2;
 
 	// Prepare
 	x1=x+image->x;
 	y1=_height-(y+image->y);
-	x2=(x+image->x)+image->surf->w;
-	y2=_height-((y+image->y)+image->surf->h);
+	x2=(x+image->x)+image->w;
+	y2=_height-((y+image->y)+image->h);
 
 	// Draw a quad
-	if(_tex!=image->tex){
+	if(_currentImg!=image){
 		Draw_Flush();
-		_tex=image->tex;
+		_currentImg=image;
 	}
 	QuadArray2D_AddQuad(_quadArray,
 		x1,y1,0.0f,0.0f,
@@ -439,7 +424,7 @@ void Draw_DrawImg(DrawImg img,int x,int y){
 //
 // Draws an image, resizing.
 void Draw_DrawImgResized(DrawImg img,int x,int y,float w,float h){
-	DrawImage *image=img;
+	DrawImage image=img;
 	int x1,x2,y1,y2;
 
 	// Prepare
@@ -449,9 +434,9 @@ void Draw_DrawImgResized(DrawImg img,int x,int y,float w,float h){
 	y2=_height-((y+image->y)+h);
 
 	// Draw a quad
-	if(_tex!=image->tex){
+	if(_currentImg!=image){
 		Draw_Flush();
-		_tex=image->tex;
+		_currentImg=image;
 	}
 	QuadArray2D_AddQuad(_quadArray,
 		x1,y1,0.0f,0.0f,
@@ -466,7 +451,7 @@ void Draw_DrawImgResized(DrawImg img,int x,int y,float w,float h){
 //
 // Draws an image part.
 void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int i){
-	DrawImage *image=img;
+	DrawImage image=img;
 	int x1,x2,y1,y2;
 	float us,u1,u2;
 
@@ -474,15 +459,15 @@ void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int i){
 	x1=x+image->x;
 	y1=_height-(y+image->y);
 	x2=(x+image->x)+w;
-	y2=_height-((y+image->y)+image->surf->h);
-	us=1.0f/image->surf->w;
+	y2=_height-((y+image->y)+image->h);
+	us=1.0f/image->w;
 	u1=us*i*w;
 	u2=u1+us*w;
 
 	// Draw a quad
-	if(_tex!=image->tex){
+	if(_currentImg!=image){
 		Draw_Flush();
-		_tex=image->tex;
+		_currentImg=image;
 	}
 	QuadArray2D_AddQuad(_quadArray,
 		x1,y1,u1,0.0f,
@@ -516,51 +501,41 @@ typedef struct {
 
 
 /////////////////////////////
-// Draw_DefaultFont
+// Draw_DefaultImage
 //
-// Creates a surface with the default font.
+// Creates a image with the default font.
 #include "FontData.h"
-SDL_Surface *Draw_DefaultFontSurface(
+DrawImage Draw_DefaultFontImage(
 	unsigned char r,
 	unsigned char g,
 	unsigned char b,
 	unsigned char a)
 {
-	SDL_Surface *surf;
+	DrawImage img;
 	int x,y,c;
 	Uint32 color,color2;
 
-	// Create the surface
-	surf = SDL_CreateRGBSurface(SDL_SWSURFACE,
-		8*256, 8, 32,0,0,0,0);
-	surf->format->Amask=0xFF000000;
-	surf->format->Ashift=24;
-	SDL_SetAlpha(surf, SDL_SRCALPHA, 255);
-
-	// HACK: Set the colors in BGR order
-	color =SDL_MapRGBA(surf->format,b,g,r,a);
-	color2=SDL_MapRGBA(surf->format,b,g,r,0);
+	// Create the image and colors
+	img=Draw_CreateImage(8*256,8);
 
 	// Draw the font
-	//SDL_LockSurface(surf);
 	for(c=0;c<256;c++){
 		for(y=0;y<8;y++){
 			for(x=0;x<8;x++){
+				int offset=((c*8+x)+(8*256*y))*4;
+				img->data[offset+0]=r;
+				img->data[offset+1]=g;
+				img->data[offset+2]=b;
 				if(((fontdata_8x8[c*8+y]>>(7-x)) & 0x01)==1){
-					//Imagen_PutPixel(dest,c*8+x,y,color);
-					((Uint32 *)surf->pixels)[(c*8+x)+(8*256*y)]=
-						color;
+					img->data[offset+3]=0xFF;
 				}else{
-					//Imagen_PutPixel(dest,c*8+x,y,color2);
-					((Uint32 *)surf->pixels)[(c*8+x)+(8*256*y)]=
-						color2;
+					img->data[offset+3]=0x00;
 				}
 			}
 		}
 	}
-	//SDL_UnlockSurface(surf);
 
-	return(surf);
+	return(img);
 }
 
 
@@ -578,10 +553,7 @@ DrawFnt Draw_DefaultFont(
 
 	// Create the default font
 	font=malloc(sizeof(DrawFont));
-	font->img.surf=Draw_DefaultFontSurface(r,g,b,a);
-	font->img.tex=Draw_UploadGLTexture(font->img.surf);
-	font->img.x=0;
-	font->img.y=0;
+	font->img=Draw_DefaultFontImage(r,g,b,a);
 	font->w=8;
 	font->h=8;
 	font->min=0;
@@ -599,12 +571,9 @@ DrawFnt Draw_LoadFont(char *fichero,int min,int max){
 
 	// Create the font form the image
 	font=malloc(sizeof(DrawFont));
-	font->img.surf=Draw_LoadSurface(fichero);
-	font->img.tex=Draw_UploadGLTexture(font->img.surf);
-	font->img.x=0;
-	font->img.y=0;
-	font->w=font->img.surf->w/(max-min);
-	font->h=font->img.surf->h;
+	font->img=Draw_LoadImage(fichero);
+	font->w=font->img->w/(max-min);
+	font->h=font->img->h;
 	font->min=min;
 	font->max=max;
 
@@ -624,7 +593,7 @@ void Draw_DrawText(DrawFnt f,char *text,int x,int y){
 	ptr=text;
 	while(*ptr){
 		if((*ptr)<font->max){
-			Draw_DrawImgPart((DrawImg)&font->img,x,y,font->w,(*ptr)-font->min);
+			Draw_DrawImgPart(font->img,x,y,font->w,(*ptr)-font->min);
 		}
 		x+=font->w;
 		ptr++;

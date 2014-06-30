@@ -34,11 +34,18 @@ void Draw_Clean(
 // Performs all the queued draw actions.
 void Draw_Flush();
 
+
 ////////////////////////////////////////////////
 // DrawImg //
 /////////////
 // Reference to a image.
 typedef void *DrawImg;
+
+
+/////////////////////////////
+// Draw_CreateImage
+//
+DrawImg Draw_CreateImage(int w,int h);
 
 
 /////////////////////////////

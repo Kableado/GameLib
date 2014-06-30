@@ -458,68 +458,69 @@ void GameEnts_Init(){
 	// Load and initialize media.
 	//
 
-	img_player=Draw_LoadImage("data/player.bmp");
-	img_platform=Draw_LoadImage("data/platform.bmp");
-	img_block=Draw_LoadImage("data/block.bmp");
+	img_player=Draw_LoadImage("data/player.png");
+	img_platform=Draw_LoadImage("data/platform.png");
+	img_block=Draw_LoadImage("data/block.png");
 
 	// Wizard
-	img_wizard[0]=Draw_LoadImage("data/wizard_left.bmp");
-	img_wizard[1]=Draw_LoadImage("data/wizard_right.bmp");
+	img_wizard[0]=Draw_LoadImage("data/wizard_left.png");
+	//img_wizard[1]=Draw_LoadImage("data/wizard_right.png");
+	img_wizard[1]=Draw_LoadImage("data/wizard_right.png");
 
 	// Magik Ball
-	img_magikball=Draw_LoadImage("data/magikball.bmp");
+	img_magikball=Draw_LoadImage("data/magikball.png");
 
 	// Load the earth images
-	img_earth[ 0]=Draw_LoadImage("data/earth/0.bmp");
-	img_earth[ 1]=Draw_LoadImage("data/earth/1.bmp");
-	img_earth[ 2]=Draw_LoadImage("data/earth/2.bmp");
-	img_earth[ 3]=Draw_LoadImage("data/earth/3.bmp");
-	img_earth[ 4]=Draw_LoadImage("data/earth/4.bmp");
-	img_earth[ 5]=Draw_LoadImage("data/earth/5.bmp");
-	img_earth[ 6]=Draw_LoadImage("data/earth/6.bmp");
-	img_earth[ 7]=Draw_LoadImage("data/earth/7.bmp");
-	img_earth[ 8]=Draw_LoadImage("data/earth/8.bmp");
-	img_earth[ 9]=Draw_LoadImage("data/earth/9.bmp");
-	img_earth[10]=Draw_LoadImage("data/earth/A.bmp");
-	img_earth[11]=Draw_LoadImage("data/earth/B.bmp");
-	img_earth[12]=Draw_LoadImage("data/earth/C.bmp");
-	img_earth[13]=Draw_LoadImage("data/earth/D.bmp");
-	img_earth[14]=Draw_LoadImage("data/earth/E.bmp");
-	img_earth[15]=Draw_LoadImage("data/earth/F.bmp");
+	img_earth[ 0]=Draw_LoadImage("data/earth/0.png");
+	img_earth[ 1]=Draw_LoadImage("data/earth/1.png");
+	img_earth[ 2]=Draw_LoadImage("data/earth/2.png");
+	img_earth[ 3]=Draw_LoadImage("data/earth/3.png");
+	img_earth[ 4]=Draw_LoadImage("data/earth/4.png");
+	img_earth[ 5]=Draw_LoadImage("data/earth/5.png");
+	img_earth[ 6]=Draw_LoadImage("data/earth/6.png");
+	img_earth[ 7]=Draw_LoadImage("data/earth/7.png");
+	img_earth[ 8]=Draw_LoadImage("data/earth/8.png");
+	img_earth[ 9]=Draw_LoadImage("data/earth/9.png");
+	img_earth[10]=Draw_LoadImage("data/earth/A.png");
+	img_earth[11]=Draw_LoadImage("data/earth/B.png");
+	img_earth[12]=Draw_LoadImage("data/earth/C.png");
+	img_earth[13]=Draw_LoadImage("data/earth/D.png");
+	img_earth[14]=Draw_LoadImage("data/earth/E.png");
+	img_earth[15]=Draw_LoadImage("data/earth/F.png");
 
 	// FIXME: Earth back
 
 	// Stone Brick
-	img_stoneBrick=Draw_LoadImage("data/rock.bmp");
+	img_stoneBrick=Draw_LoadImage("data/rock.png");
 
 	// FIXME: Stone Brick back
 
 	// Spiked Bush
-	img_spikedBush=Draw_LoadImage("data/spikedbush.bmp");
+	img_spikedBush=Draw_LoadImage("data/spikedbush.png");
 
 	// FIXME: Lava Pit
 
 	// FIXME: Fireball
 
 	// Flower
-	img_flower[0]=Draw_LoadImage("data/flower_left.bmp");
-	img_flower[1]=Draw_LoadImage("data/flower_right.bmp");
+	img_flower[0]=Draw_LoadImage("data/flower_left.png");
+	img_flower[1]=Draw_LoadImage("data/flower_right.png");
 
 	// Spike
-	img_spike[0]=Draw_LoadImage("data/spike_left.bmp");
-	img_spike[1]=Draw_LoadImage("data/spike_right.bmp");
+	img_spike[0]=Draw_LoadImage("data/spike_left.png");
+	img_spike[1]=Draw_LoadImage("data/spike_right.png");
 
 	// Carnivore Plant
-	img_carnivorePlant[0]=Draw_LoadImage("data/carnivoreplant_left.bmp");
-	img_carnivorePlant[1]=Draw_LoadImage("data/carnivoreplant_right.bmp");
+	img_carnivorePlant[0]=Draw_LoadImage("data/carnivoreplant_left.png");
+	img_carnivorePlant[1]=Draw_LoadImage("data/carnivoreplant_right.png");
 
 	// Bunny
-	img_bunny[0]=Draw_LoadImage("data/bunny_left.bmp");
-	img_bunny[1]=Draw_LoadImage("data/bunny_right.bmp");
+	img_bunny[0]=Draw_LoadImage("data/bunny_left.png");
+	img_bunny[1]=Draw_LoadImage("data/bunny_right.png");
 
 	// Spider
-	img_spider[0]=Draw_LoadImage("data/spider_left.bmp");
-	img_spider[1]=Draw_LoadImage("data/spider_right.bmp");
+	img_spider[0]=Draw_LoadImage("data/spider_left.png");
+	img_spider[1]=Draw_LoadImage("data/spider_right.png");
 
 	// FIXME: Guard
 
