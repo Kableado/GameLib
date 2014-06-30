@@ -26,6 +26,9 @@ typedef float vec2[2];
 #define vec2_perp(v,n) (v)[0]=-(n)[1];(v)[1]=(n)[0];
 #define vec2_scaleadd(v,v1,v2,s) (v)[0]=(v2)[0]*(s)+(v1)[0];(v)[1]=(v2)[1]*(s)+(v1)[1];
 float vec2_norm(vec2 v);
+#define vec2_interpol(v,v1,v2,f) \
+	(v)[0]=(v1)[0]-f*((v1)[0]-(v2)[0]);\
+	(v)[1]=(v1)[1]-f*((v1)[1]-(v2)[1]);
 
 
 /////////////////////////////
@@ -33,6 +36,7 @@ float vec2_norm(vec2 v);
 //
 // Intersection between a ray and a Unit Circle.
 int Intersec_RayUnitCircle(vec2 orig,vec2 vel,vec2 center,float *t);
+
 
 /////////////////////////////
 // Intersect_CircleCircle
@@ -42,6 +46,7 @@ int Colision_CircleCircle(
 	vec2 cir1,float ra,vec2 vel,
 	vec2 cb,float rb,
 	float *t,vec2 n);
+
 
 /////////////////////////////
 // Intersect_RayEdge
@@ -53,12 +58,23 @@ int Intersect_RayEdge(
 	float *t);
 
 
-
 /////////////////////////////
 // absmod
 //
 int absmod(int v,int d);
 float fabsmod(float v,int d);
+
+
+/////////////////////////////
+// IsBigEndian
+//
+int IsBigEndian();
+
+
+/////////////////////////////
+// EndsWith
+//
+int EndsWith(char *str, char *suffix);
 
 
 #endif

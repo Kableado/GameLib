@@ -85,7 +85,6 @@ void ProcGame(){
 }
 
 void PostProcGame(){
-
 	if(game_level_reset){
 		if(Input_AnyKey()){
 			if(GameMap_CreateLevel(game_level,game_level_point)){
@@ -102,7 +101,7 @@ void PostProcGame(){
 	}
 }
 
-void DrawGame(){
+void DrawGame(float f){
 	char string[1024];
 
 	Draw_SetColor(1.0f,1.0f,1.0f,1.0f);
@@ -176,15 +175,15 @@ int main(int argc,char *argv[]){
 
 	GameLib_Init(640,480,"Game",60,60);
 
-	img_logo=Draw_LoadImage("data/logo.bmp");
-	img_end=Draw_LoadImage("data/end.bmp");
+	img_logo=Draw_LoadImage("data/logo.png");
+	img_end=Draw_LoadImage("data/end.png");
 
 	font=Draw_DefaultFont(255,255,255,255);
 
 	GameEnts_Init();
 
 	LoadGame("game.save");
-
+#ifndef EMSCRIPTEN
 	do{
 		play=0;
 		Draw_Loop(ProcTitle,DrawTitle);
@@ -208,6 +207,15 @@ int main(int argc,char *argv[]){
 
 
 	SaveGame("game.save");
+#else
+	int  pos[2]={0,0};
+	GameLib_SetPos(pos);
+	game_level=0;
+	game_level_point=1;
+	game_level_reset=0;
 
+	GameMap_CreateLevel(game_level,game_level_point);
+	GameLib_Loop(ProcGame,PostProcGame,NULL,DrawGame);
+#endif
 	return(0);
 }

@@ -8,10 +8,11 @@
 
 #include "GameMap.h"
 
-Entity *GameMapAux_CreateEnt(Entity *ent,int i,int j){
-	Entity *e;
+Entity GameMapAux_CreateEnt(Entity ent,int i,int j){
+	Entity e;
 	e=Entity_Copy(ent);
 	vec2_set(e->pos,16+i*32,16+j*32);
+	Entity_CalcBBox(e);
 	GameLib_AddEntity(e);
 	return(e);
 }
@@ -39,10 +40,10 @@ void Aux_Linea(FILE *f,char *line){
 }
 
 int _startpoint;
-int GameMapAux_CreatePlayer(Entity *ent){
+int GameMapAux_CreatePlayer(Entity ent){
 	if(ent->type==Ent_SavePoint){
 		if(ent->A==_startpoint){
-			Entity *e;
+			Entity e;
 			e=Entity_Copy(ent_player);
 			vec2_copy(e->pos,ent->pos);
 			GameLib_AddEntity(e);
@@ -158,7 +159,7 @@ int GameMap_CreateLevel(int level,int point){
 				GameMapAux_CreateEnt(ent_hole_lava,i,j);
 			}else
 			if(line[i2]=='S'){
-				Entity *e;
+				Entity e;
 				// Save point
 				e=GameMapAux_CreateEnt(ent_savepoint,i,j);
 				e->A=line[i2+1]-'0';
@@ -189,12 +190,12 @@ int GameMap_CreateLevel(int level,int point){
 			}else
 			if(line[i2]=='T'){
 				// Teleporter
-				Entity *ent=GameMapAux_CreateEnt(ent_teleporter,i,j);
+				Entity ent=GameMapAux_CreateEnt(ent_teleporter,i,j);
 				ent->A=line[i2+1]-'0';
 			}else
 			if(line[i2]=='D'){
 				// Teleporter Destination
-				Entity *ent=GameMapAux_CreateEnt(ent_teleporter_dest,i,j);
+				Entity ent=GameMapAux_CreateEnt(ent_teleporter_dest,i,j);
 				ent->A=line[i2+1]-'0';
 			}else
 

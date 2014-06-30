@@ -1,7 +1,8 @@
 #!/bin/sh
 
-DATE=$(date +%Y%m%d)
 DIRNAME="Lonely_Ruins"
+
+DATE=$(date +%Y%m%d)
 ZIPNAME="$DIRNAME.$DATE.zip"
 
 make -f Makefile.linux

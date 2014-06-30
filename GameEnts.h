@@ -21,31 +21,31 @@ enum {
 	Ent_Teleporter_Dest,
 	Ent_Effect
 } EntityType;
-extern Entity *ent_player;
-extern Entity *ent_barrel;
-extern Entity *ent_column;
-extern Entity *ent_column_faded;
-extern Entity *ent_rock;
-extern Entity *ent_lamp;
-extern Entity *ent_floor;
-extern Entity *ent_floor_right;
-extern Entity *ent_floor_left;
-extern Entity *ent_floor_center;
-extern Entity *ent_hole_spiked;
-extern Entity *ent_hole_filled;
-extern Entity *ent_hole_lava;
-extern Entity *ent_arrowshooter_up;
-extern Entity *ent_arrowshooter_down;
-extern Entity *ent_arrowshooter_left;
-extern Entity *ent_arrowshooter_right;
-extern Entity *ent_arrow_up;
-extern Entity *ent_arrow_down;
-extern Entity *ent_arrow_left;
-extern Entity *ent_arrow_right;
-extern Entity *ent_exitpoint;
-extern Entity *ent_endpoint;
-extern Entity *ent_savepoint;
-extern Entity *ent_teleporter;
-extern Entity *ent_teleporter_dest;
+extern Entity ent_player;
+extern Entity ent_barrel;
+extern Entity ent_column;
+extern Entity ent_column_faded;
+extern Entity ent_rock;
+extern Entity ent_lamp;
+extern Entity ent_floor;
+extern Entity ent_floor_right;
+extern Entity ent_floor_left;
+extern Entity ent_floor_center;
+extern Entity ent_hole_spiked;
+extern Entity ent_hole_filled;
+extern Entity ent_hole_lava;
+extern Entity ent_arrowshooter_up;
+extern Entity ent_arrowshooter_down;
+extern Entity ent_arrowshooter_left;
+extern Entity ent_arrowshooter_right;
+extern Entity ent_arrow_up;
+extern Entity ent_arrow_down;
+extern Entity ent_arrow_left;
+extern Entity ent_arrow_right;
+extern Entity ent_exitpoint;
+extern Entity ent_endpoint;
+extern Entity ent_savepoint;
+extern Entity ent_teleporter;
+extern Entity ent_teleporter_dest;
 
 #endif

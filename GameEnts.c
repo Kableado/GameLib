@@ -48,43 +48,43 @@ AudioSnd snd_burn;
 AudioSnd snd_fillhole;
 AudioSnd snd_drag;
 
-Entity *ent_player;
-Entity *ent_barrel;
-Entity *ent_column;
-Entity *ent_column_faded;
-Entity *ent_rock;
-Entity *ent_lamp;
-Entity *ent_floor;
-Entity *ent_floor_right;
-Entity *ent_floor_left;
-Entity *ent_floor_center;
-Entity *ent_hole_spiked;
-Entity *ent_hole_filled;
-Entity *ent_hole_lava;
-Entity *ent_arrowshooter_up;
-Entity *ent_arrowshooter_down;
-Entity *ent_arrowshooter_left;
-Entity *ent_arrowshooter_right;
-Entity *ent_arrow_up;
-Entity *ent_arrow_down;
-Entity *ent_arrow_left;
-Entity *ent_arrow_right;
-Entity *ent_exitpoint;
-Entity *ent_endpoint;
-Entity *ent_savepoint;
-Entity *ent_teleporter;
-Entity *ent_teleporter_dest;
+Entity ent_player;
+Entity ent_barrel;
+Entity ent_column;
+Entity ent_column_faded;
+Entity ent_rock;
+Entity ent_lamp;
+Entity ent_floor;
+Entity ent_floor_right;
+Entity ent_floor_left;
+Entity ent_floor_center;
+Entity ent_hole_spiked;
+Entity ent_hole_filled;
+Entity ent_hole_lava;
+Entity ent_arrowshooter_up;
+Entity ent_arrowshooter_down;
+Entity ent_arrowshooter_left;
+Entity ent_arrowshooter_right;
+Entity ent_arrow_up;
+Entity ent_arrow_down;
+Entity ent_arrow_left;
+Entity ent_arrow_right;
+Entity ent_exitpoint;
+Entity ent_endpoint;
+Entity ent_savepoint;
+Entity ent_teleporter;
+Entity ent_teleporter_dest;
 
 
-Entity *ent_fire;
-Entity *ent_player_broken;
+Entity ent_fire;
+Entity ent_player_broken;
 
 extern int game_level;
 extern int game_level_point;
 extern int game_level_reset;
 
 
-void player_proc(Entity *e,int ft){
+void player_proc(Entity e,int ft){
 	vec2 vel;
 	int pos[2],size[2],delta[2];
 
@@ -144,7 +144,7 @@ void player_proc(Entity *e,int ft){
 	GameLib_SetPos(pos);
 }
 
-int player_collision(Entity *e1,Entity *e2,float t,vec2 n){
+int player_collision(Entity e1,Entity e2,float t,vec2 n){
 	if(e2->type==Ent_Barrel){
 		float vlen;
 		vec2 vdir;
@@ -164,7 +164,7 @@ int player_collision(Entity *e1,Entity *e2,float t,vec2 n){
 	return(1);
 }
 
-void barrel_proc(Entity *e,int ft){
+void barrel_proc(Entity e,int ft){
 	float qvel;
 	int tnow;
 
@@ -179,11 +179,11 @@ void barrel_proc(Entity *e,int ft){
 }
 
 
-void hole_spiked_overlap(Entity *e1,Entity *e2){
-	Entity *e;
+void hole_spiked_overlap(Entity e1,Entity e2){
+	Entity e;
 
 	if(e2->type==Ent_Barrel){
-		Entity *e;
+		Entity e;
 
 		// Disable future overlaps
 		e1->overlap=NULL;
@@ -212,8 +212,8 @@ void hole_spiked_overlap(Entity *e1,Entity *e2){
 }
 
 
-void hole_lava_overlap(Entity *e1,Entity *e2){
-	Entity *e;
+void hole_lava_overlap(Entity e1,Entity e2){
+	Entity e;
 
 	if(e2->type==Ent_Barrel){
 		// "Burn the barrel"
@@ -235,8 +235,8 @@ void hole_lava_overlap(Entity *e1,Entity *e2){
 }
 
 
-int arrow_collision(Entity *e1,Entity *e2,float t,vec2 n){
-	Entity *e;
+int arrow_collision(Entity e1,Entity e2,float t,vec2 n){
+	Entity e;
 
 	if(e1->postproc)
 		return(0);
@@ -261,13 +261,13 @@ int arrow_collision(Entity *e1,Entity *e2,float t,vec2 n){
 	return(0);
 }
 
-void arrowshooter_oncopy(Entity *e){
+void arrowshooter_oncopy(Entity e){
 	e->A=rand()%30;
 }
 
-void arrowshooter_proc(Entity *e,int ft){
+void arrowshooter_proc(Entity e,int ft){
 	if(e->A==0){
-		Entity *e2;
+		Entity e2;
 
 		e2=Entity_Copy(e->child);
 		vec2_copy(e2->pos,e->pos);
@@ -280,13 +280,13 @@ void arrowshooter_proc(Entity *e,int ft){
 	}
 }
 
-Entity *_savepoint=NULL;
-void savepoint_ondelete(Entity *e){
+Entity _savepoint=NULL;
+void savepoint_ondelete(Entity e){
 	if(_savepoint==e){
 		_savepoint=NULL;
 	}
 }
-void savepoint_overlap(Entity *e1,Entity *e2){
+void savepoint_overlap(Entity e1,Entity e2){
 	if(e2->type==Ent_Player){
 		// Save the point
 		if(game_level_point!=e1->A){
@@ -305,7 +305,7 @@ void savepoint_overlap(Entity *e1,Entity *e2){
 	}
 }
 
-void exitpoint_overlap(Entity *e1,Entity *e2){
+void exitpoint_overlap(Entity e1,Entity e2){
 	if(e2->type==Ent_Player){
 		// Exit the level
 		game_level++;
@@ -319,7 +319,7 @@ void exitpoint_overlap(Entity *e1,Entity *e2){
 	}
 }
 
-void endpoint_overlap(Entity *e1,Entity *e2){
+void endpoint_overlap(Entity e1,Entity e2){
 	if(e2->type==Ent_Player){
 		// Go to end
 		game_level_reset=3;
@@ -331,7 +331,7 @@ void endpoint_overlap(Entity *e1,Entity *e2){
 	}
 }
 
-void timeoutent_proc(Entity *e,int ft){
+void timeoutent_proc(Entity e,int ft){
 	if(e->A==0){
 		GameLib_DelEntity(e);
 	}else{
@@ -339,7 +339,7 @@ void timeoutent_proc(Entity *e,int ft){
 	}
 }
 
-int teleporter_searchdest(Entity *ent,void *d){
+int teleporter_searchdest(Entity ent,void *d){
 	int a=*(int*)d;
 	if(ent->type!=Ent_Teleporter_Dest){
 		return 0;
@@ -351,8 +351,8 @@ int teleporter_searchdest(Entity *ent,void *d){
 	return 0;
 }
 
-void teleporter_overlap(Entity *e1,Entity *e2){
-	Entity *dest=NULL;
+void teleporter_overlap(Entity e1,Entity e2){
+	Entity dest=NULL;
 
 	// Search the destination
 	dest=GameLib_SearchEnt(teleporter_searchdest,&e1->A);
@@ -364,84 +364,84 @@ void teleporter_overlap(Entity *e1,Entity *e2){
 
 
 void GameEnts_Init(){
-	Entity *ent;
+	Entity ent;
 
 	//////////////////////////////
 	// Load Resources
 
-	img_barrel=Draw_LoadImage("data/barrel.bmp");
+	img_barrel=Draw_LoadImage("data/barrel.png");
 	Draw_SetOffset(img_barrel,-16,-32);
 
-	img_barrel2=Draw_LoadImage("data/barrel2.bmp");
+	img_barrel2=Draw_LoadImage("data/barrel2.png");
 	Draw_SetOffset(img_barrel2,-16,-16);
 
-	img_floor=Draw_LoadImage("data/floor.bmp");
+	img_floor=Draw_LoadImage("data/floor.png");
 	Draw_SetOffset(img_floor,-16,-16);
-	img_floor_left=Draw_LoadImage("data/floor_left.bmp");
+	img_floor_left=Draw_LoadImage("data/floor_left.png");
 	Draw_SetOffset(img_floor_left,-16,-16);
-	img_floor_right=Draw_LoadImage("data/floor_right.bmp");
+	img_floor_right=Draw_LoadImage("data/floor_right.png");
 	Draw_SetOffset(img_floor_right,-16,-16);
-	img_floor_center=Draw_LoadImage("data/floor_center.bmp");
+	img_floor_center=Draw_LoadImage("data/floor_center.png");
 	Draw_SetOffset(img_floor_center,-16,-16);
 
-	img_column=Draw_LoadImage("data/column.bmp");
+	img_column=Draw_LoadImage("data/column.png");
 	Draw_SetOffset(img_column,-16,-80);
-	img_column_faded=Draw_LoadImage("data/column_faded.bmp");
+	img_column_faded=Draw_LoadImage("data/column_faded.png");
 	Draw_SetOffset(img_column_faded,-16,-80);
-	img_rock=Draw_LoadImage("data/rock.bmp");
+	img_rock=Draw_LoadImage("data/rock.png");
 	Draw_SetOffset(img_rock,-16,-32);
-	img_lamp=Draw_LoadImage("data/lamp.bmp");
+	img_lamp=Draw_LoadImage("data/lamp.png");
 	Draw_SetOffset(img_lamp,-16,-48);
 
-	img_hole_spiked=Draw_LoadImage("data/hole_spiked.bmp");
+	img_hole_spiked=Draw_LoadImage("data/hole_spiked.png");
 	Draw_SetOffset(img_hole_spiked,-16,-16);
 
-	anim_hole_lava=Anim_LoadAnim("data/hole_lava.bmp",2,3);
+	anim_hole_lava=Anim_LoadAnim("data/hole_lava.png",2,3);
 	Anim_SetOffset(anim_hole_lava,-16,-16);
 
-	img_player_up=Draw_LoadImage("data/player_up.bmp");
+	img_player_up=Draw_LoadImage("data/player_up.png");
 	Draw_SetOffset(img_player_up,-16,-48);
-	img_player_down=Draw_LoadImage("data/player_down.bmp");
+	img_player_down=Draw_LoadImage("data/player_down.png");
 	Draw_SetOffset(img_player_down,-16,-48);
-	img_player_left=Draw_LoadImage("data/player_left.bmp");
+	img_player_left=Draw_LoadImage("data/player_left.png");
 	Draw_SetOffset(img_player_left,-16,-48);
-	img_player_right=Draw_LoadImage("data/player_right.bmp");
+	img_player_right=Draw_LoadImage("data/player_right.png");
 	Draw_SetOffset(img_player_right,-16,-48);
 
-	img_savepoint=Draw_LoadImage("data/save_point.bmp");
+	img_savepoint=Draw_LoadImage("data/save_point.png");
 	Draw_SetOffset(img_savepoint,-16,-16);
 
-	anim_savepoint_active=Anim_LoadAnim("data/save_point_active.bmp",2,5);
+	anim_savepoint_active=Anim_LoadAnim("data/save_point_active.png",2,5);
 	Anim_SetOffset(anim_savepoint_active,-16,-16);
 
-	anim_exitpoint=Anim_LoadAnim("data/exit_point.bmp",2,10);
+	anim_exitpoint=Anim_LoadAnim("data/exit_point.png",2,10);
 	Anim_SetOffset(anim_exitpoint,-16,-48);
 
-	img_endpoint=Draw_LoadImage("data/end_point.bmp");
+	img_endpoint=Draw_LoadImage("data/end_point.png");
 	Draw_SetOffset(img_endpoint,-16,-32);
 
-	img_arrowshooter_up=Draw_LoadImage("data/arrowshooter_up.bmp");
+	img_arrowshooter_up=Draw_LoadImage("data/arrowshooter_up.png");
 	Draw_SetOffset(img_arrowshooter_up,-16,-16);
-	img_arrowshooter_down=Draw_LoadImage("data/arrowshooter_down.bmp");
+	img_arrowshooter_down=Draw_LoadImage("data/arrowshooter_down.png");
 	Draw_SetOffset(img_arrowshooter_down,-16,-16);
-	img_arrowshooter_left=Draw_LoadImage("data/arrowshooter_left.bmp");
+	img_arrowshooter_left=Draw_LoadImage("data/arrowshooter_left.png");
 	Draw_SetOffset(img_arrowshooter_left,-16,-16);
-	img_arrowshooter_right=Draw_LoadImage("data/arrowshooter_right.bmp");
+	img_arrowshooter_right=Draw_LoadImage("data/arrowshooter_right.png");
 	Draw_SetOffset(img_arrowshooter_right,-16,-16);
 
-	img_arrow_up=Draw_LoadImage("data/arrow_up.bmp");
+	img_arrow_up=Draw_LoadImage("data/arrow_up.png");
 	Draw_SetOffset(img_arrow_up,-16,-16);
-	img_arrow_down=Draw_LoadImage("data/arrow_down.bmp");
+	img_arrow_down=Draw_LoadImage("data/arrow_down.png");
 	Draw_SetOffset(img_arrow_down,-16,-16);
-	img_arrow_left=Draw_LoadImage("data/arrow_left.bmp");
+	img_arrow_left=Draw_LoadImage("data/arrow_left.png");
 	Draw_SetOffset(img_arrow_left,-16,-16);
-	img_arrow_right=Draw_LoadImage("data/arrow_right.bmp");
+	img_arrow_right=Draw_LoadImage("data/arrow_right.png");
 	Draw_SetOffset(img_arrow_right,-16,-16);
 
-	anim_fire=Anim_LoadAnim("data/fire.bmp",3,5);
+	anim_fire=Anim_LoadAnim("data/fire.png",3,5);
 	Anim_SetOffset(anim_fire,-16,-48);
 
-	img_player_broken=Draw_LoadImage("data/player_broken.bmp");
+	img_player_broken=Draw_LoadImage("data/player_broken.png");
 	Draw_SetOffset(img_player_broken,-16,-48);
 
 
