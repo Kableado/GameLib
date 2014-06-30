@@ -1,6 +1,8 @@
 // Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
 
 #include <math.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "Util.h"
 
@@ -187,7 +189,6 @@ int absmod(int v,int d){
 		return(v%d);
 	}
 }
-
 float fabsmod(float v,int d){
 	if(v<0){
 		v+=d*((((int)(v/d))*(-1))+1);
@@ -198,6 +199,17 @@ float fabsmod(float v,int d){
 	}
 }
 
+
+/////////////////////////////
+// IsBigEndian
+//
+int IsBigEndian(){
+	union{
+		unsigned int i;
+		char c[4];
+	} bint={0x01020304};
+	return bint.c[0]==1;
+}
 
 
 /////////////////////////////

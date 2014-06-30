@@ -4,6 +4,9 @@
 	#define _WIN32_WINNT 0x0501
 	#include <windows.h>
 #endif
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <SDL/SDL.h>
 
 #include "Audio.h"
@@ -63,7 +66,11 @@ int Audio_Init(){
 	as.freq = 44100;
 	as.format = AUDIO_S16SYS;
 	as.channels = 2;
+#ifdef EMSCRIPTEN
+	as.samples = 4096;
+#else
 	as.samples = 1024;
+#endif
 	as.callback = Audio_MixerCallback;
 	if(SDL_OpenAudio(&as, &as2) < 0){
 		printf("Audio_Init: Failure opening audio.\n");

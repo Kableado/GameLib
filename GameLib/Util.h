@@ -65,6 +65,11 @@ int absmod(int v,int d);
 float fabsmod(float v,int d);
 
 
+/////////////////////////////
+// IsBigEndian
+//
+int IsBigEndian();
+
 
 /////////////////////////////
 // EndsWith
