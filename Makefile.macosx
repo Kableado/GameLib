@@ -1,9 +1,0 @@
-LIBS=-lm -ldl -framework Cocoa -framework SDL -framework OpenGL macosx/SDLMain.m
-CFLAGS=-g -DDEBUG -Wall -DMACOSX -ObjC -Dmain=SDL_main
-CC=gcc
-RM=rm -rf
-
-RESULT=game
-BUILDDIR=build-macosx
-
-include Makefile.common

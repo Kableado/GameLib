@@ -49,7 +49,7 @@ $(BUILDDIR):
 clean:
 	rm -f $(OBJS) $(BUILDDIR)/$(RESULT)
 
-run: $(BUILDDIR)/$(RESULT)
+run: $(BUILDDIR) $(BUILDDIR)/$(RESULT)
 	$(LAUNCHER) ./$(BUILDDIR)/$(RESULT) debug
 
 rebuild: clean all
