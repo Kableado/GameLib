@@ -25,7 +25,7 @@ typedef struct {
 // Anim_LoadAnim
 //
 //
-Anim Anim_LoadAnim(char *fichero,int frames,float fps){
+Anim Anim_LoadAnim(char *fichero,int width,int frames,float fps){
 	DrawImg img;
 	Animation *anim;
 	int w,h;
@@ -39,7 +39,10 @@ Anim Anim_LoadAnim(char *fichero,int frames,float fps){
 	// Create the animation container
 	anim=malloc(sizeof(Animation));
 	anim->img=img;
-	anim->w=w/frames;
+	anim->w=width;
+	if(width<=0){
+		anim->w=w/frames;
+	}
 	anim->fps=fps;
 	anim->frames=frames;
 	anim->ftime=1000/fps;
