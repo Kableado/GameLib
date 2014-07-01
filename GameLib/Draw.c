@@ -6,23 +6,20 @@
 #include <string.h>
 
 #ifdef WIN32
+	// Windows
 	#define _WIN32_WINNT 0x0501
 	#include <windows.h>
 	#include <GL/gl.h>
 	#include <GL/glext.h>
 #else
-#ifdef MACOSX
-	#include <Cocoa/Cocoa.h>
-	#include <OpenGL/OpenGL.h>
-	#include <OpenGL/gl.h>
-	#include <OpenGL/glu.h>
-	#include <OpenGL/glext.h>
+#ifdef EMSCRIPTEN
+	// Emscripten
+	#include <emscripten.h>
+	#include <GL/gl.h>
 #else
+	// UNIX
 	#include <GL/gl.h>
 #endif
-#endif
-#ifdef EMSCRIPTEN
-	#include <emscripten.h>
 #endif
 #include "lodepng.c"
 #include <SDL/SDL.h>
@@ -84,10 +81,9 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 	// Initialize SDL
 	if(SDL_Init(SDL_INIT_VIDEO)<0){
 		printf("Draw_Init: Failure initializing SDL.\n");
-		printf("Draw_Init: SDL Error: %s\n",SDL_GetError());
+		printf("\tSDL Error: %s\n",SDL_GetError());
 		return(0);
 	}
-
 
 	// Prepare OpenGL inicialization
 	SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 8);
@@ -103,7 +99,7 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 	_screen=SDL_SetVideoMode(width,height,32,SDL_HWSURFACE|SDL_OPENGL);
 	if( _screen == NULL){
 		printf("Draw_Init: Failure initializing video mode.\n");
-		printf("Draw_Init: SDL Error: %s\n",SDL_GetError());
+		printf("\tSDL Error: %s\n",SDL_GetError());
 		return(0);
 	}
 	SDL_WM_SetCaption(title, NULL);
