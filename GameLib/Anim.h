@@ -17,7 +17,7 @@ typedef void *Anim;
 // Anim_LoadAnim
 //
 //
-Anim Anim_LoadAnim(char *fichero,int frames,float fps);
+Anim Anim_LoadAnim(char *fichero,int width,int frames,float fps);
 
 
 /////////////////////////////

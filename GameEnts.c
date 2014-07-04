@@ -396,7 +396,7 @@ void GameEnts_Init(){
 	img_hole_spiked=Draw_LoadImage("data/hole_spiked.png");
 	Draw_SetOffset(img_hole_spiked,-16,-16);
 
-	anim_hole_lava=Anim_LoadAnim("data/hole_lava.png",2,3);
+	anim_hole_lava=Anim_LoadAnim("data/hole_lava.png",32,2,3);
 	Anim_SetOffset(anim_hole_lava,-16,-16);
 
 	img_player_up=Draw_LoadImage("data/player_up.png");
@@ -411,10 +411,10 @@ void GameEnts_Init(){
 	img_savepoint=Draw_LoadImage("data/save_point.png");
 	Draw_SetOffset(img_savepoint,-16,-16);
 
-	anim_savepoint_active=Anim_LoadAnim("data/save_point_active.png",2,5);
+	anim_savepoint_active=Anim_LoadAnim("data/save_point_active.png",32,2,5);
 	Anim_SetOffset(anim_savepoint_active,-16,-16);
 
-	anim_exitpoint=Anim_LoadAnim("data/exit_point.png",2,10);
+	anim_exitpoint=Anim_LoadAnim("data/exit_point.png",32,2,10);
 	Anim_SetOffset(anim_exitpoint,-16,-48);
 
 	img_endpoint=Draw_LoadImage("data/end_point.png");
@@ -438,7 +438,7 @@ void GameEnts_Init(){
 	img_arrow_right=Draw_LoadImage("data/arrow_right.png");
 	Draw_SetOffset(img_arrow_right,-16,-16);
 
-	anim_fire=Anim_LoadAnim("data/fire.png",3,5);
+	anim_fire=Anim_LoadAnim("data/fire.png",32,3,5);
 	Anim_SetOffset(anim_fire,-16,-48);
 
 	img_player_broken=Draw_LoadImage("data/player_broken.png");

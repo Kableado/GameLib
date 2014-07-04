@@ -12,13 +12,6 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps);
 
 
 /////////////////////////////
-// Draw_Loop
-//
-// Loops updating the game window.
-void Draw_Loop(int (*proc)(),void (*draw)(float f));
-
-
-/////////////////////////////
 // Draw_Clean
 //
 // Cleans the game window.
@@ -26,6 +19,13 @@ void Draw_Clean(
 	unsigned char r,
 	unsigned char g,
 	unsigned char b);
+
+
+/////////////////////////////
+// Draw_Loop
+//
+// Loops updating the game window.
+void Draw_Loop(int (*proc)(),void (*draw)(float f));
 
 
 /////////////////////////////

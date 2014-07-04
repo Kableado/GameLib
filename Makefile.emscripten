@@ -3,7 +3,8 @@ LAUNCHER= start
 RM=rm -rf
 
 LIBS=
-CFLAGS= -s LEGACY_GL_EMULATION=1 -s ASM_JS=1 -O1
+CFLAGS= -s FULL_ES2=1 -s ASM_JS=1 -O1
+#LDFLAGS= --embed-file data
 LDFLAGS= --preload-file data
 
 RESULT=game.html

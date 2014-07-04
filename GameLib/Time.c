@@ -1,4 +1,4 @@
-// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011-2014 Valeriano Alfonso Rodriguez (Kableado)
 
 #include <stdio.h>
 #include <math.h>
@@ -45,25 +45,6 @@ void Time_Pause(int pausa){
 	}while(tend>=t);
 }
 #else
-#ifdef MACOSX
-#include <mach/mach_time.h>
-// MacOSX
-long long Time_GetTime(){
-	static mach_timebase_info_data_t info = {0,0};
-	uint64_t t;
-	if(info.denom==0){
-		mach_timebase_info(&info);
-	}
-	t=mach_absolute_time()*(info.numer / info.denom);
-	return(t/1000);
-}
-void Time_Pause(int pausa){
-	struct timeval tv;
-	tv.tv_sec=(long long)pausa/1000000;
-	tv.tv_usec=(long long)pausa%1000000;
-	select(0, NULL, NULL, NULL, &tv);
-}
-#else
 // UNIX
 long long Time_GetTime(){
 	struct timeval t;
@@ -78,7 +59,6 @@ void Time_Pause(int pausa){
 	tv.tv_usec=(long long)pausa%1000000;
 	select(0, NULL, NULL, NULL, &tv);
 }
-#endif // if MACOSX
 #endif // if WIN32
 
 

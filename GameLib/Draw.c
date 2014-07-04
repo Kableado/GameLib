@@ -6,19 +6,27 @@
 #include <string.h>
 
 #ifdef WIN32
+	// Windows
 	#define _WIN32_WINNT 0x0501
 	#include <windows.h>
 	#include <GL/gl.h>
 	#include <GL/glext.h>
+	#define USE_OpenGL 1
+	#define USE_OpenGLES 0
 #else
 #ifdef EMSCRIPTEN
-	//#include <GLES2/gl2.h>
-	//#define GL_GLEXT_PROTOTYPES 1
-	//#include <GLES2/gl2ext.h>
+	// Emscripten
+	#include <GLES2/gl2.h>
+	#define GL_GLEXT_PROTOTYPES 1
+	#include <GLES2/gl2ext.h>
 	#include <emscripten.h>
-	#include <GL/gl.h>
+	#define USE_OpenGL 0
+	#define USE_OpenGLES 1
 #else
+	// UNIX
 	#include <GL/gl.h>
+	#define USE_OpenGL 1
+	#define USE_OpenGLES 0
 #endif
 #endif
 #include "lodepng.c"
@@ -57,8 +65,71 @@ QuadArray2D _quadArray=NULL;
 DrawImage _currentImg=NULL;
 float _color[4];
 
+#if USE_OpenGLES
+
+GLuint Draw_CompileShader(GLenum type, const char *source){
+	GLuint shader = glCreateShader(type);
+	if (shader == 0) {
+		return 0;
+	}
+
+	//load the shader source to the shader object and compile it
+	glShaderSource(shader, 1, &source, NULL);
+	glCompileShader(shader);
+
+	//check if the shader compiled successfully
+	GLint compiled;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+	if (!compiled) {
+		glDeleteShader(shader);
+		return 0;
+	}
+
+	return shader;
+}
 
 
+GLuint Draw_BuildProgram(
+	const char *vertexShaderSource,
+	const char *fragmentShaderSource)
+{
+	// Compile shaders
+	GLuint vertexShader = Draw_CompileShader(GL_VERTEX_SHADER, vertexShaderSource);
+	GLuint fragmentShader = Draw_CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
+	if(vertexShader==0 || fragmentShader==0){
+		return 0;
+	}
+
+	//create a GL program and link it
+	GLuint programObject = glCreateProgram();
+	glAttachShader(programObject, vertexShader);
+	glAttachShader(programObject, fragmentShader);
+	glLinkProgram(programObject);
+
+	//check if the program linked successfully
+	GLint linked;
+	glGetProgramiv(programObject, GL_LINK_STATUS, &linked);
+	if (!linked)
+	{
+		glDeleteProgram(programObject);
+		return 0;
+	}
+	return programObject;
+}
+
+GLuint vertPosLoc;
+GLuint vertTexLoc;
+GLuint vertColorLoc;
+
+GLuint textureLoc;
+GLuint projectionMatrixLoc;
+
+
+GLuint vertexObject;
+
+#define Max_Vertices 6000
+
+#endif
 
 /////////////////////////////
 // Draw_Init
@@ -78,6 +149,13 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 	}
 #endif
 
+	// Set globals
+	proc_t_frame=1000000/pfps;
+	draw_t_frame=1000000/fps;
+	_fps=fps;
+	_width=width;
+	_height=height;
+
 	// Initialize SDL
 	if(SDL_Init(SDL_INIT_VIDEO)<0){
 		printf("Draw_Init: Failure initializing SDL.\n");
@@ -85,7 +163,7 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 		return(0);
 	}
 
-
+#if USE_OpenGL
 	// Prepare OpenGL inicialization
 	SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 8);
@@ -94,7 +172,7 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 	SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute (SDL_GL_STENCIL_SIZE, 8);
 	SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
-
+#endif
 
 	// Initialize video mode
 	_screen=SDL_SetVideoMode(width,height,32,SDL_HWSURFACE|SDL_OPENGL);
@@ -104,14 +182,10 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 		return(0);
 	}
 	SDL_WM_SetCaption(title, NULL);
-	proc_t_frame=1000000/pfps;
-	draw_t_frame=1000000/fps;
-	_fps=fps;
-	_width=width;
-	_height=height;
 
+#if USE_OpenGL
 	// Set the desired state
-	//glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 	glDisable(GL_CULL_FACE);
 	glEnable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
@@ -146,6 +220,90 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 	glMatrixMode (GL_MODELVIEW);
 	glLoadIdentity ();
 
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_VERTEX_ARRAY);
+
+#else
+
+	// Show device info
+	char *str;
+	printf("\n*********************************\n");
+	printf("*** Draw Info\n");
+	str=(char *)glGetString(GL_VENDOR);
+	printf(" Vendor: %s\n",str);
+	str=(char *)glGetString(GL_RENDERER);
+	printf(" Renderer: %s\n",str);
+	str=(char *)glGetString(GL_VERSION);
+	printf(" Version: %s\n",str);
+	printf("*********************************\n");
+
+	const char vertexShaderSource[] =
+		"attribute vec4 aPosition;      \n"
+		"attribute vec2 aTexCoord;      \n"
+		"attribute vec4 aColor;         \n"
+		"varying vec2 vTexCoord;        \n"
+		"varying vec4 vColor;           \n"
+		"uniform mat4 sProjectionMatrix; \n"
+		"void main() {                  \n"
+		"   gl_Position = aPosition *   \n"
+		"            sProjectionMatrix;  \n"
+		"   vTexCoord = aTexCoord;      \n"
+		"   vColor = aColor;            \n"
+		"}                              \n";
+
+	const char fragmentShaderSource[] =
+		"precision mediump float;                                \n"
+		"varying vec2 vTexCoord;                                 \n"
+		"varying vec4 vColor;                                    \n"
+		"uniform sampler2D sTexture;                             \n"
+		"void main() {                                           \n"
+		"  gl_FragColor = texture2D(sTexture, vTexCoord)*vColor; \n"
+		"}                                                       \n";
+
+	GLuint programObject=Draw_BuildProgram(
+		vertexShaderSource,
+		fragmentShaderSource);
+	glUseProgram(programObject);
+
+	vertPosLoc = glGetAttribLocation(programObject, "aPosition");
+	vertTexLoc = glGetAttribLocation(programObject, "aTexCoord");
+	vertColorLoc = glGetAttribLocation(programObject, "aColor");
+
+	textureLoc = glGetUniformLocation(programObject, "sTexture");
+	projectionMatrixLoc = glGetUniformLocation(programObject, "sProjectionMatrix");
+
+	glGenBuffers(1, &vertexObject);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexObject );
+	glBufferData(GL_ARRAY_BUFFER, Vertex2D_Length*sizeof(float)*Max_Vertices,
+		NULL, GL_DYNAMIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vertexObject );
+
+	glVertexAttribPointer(vertPosLoc, 2, GL_FLOAT,GL_FALSE,
+		Vertex2D_Length*sizeof(float), (void*)(0*sizeof(float)));
+	glVertexAttribPointer(vertTexLoc, 2, GL_FLOAT, GL_FALSE,
+		Vertex2D_Length*sizeof(float), (void*)(2*sizeof(float)));
+	glVertexAttribPointer(vertColorLoc, 4, GL_FLOAT, GL_FALSE,
+		Vertex2D_Length*sizeof(float), (void*)(4*sizeof(float)));
+
+	glEnableVertexAttribArray(vertPosLoc);
+	glEnableVertexAttribArray(vertTexLoc);
+	glEnableVertexAttribArray(vertColorLoc);
+
+	glUniform1i(textureLoc, 0);
+
+	GLfloat projectionMatrix[16]={
+			2.0f/(float)_width, 0.0, 0.0, -1.0,
+			0.0, 2.0/(float)_height, 0.0, -1.0,
+			0.0, 0.0, 1.0, 0.0,
+			0.0, 0.0, 0.0, 1.0
+		};
+	glUniformMatrix4fv(projectionMatrixLoc,
+		1, GL_FALSE, projectionMatrix);
+
+#endif
+
 	// Enable Alpha blending
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -156,6 +314,123 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 	Draw_SetColor(1.0f,1.0f,1.0f,1.0f);
 
 	return(1);
+}
+
+
+
+/////////////////////////////
+// Draw_UploadGLTexture
+//
+// Uploads a OpenGL texture.
+GLuint Draw_UploadGLTexture(int w, int h, unsigned char *pixels){
+	GLuint tex;
+
+	// Generate OpenGL texture
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	// Load OpenGL texture
+	glBindTexture(GL_TEXTURE_2D, tex);
+#if USE_OpenGL
+	glPixelStorei( GL_UNPACK_ROW_LENGTH, w );
+#endif
+	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+				 w, h, 0,
+				 GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+	return(tex);
+}
+
+
+/////////////////////////////
+// Draw_Flush
+//
+// Performs all the queued draw actions.
+void Draw_Flush(){
+	if(_currentImg==NULL || _quadArray->nVertex<=0){
+		return;
+	}
+	if(_currentImg->tex==-1){
+		_currentImg->tex=Draw_UploadGLTexture(_currentImg->w, _currentImg->h, _currentImg->data);
+	}
+
+#if USE_OpenGL
+	// Draw the quad array
+	glBindTexture(GL_TEXTURE_2D, _currentImg->tex);
+	glColorPointer( 4, GL_FLOAT, Vertex2D_Length*sizeof(float),
+		(GLvoid *)(_quadArray->vertexData+4) );
+	glTexCoordPointer( 2, GL_FLOAT, Vertex2D_Length*sizeof(float),
+		(GLvoid *)(_quadArray->vertexData+2) );
+	glVertexPointer( 2, GL_FLOAT, Vertex2D_Length*sizeof(float),
+		(GLvoid *)(_quadArray->vertexData) );
+	glDrawArrays(GL_TRIANGLES,0,_quadArray->nVertex);
+
+#else
+
+	// Draw the quad array
+	glBindTexture(GL_TEXTURE_2D, _currentImg->tex);
+	glBufferSubData(GL_ARRAY_BUFFER, 0,
+		Vertex2D_Length*sizeof(float)*_quadArray->nVertex,
+		_quadArray->vertexData);
+	glDrawArrays(GL_TRIANGLES, 0, _quadArray->nVertex);
+
+#endif
+
+	// Empty it
+	QuadArray2D_Clean(_quadArray);
+}
+
+
+/////////////////////////////
+// Draw_Clean
+//
+// Cleans the game window.
+void Draw_Clean(
+	unsigned char r,
+	unsigned char g,
+	unsigned char b)
+{
+#ifndef EMSCRIPTEN
+	glClearColor(r/255.0f,g/255.0f,b/255.0f,1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+#else
+	Draw_Flush();
+	float fr=r/255.0f;
+	float fg=g/255.0f;
+	float fb=b/255.0f;
+	GLfloat vVertices[] = {
+		 0.0,  0.0,  // Position 0
+		 0.0,  0.0,  // TexCoord 0
+		 fr,  fg,  fb,  1.0, // Color
+
+		 0.0, _height,  // Position 1
+		 0.0,  1.0,  // TexCoord 1
+		 fr,  fg,  fb,  1.0, // Color
+
+		 _width, _height,  // Position 2
+		 1.0,  1.0,  // TexCoord 2
+		 fr,  fg,  fb,  1.0, // Color
+
+		 _width, _height,  // Position 2
+		 1.0,  1.0,  // TexCoord 2
+		 fr,  fg,  fb,  1.0, // Color
+
+		 _width,  0.0,  // Position 3
+		 1.0,  0.0,  // TexCoord 3
+		 fr,  fg,  fb,  1.0, // Color
+
+		 0.0,  0.0,  // Position 0
+		 0.0,  0.0,  // TexCoord 0
+		 fr,  fg,  fb,  1.0, // Color
+	};
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vVertices), vVertices);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+#endif
 }
 
 
@@ -271,47 +546,6 @@ void Draw_Loop(int (*proc)(),void (*draw)(float f)){
 
 
 /////////////////////////////
-// Draw_Clean
-//
-// Cleans the game window.
-void Draw_Clean(
-	unsigned char r,
-	unsigned char g,
-	unsigned char b)
-{
-	glClearColor(r/255.0f,g/255.0f,b/255.0f,1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-}
-
-
-/////////////////////////////
-// Draw_UploadGLTexture
-//
-// Uploads a OpenGL texture.
-GLuint Draw_UploadGLTexture(int w, int h, unsigned char *pixels){
-	GLuint tex;
-
-	// Generate OpenGL texture
-	glGenTextures(1, &tex);
-	glBindTexture(GL_TEXTURE_2D, tex);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	// Load OpenGL texture
-	glBindTexture(GL_TEXTURE_2D, tex);
-	//glPixelStorei( GL_UNPACK_ROW_LENGTH, w );
-	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-				 w, h, 0,
-				 GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-
-	return(tex);
-}
-
-
-/////////////////////////////
 // Draw_CreateImage
 //
 DrawImg Draw_CreateImage(int w,int h){
@@ -391,42 +625,6 @@ void Draw_GetOffset(DrawImg img,int *x,int *y){
 	// Gets the image offset
 	*x=image->x;
 	*y=image->y;
-}
-
-
-/////////////////////////////
-// Draw_Flush
-//
-// Performs all the queued draw actions.
-void Draw_Flush(){
-	if(_currentImg==NULL){
-		return;
-	}
-	if(_currentImg->tex==-1){
-		_currentImg->tex=Draw_UploadGLTexture(_currentImg->w, _currentImg->h, _currentImg->data);
-	}
-
-	// Draw the quad array
-	glBindTexture(GL_TEXTURE_2D, _currentImg->tex);
-	glEnableClientState(GL_COLOR_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glEnableClientState(GL_VERTEX_ARRAY);
-
-	glColorPointer( 4, GL_FLOAT, Vertex2D_Length*sizeof(float),
-		(GLvoid *)(_quadArray->vertexData+4) );
-	glTexCoordPointer( 2, GL_FLOAT, Vertex2D_Length*sizeof(float),
-		(GLvoid *)(_quadArray->vertexData+2) );
-	glVertexPointer( 2, GL_FLOAT, Vertex2D_Length*sizeof(float),
-		(GLvoid *)(_quadArray->vertexData) );
-
-	glDrawArrays(GL_QUADS,0,_quadArray->nVertex);
-
-	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
-
-	// Empty it
-	QuadArray2D_Clean(_quadArray);
 }
 
 
@@ -518,7 +716,6 @@ void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int i){
 //
 //
 void Draw_SetColor(float r,float g,float b,float a){
-	glColor4f(r,g,b,a);
 	_color[0]=r;
 	_color[1]=g;
 	_color[2]=b;
@@ -643,6 +840,7 @@ void Draw_DrawText(DrawFnt f,char *text,int x,int y){
 //
 //
 void Draw_SaveScreenshoot(char *filename){
+#if USE_OpenGL
 	SDL_Surface *surf;
 	unsigned char *image_line;
 	int i,half_height,line_size;
@@ -690,6 +888,7 @@ void Draw_SaveScreenshoot(char *filename){
 
 	// Cleanup
 	SDL_FreeSurface(surf);
+#endif
 }
 
 

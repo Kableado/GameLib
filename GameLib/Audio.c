@@ -18,30 +18,35 @@ static void Audio_MixerCallback(void *ud,Uint8 *stream,int l);
 // AudioWave //
 ///////////////
 // Reference to a sound.
-typedef struct Tag_AudioWave {
-	SDL_AudioSpec spec;
+typedef struct TAudioWave TAudioWave, *AudioWave;
+struct TAudioWave {
+	unsigned int sampleRate;
+	int channels;
+	int bpb;
+	int BPB;
 	Uint32 len;
 	Uint8 *buffer;
 
-	struct Tag_AudioWave *next;
-} AudioWave;
-AudioWave *_waves=NULL;
+	AudioWave next;
+};
+AudioWave _waves=NULL;
 
 
 ////////////////////////////////////////////////
 // AudioChan //
 ///////////////
 // Reference to a sound.
-typedef struct Tag_AudioChan {
-	AudioWave *wave;
+typedef struct TAudioChan TAudioChan, *AudioChan;
+struct TAudioChan {
+	AudioWave wave;
 	Uint32 pos;
 	unsigned char rightvol;
 	unsigned char leftvol;
 
-	struct Tag_AudioChan *next;
-} AudioChan;
-AudioChan *_channels=NULL;
-AudioChan *_free_channels=NULL;
+	AudioChan next;
+};
+AudioChan _channels=NULL;
+AudioChan _free_channels=NULL;
 
 /////////////////////////////
 // Audio_Init
@@ -58,7 +63,7 @@ int Audio_Init(){
 #endif
 	if(SDL_InitSubSystem(SDL_INIT_AUDIO) < 0){
 		printf("Audio_Init: Failure initializing SDL Audio.\n");
-		printf("Audio_Init: SDL Error: %s\n",SDL_GetError());
+		printf("\tSDL Error: %s\n",SDL_GetError());
 		return(0);
 	}
 
@@ -66,15 +71,11 @@ int Audio_Init(){
 	as.freq = 44100;
 	as.format = AUDIO_S16SYS;
 	as.channels = 2;
-#ifdef EMSCRIPTEN
-	as.samples = 4096;
-#else
-	as.samples = 1024;
-#endif
+	as.samples = 2048;
 	as.callback = Audio_MixerCallback;
 	if(SDL_OpenAudio(&as, &as2) < 0){
 		printf("Audio_Init: Failure opening audio.\n");
-		printf("Audio_Init: SDL Error: %s\n",SDL_GetError());
+		printf("\tSDL Error: %s\n",SDL_GetError());
 		return(0);
 	}
 
@@ -101,16 +102,16 @@ int Audio_Init(){
 // Mixes the audio channels.
 static void Audio_MixerCallback(void *ud,Uint8 *stream,int l){
 	signed short *ptr_out,*ptr_wave;
-	AudioChan *prevchan;
-	AudioChan *chan;
-	AudioWave *wave;
+	AudioChan prevchan;
+	AudioChan chan;
+	AudioWave wave;
 	int len=l/4; // Asume 16bpb and 2 output chan
 	int chan_remain;
 	int len_mix;
 	int i;
 
 	// Clean
-	memset(stream,0,len);
+	memset(stream,0,l);
 
 	// Mix all the channels
 	prevchan=NULL;
@@ -118,7 +119,7 @@ static void Audio_MixerCallback(void *ud,Uint8 *stream,int l){
 	while(chan){
 		if(!chan->wave){
 			// Remove finished channels
-			AudioChan *aux_chan=chan->next;
+			AudioChan aux_chan=chan->next;
 			chan->next=_free_channels;
 			_free_channels=chan;
 			chan=aux_chan;
@@ -197,41 +198,105 @@ void Audio_Frame(){
 //
 // Loads a sound, giving a reference.
 AudioSnd Audio_LoadSound(char *filename){
-	AudioWave *wave;
-#ifndef EMSCRIPTEN
-	// Allocate and load the sound
-	wave=malloc(sizeof(AudioWave));
-	if( SDL_LoadWAV(filename,
-		&wave->spec, &wave->buffer, &wave->len) == NULL )
-	{
-		printf("Audio_LoadSound: Failure Loading sound: %s\n",filename);
-		printf("Audio_LoadSound: SDL Error: %s\n",SDL_GetError());
-		free(wave);
+	int error = 0;
+	FILE *f;
+	char id[5] = { 0, 0, 0, 0, 0 }, *sndBuffer = NULL;
+	short formatTag, channels, bitsPerSample;
+	int formatLen, sampleRate, dataSize;
+
+	f = fopen(filename, "rb");
+	if (!f) {
+		printf("Audio_LoadSound: Failure opening file.\n");
 		return(NULL);
 	}
 
-	// Asert results
-	if(	wave->spec.format   != AUDIO_S16 ||
-		wave->spec.freq     != 44100 ||
-		wave->spec.channels != 1 )
-	{
-		printf("Audio_LoadSound: Failure opening sound. (44.1Khz/16b/1c).\n");
-		SDL_FreeWAV(wave->buffer);
-		free(wave);
-		return(0);
+	// Read id "RIFF"
+	fread(id, 4, sizeof(char), f);
+	if (strcmp(id, "RIFF")) {
+		printf("Audio_LoadSound: File is not RIFF.\n");
+		fclose(f);
+		return(NULL);
 	}
 
-	// Correct the lenght
-	wave->len/=2;
+	// File size (-"RIFF")
+	fseek(f, 4, SEEK_CUR); // size
+
+	// Read id "WAVE"
+	fread(id, 4, sizeof(char), f);
+	if (strcmp(id, "WAVE")) {
+		printf("Audio_LoadSound: File is not WAVE.\n");
+		fclose(f);
+		return(NULL);
+	}
+
+	// Read the format
+	fread(id, 1, sizeof(char) * 4, f); // Read "fmt "
+	fread(&formatLen, 1, sizeof(int), f);
+	if (formatLen < 14) {
+		printf("Audio_LoadSound: File too short.\n");
+		fclose(f);
+		return (NULL );
+	}
+	fread(&formatTag, 1, sizeof(short), f); // 1=PCM
+	if (formatTag != 1) {
+		printf("Audio_LoadSound: Not PCM format.\n");
+		fclose(f);
+		return (NULL );
+	}
+	fread(&channels, 1, sizeof(short), f);
+	fread(&sampleRate, 1, sizeof(int), f);
+	fseek(f, 2, SEEK_CUR); // avgBytesSec
+	fseek(f, 2, SEEK_CUR); // blockAlign
+	fread(&bitsPerSample, 1, sizeof(short), f);
+	fseek(f, formatLen - 14, SEEK_CUR); // Align read
+
+	// Assert sound format
+	if (sampleRate!=44100 || channels!=1 || bitsPerSample!=2) {
+		printf("Audio_LoadSound: Format not supported: "
+				"sampleRate:%d; channels:%d; BPB:%d\n",
+					sampleRate, channels, bitsPerSample);
+		fclose(f);
+		return(NULL);
+	}
+
+	// Skip no "data" blocks
+	do{
+		int lenRead=fread(id, 1, sizeof(char) * 4, f);
+		if(lenRead<4){ break; }
+		if (strcmp(id, "data")) {
+			fread(&dataSize, 1, sizeof(int), f);
+			fseek(f, dataSize, SEEK_CUR);
+		}else{
+			break;
+		}
+	}while(1);
+	if (strcmp(id, "data")) {
+		printf("Audio_LoadSound: DATA block not found\n");
+		fclose(f);
+		return (NULL );
+	}
+
+	// Read the "data" block
+	fread(&dataSize, 1, sizeof(int), f);
+	sndBuffer = malloc(sizeof(char)*dataSize);
+	fread(sndBuffer, dataSize, sizeof(char), f);
+
+	fclose(f);
+
+	// Build the wave object
+	AudioWave wave = malloc(sizeof(TAudioWave));
+	wave->sampleRate = sampleRate;
+	wave->channels = channels;
+	wave->buffer = (Uint8 *) sndBuffer;
+	wave->BPB = bitsPerSample;
+	wave->bpb = wave->bpb * 8;
+	wave->len = dataSize / (wave->BPB * wave->channels);
 
 	// Take a reference
 	wave->next=_waves;
 	_waves=wave;
 
-	return((AudioSnd)wave);
-#else
-	return(NULL);
-#endif
+	return (wave);
 }
 
 
@@ -242,8 +307,8 @@ AudioSnd Audio_LoadSound(char *filename){
 void Audio_PlaySound(AudioSnd snd,
 	float leftvol, float rightvol)
 {
-	AudioChan *chan;
-	AudioWave *wave;
+	AudioChan chan;
+	AudioWave wave;
 	if(!snd)
 		return;
 
@@ -256,7 +321,7 @@ void Audio_PlaySound(AudioSnd snd,
 		_free_channels=chan->next;
 		chan->next=NULL;
 	}else{
-		chan=malloc(sizeof(AudioChan));
+		chan=malloc(sizeof(TAudioChan));
 		chan->next=NULL;
 	}
 

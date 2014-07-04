@@ -70,6 +70,9 @@ void QuadArray2D_AddQuad(QuadArray2D quadArray,
 	v[0]=x0; v[1]=y0; v[2]=u0; v[3]=v0; QuadArray2D_AddVertex(quadArray,v);
 	v[0]=x1; v[1]=y0; v[2]=u1; v[3]=v0; QuadArray2D_AddVertex(quadArray,v);
 	v[0]=x1; v[1]=y1; v[2]=u1; v[3]=v1; QuadArray2D_AddVertex(quadArray,v);
+
+	v[0]=x1; v[1]=y1; v[2]=u1; v[3]=v1; QuadArray2D_AddVertex(quadArray,v);
 	v[0]=x0; v[1]=y1; v[2]=u0; v[3]=v1; QuadArray2D_AddVertex(quadArray,v);
+	v[0]=x0; v[1]=y0; v[2]=u0; v[3]=v0; QuadArray2D_AddVertex(quadArray,v);
 }
 
