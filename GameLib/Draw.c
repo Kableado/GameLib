@@ -149,6 +149,10 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_VERTEX_ARRAY);
+
 	// Initialize the triangle array
 	_quadArray=QuadArray2D_Create(400);
 
@@ -407,10 +411,6 @@ void Draw_Flush(){
 
 	// Draw the quad array
 	glBindTexture(GL_TEXTURE_2D, _currentImg->tex);
-	glEnableClientState(GL_COLOR_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glEnableClientState(GL_VERTEX_ARRAY);
-
 	glColorPointer( 4, GL_FLOAT, Vertex2D_Length*sizeof(float),
 		(GLvoid *)(_quadArray->vertexData+4) );
 	glTexCoordPointer( 2, GL_FLOAT, Vertex2D_Length*sizeof(float),
@@ -418,11 +418,7 @@ void Draw_Flush(){
 	glVertexPointer( 2, GL_FLOAT, Vertex2D_Length*sizeof(float),
 		(GLvoid *)(_quadArray->vertexData) );
 
-	glDrawArrays(GL_QUADS,0,_quadArray->nVertex);
-
-	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
+	glDrawArrays(GL_TRIANGLES,0,_quadArray->nVertex);
 
 	// Empty it
 	QuadArray2D_Clean(_quadArray);
