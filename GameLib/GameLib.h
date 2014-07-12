@@ -52,13 +52,6 @@ void GameLib_Loop(
 
 
 /////////////////////////////
-// GameLib_BreakLoop
-//
-// Breaks the game loop.
-void GameLib_BreakLoop();
-
-
-/////////////////////////////
 // GameLib_GetPos
 // GameLib_SetPos
 // GameLib_SetPos

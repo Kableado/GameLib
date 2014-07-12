@@ -25,7 +25,24 @@ void Draw_Clean(
 // Draw_Loop
 //
 // Loops updating the game window.
-void Draw_Loop(int (*proc)(),void (*draw)(float f));
+void Draw_Loop(
+	void (*proc)(void *data),
+	void (*draw)(void *data,float f),
+	void *data);
+
+
+/////////////////////////////
+// Draw_BreakLoop
+//
+// Breaks the drawing loop
+void Draw_BreakLoop();
+
+
+/////////////////////////////
+// Draw_OverrideExit
+//
+// Overrides the default exit mechanism
+void Draw_OverrideExit(int override);
 
 
 /////////////////////////////

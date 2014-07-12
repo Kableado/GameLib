@@ -17,7 +17,6 @@
 #include "GameLib.h"
 
 // Globals
-int _running;
 Entity *_entity=NULL;
 int *_entity_flag=NULL;
 int _n_entities=0;
@@ -188,7 +187,7 @@ void GameLib_Compactate(){
 // GameLib_ProcLoop
 //
 // Process the loop.
-int GameLib_ProcLoop(){
+void GameLib_ProcLoop(void *data){
 	int i,j;
 	int repeat,count;
 	long long time;
@@ -324,8 +323,6 @@ int GameLib_ProcLoop(){
 	t_postproc+=Time_GetTime()-time;
 
 	fproc_count++;
-
-	return(_running);
 }
 
 
@@ -333,7 +330,7 @@ int GameLib_ProcLoop(){
 // GameLib_DrawLoop
 //
 //
-void GameLib_DrawLoop(float f){
+void GameLib_DrawLoop(void *data, float f){
 	long long time;
 	int i;
 	int game_pos[2];
@@ -414,8 +411,6 @@ void GameLib_Loop(
 	void (*gamepredraw)(float f),
 	void (*gamedraw)(float f))
 {
-	_running=1;
-
 	_gameproc=gameproc;
 	_gamepostproc=gamepostproc;
 	_gamepredraw=gamepredraw;
@@ -427,16 +422,7 @@ void GameLib_Loop(
 	t_draw=0;
 	fproc_count=0;
 	fdraw_count=0;
-	Draw_Loop(GameLib_ProcLoop,GameLib_DrawLoop);
-}
-
-
-/////////////////////////////
-// GameLib_BreakLoop
-//
-// Breaks the game loop.
-void GameLib_BreakLoop(){
-	_running=0;
+	Draw_Loop(GameLib_ProcLoop,GameLib_DrawLoop,NULL);
 }
 
 

@@ -33,6 +33,7 @@ typedef enum {
 	InputKey_Right,
 	InputKey_Jump,
 	InputKey_Continue,
+	InputKey_Exit,
 
 	InputKey_DumpProfiling,
 
