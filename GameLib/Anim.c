@@ -101,7 +101,7 @@ void Anim_Draw(Anim a,int time_ms,int x,int y){
 	Animation *anim=a;
 	int frame;
 
-	frame=(time_ms%anim->time)/anim->ftime;
+	frame=(time_ms/anim->ftime)%anim->frames;
 	Draw_DrawImgPart(anim->img,x,y,anim->w,frame);
 }
 

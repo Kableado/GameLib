@@ -451,7 +451,6 @@ int Draw_LoopIteration(){
 	SDL_GL_SwapBuffers();
 
 	// Process Events
-	Input_SetKey(InputKey_Exit,0);
 	while(SDL_PollEvent(&event) ){
 		if(event.type == SDL_QUIT ){
 			Input_SetKey(InputKey_Exit,1);
@@ -494,6 +493,7 @@ int Draw_LoopIteration(){
 			Input_Frame();
 			_proc_func(_data);
 			_accTime-=proc_t_frame;
+			Input_SetKey(InputKey_Exit,0);
 		}
 	}
 
