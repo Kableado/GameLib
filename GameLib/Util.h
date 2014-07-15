@@ -29,6 +29,9 @@ float vec2_norm(vec2 v);
 #define vec2_interpol(v,v1,v2,f) \
 	(v)[0]=(v1)[0]-f*((v1)[0]-(v2)[0]);\
 	(v)[1]=(v1)[1]-f*((v1)[1]-(v2)[1]);
+void vec2_orthogonalize4(vec2 v);
+void vec2_orthogonalize8(vec2 v);
+
 
 
 /////////////////////////////

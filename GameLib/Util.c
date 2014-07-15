@@ -17,6 +17,60 @@ float vec2_norm(vec2 v){
 	return(len);
 }
 
+void vec2_orthogonalize4(vec2 v) {
+	if (fabs(v[0]) > fabs(v[1])) {
+		if (v[0] >= 0) {
+			v[0] = 1.0f;
+			v[1] = 0.0f;
+		} else {
+			v[0] = -1.0f;
+			v[1] = 0.0f;
+		}
+	} else {
+		if (v[1] >= 0) {
+			v[1] = 1.0f;
+			v[0] = 0.0f;
+		} else {
+			v[1] = -1.0f;
+			v[0] = 0.0f;
+		}
+	}
+}
+
+void vec2_orthogonalize8(vec2 v) {
+	float diff = fabs(fabs(v[0]) - fabs(v[1]));
+	if (diff > 0.2f) {
+		if (fabs(v[0]) > fabs(v[1])) {
+			if (v[0] >= 0) {
+				v[0] = 1.0f;
+				v[1] = 0.0f;
+			} else {
+				v[0] = -1.0f;
+				v[1] = 0.0f;
+			}
+		} else {
+			if (v[1] >= 0) {
+				v[1] = 1.0f;
+				v[0] = 0.0f;
+			} else {
+				v[1] = -1.0f;
+				v[0] = 0.0f;
+			}
+		}
+	} else {
+		if (v[0] > 0.0f) {
+			v[0] = 0.707f;
+		} else {
+			v[0] = -0.707f;
+		}
+		if (v[1] > 0.0f) {
+			v[1] = 0.707f;
+		} else {
+			v[1] = -0.707f;
+		}
+	}
+}
+
 
 /////////////////////////////
 // SolveQuadratic
