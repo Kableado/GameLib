@@ -30,6 +30,7 @@ struct TEntity {
 	vec2 pos;
 	int flags;
 	int zorder;
+	float sortYOffset;
 
 	vec2 dir;
 

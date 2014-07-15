@@ -34,6 +34,7 @@ Entity Entity_New(){
 	vec2_set(e->pos,0.0f,0.0f);
 	e->flags=EntityFlag_Collision|EntityFlag_Overlap;
 	e->zorder=1;
+	e->sortYOffset=0;
 
 	vec2_set(e->dir,0.0f,0.0f);
 
@@ -99,6 +100,7 @@ Entity Entity_Copy(Entity e){
 	vec2_set(n->pos,e->pos[0],e->pos[1]);
 	n->flags=e->flags;
 	n->zorder=e->zorder;
+	n->sortYOffset=e->sortYOffset;
 
 	vec2_set(n->vel,e->vel[0],e->vel[1]);
 	n->radius=e->radius;

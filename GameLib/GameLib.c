@@ -285,16 +285,20 @@ void GameLib_ProcLoop(void *data){
 	do{
 		n2=0;
 		for(i=1;i<n;i++){
+			Entity ent1=_entity[i-1];
+			Entity ent2=_entity[i];
 			swap=0;
-			if(_entity[i-1]->zorder > _entity[i]->zorder){
+			if(ent1->zorder > ent2->zorder){
 				// Lower level
 				swap=1;
 			}else
-			if(_entity[i-1]->zorder < _entity[i]->zorder){
+			if(ent1->zorder < ent2->zorder){
 				// Upper level
 			}else{
 				// Same level
-				if(_entity[i-1]->pos[1] > _entity[i]->pos[1]){
+				float y1=ent1->pos[1]+ent1->sortYOffset;
+				float y2=ent2->pos[1]+ent2->sortYOffset;
+				if(y1 > y2){
 					swap=1;
 				}
 			}
