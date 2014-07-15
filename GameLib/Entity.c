@@ -636,12 +636,14 @@ int Entity_CollisionInfoResponse(CollisionInfo collInfo){
 		// Handle colision
 		int response=1;
 		int rc;
+		vec2 n1;
 		vec2 n2;
+		vec2_copy(n1,collInfo->n);
 		vec2_scale(n2,collInfo->n,-1.0f);
 
 		// Check the collision methods
 		if(collInfo->ent1->collision){
-			rc=collInfo->ent1->collision(collInfo->ent1,collInfo->ent2,collInfo->t,collInfo->n);
+			rc=collInfo->ent1->collision(collInfo->ent1,collInfo->ent2,collInfo->t,n1);
 			if (rc==0)
 				response=0;
 			if (rc>1)
@@ -667,7 +669,7 @@ int Entity_CollisionInfoResponse(CollisionInfo collInfo){
 				{
 					Entity_CollisionResponseCircle(collInfo->ent1,collInfo->ent2,collInfo->t,n2);
 				}else{
-					Entity_CollisionResponseCircle(collInfo->ent2,collInfo->ent1,collInfo->t,collInfo->n);
+					Entity_CollisionResponseCircle(collInfo->ent2,collInfo->ent1,collInfo->t,n1);
 				}
 			}
 			return(1);
