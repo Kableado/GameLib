@@ -17,7 +17,6 @@
 #include "GameLib.h"
 
 // Globals
-int _running;
 Entity *_entity=NULL;
 int *_entity_flag=NULL;
 int _n_entities=0;
@@ -28,7 +27,7 @@ void (*_gameproc)()=NULL;
 void (*_gamepostproc)()=NULL;
 void (*_gamepredraw)(float f)=NULL;
 void (*_gamedraw)(float f)=NULL;
-int _ft;
+int _pft;
 int _game_size[2];
 int _game_pos0[2];
 int _game_pos1[2];
@@ -64,7 +63,7 @@ int GameLib_Init(int w,int h,char *title,int pfps,int fps){
 	_game_pos1[0]=0;
 	_game_pos1[1]=0;
 
-	_ft=1000/fps;
+	_pft=1000/pfps;
 
 	return(1);
 }
@@ -106,6 +105,8 @@ void GameLib_AddEntity(Entity e){
 
 	// Mark for light update
 	Entity_MarkUpdateLight(e,_entity,_n_entities);
+
+	Entity_CalcBBox(e);
 }
 
 
@@ -188,14 +189,14 @@ void GameLib_Compactate(){
 // GameLib_ProcLoop
 //
 // Process the loop.
-int GameLib_ProcLoop(){
+void GameLib_ProcLoop(void *data){
 	int i,j;
 	int repeat,count;
 	long long time;
 
 	// Step the gamePosition
 	_game_pos0[0]=_game_pos1[0];
-	_game_pos0[0]=_game_pos1[0];
+	_game_pos0[1]=_game_pos1[1];
 
 	// Process
 	time=Time_GetTime();
@@ -206,7 +207,7 @@ int GameLib_ProcLoop(){
 	for(i=0;i<_n_entities;i++){
 		if(!_entity[i])
 			continue;
-		Entity_Process(_entity[i],_ft);
+		Entity_Process(_entity[i],_pft);
 	}
 	GameLib_Compactate();
 	t_proc+=Time_GetTime()-time;
@@ -284,16 +285,20 @@ int GameLib_ProcLoop(){
 	do{
 		n2=0;
 		for(i=1;i<n;i++){
+			Entity ent1=_entity[i-1];
+			Entity ent2=_entity[i];
 			swap=0;
-			if(_entity[i-1]->zorder > _entity[i]->zorder){
+			if(ent1->zorder > ent2->zorder){
 				// Lower level
 				swap=1;
 			}else
-			if(_entity[i-1]->zorder < _entity[i]->zorder){
+			if(ent1->zorder < ent2->zorder){
 				// Upper level
 			}else{
 				// Same level
-				if(_entity[i-1]->pos[1] > _entity[i]->pos[1]){
+				float y1=ent1->pos[1]+ent1->sortYOffset;
+				float y2=ent2->pos[1]+ent2->sortYOffset;
+				if(y1 > y2){
 					swap=1;
 				}
 			}
@@ -312,7 +317,7 @@ int GameLib_ProcLoop(){
 	time=Time_GetTime();
 	GameLib_Compactate();_entities_lock=1;
 	for(i=0;i<_n_entities;i++){
-		Entity_PostProcess(_entity[i],_ft);
+		Entity_PostProcess(_entity[i],_pft);
 		if(_entity[i]->flags&EntityFlag_UpdatedPos){
 			Entity_MarkUpdateLight(_entity[i],_entity,_n_entities);
 		}
@@ -324,8 +329,6 @@ int GameLib_ProcLoop(){
 	t_postproc+=Time_GetTime()-time;
 
 	fproc_count++;
-
-	return(_running);
 }
 
 
@@ -333,7 +336,7 @@ int GameLib_ProcLoop(){
 // GameLib_DrawLoop
 //
 //
-void GameLib_DrawLoop(float f){
+void GameLib_DrawLoop(void *data, float f){
 	long long time;
 	int i;
 	int game_pos[2];
@@ -414,8 +417,6 @@ void GameLib_Loop(
 	void (*gamepredraw)(float f),
 	void (*gamedraw)(float f))
 {
-	_running=1;
-
 	_gameproc=gameproc;
 	_gamepostproc=gamepostproc;
 	_gamepredraw=gamepredraw;
@@ -427,16 +428,7 @@ void GameLib_Loop(
 	t_draw=0;
 	fproc_count=0;
 	fdraw_count=0;
-	Draw_Loop(GameLib_ProcLoop,GameLib_DrawLoop);
-}
-
-
-/////////////////////////////
-// GameLib_BreakLoop
-//
-// Breaks the game loop.
-void GameLib_BreakLoop(){
-	_running=0;
+	Draw_Loop(GameLib_ProcLoop,GameLib_DrawLoop,NULL);
 }
 
 

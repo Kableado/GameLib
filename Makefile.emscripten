@@ -1,4 +1,4 @@
-CC= python /c/Program\ Files/Emscripten/emscripten/1.7.8/emcc
+CC= emcc
 LAUNCHER= start
 RM=rm -rf
 
@@ -7,8 +7,14 @@ CFLAGS= -s FULL_ES2=1 -s ASM_JS=1 -O1
 #LDFLAGS= --embed-file data
 LDFLAGS= --preload-file data
 
+
 RESULT=game.html
 BUILDDIR=build-emscripten
+
+ifeq ($(target),release)
+	CFLAGS= -s FULL_ES2=1 -s ASM_JS=1 -O2 --llvm-lto 1
+	BUILDDIR=build-emscripten-release
+endif
 
 include Makefile.common
 

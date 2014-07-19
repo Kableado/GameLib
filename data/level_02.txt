@@ -15,9 +15,9 @@
                                           ##..................##
                                           ##..................##
                                           ll..................ll
-                                          ##..BBBBBB..BBBBBB..##
-                                          ##LLLLLLLLrr||||||||##
-                                          ##..................##
-                                          ##..................##
-                                          ##........EE........##
-                                          ##mmmmmmmmmmmmmmmmmm##
+                                          mm..BBBBBB..BBBBBB..mm
+                                          mmLLLLLLLLrr||||||||mm
+                                          mm..................mm
+                                          mm..................mm
+                                          mm........EE........mm
+                                          mmmmmmmmmmmmmmmmmmmmmm

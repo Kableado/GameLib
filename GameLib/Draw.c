@@ -438,27 +438,60 @@ void Draw_Clean(
 // Draw_LoopIteration
 //
 // One iteracion of the loop updating the game window.
-int (*_proc_func)()=NULL;
-void (*_draw_func)(float f)=NULL;
+void (*_proc_func)(void *data)=NULL;
+void (*_draw_func)(void *data,float f)=NULL;
+void *_data=NULL;
+int _draw_looping=0;
+int _draw_exitoverrided=0;
 long long _accTime;
 int Draw_LoopIteration(){
 	SDL_Event event;
 	Uint8* keys;
-	int done=0;
 	// Update screen
 	SDL_GL_SwapBuffers();
 
 	// Process Events
+#ifdef EMSCRIPTEN
 	while(SDL_PollEvent(&event) ){
 		if(event.type == SDL_QUIT ){
-			done=1;
+			Input_SetKey(InputKey_Exit,1);
 		}
 		if(event.type == SDL_KEYDOWN ){
 			if(event.key.keysym.sym == SDLK_ESCAPE ) {
-				done=1;
+				Input_SetKey(InputKey_Exit,1);
 			}
 		}
+		if(event.type==SDL_MOUSEBUTTONDOWN || event.type==SDL_FINGERDOWN || event.type==SDL_TOUCHBUTTONDOWN){
+			Input_SetPointerDown(1);
+		}
+		if(event.type==SDL_MOUSEBUTTONUP || event.type==SDL_FINGERUP || event.type==SDL_TOUCHBUTTONUP){
+			Input_SetPointerDown(0);
+		}
 	}
+#else
+	while(SDL_PollEvent(&event) ){
+		if(event.type == SDL_QUIT ){
+			Input_SetKey(InputKey_Exit,1);
+			if(!_draw_exitoverrided){
+				_draw_looping=0;
+			}
+		}
+		if(event.type == SDL_KEYDOWN ){
+			if(event.key.keysym.sym == SDLK_ESCAPE ) {
+				Input_SetKey(InputKey_Exit,1);
+				if(!_draw_exitoverrided){
+					_draw_looping=0;
+				}
+			}
+		}
+		if(event.type==SDL_MOUSEBUTTONDOWN){
+			Input_SetPointerDown(1);
+		}
+		if(event.type==SDL_MOUSEBUTTONUP){
+			Input_SetPointerDown(0);
+		}
+	}
+#endif
 
 #ifndef EMSCRIPTEN
 	// Process keys for Draw
@@ -477,12 +510,11 @@ int Draw_LoopIteration(){
 		if(_accTime>100000){
 			_accTime=100000;
 		}
-		while(_accTime>=proc_t_frame && !done){
+		while(_accTime>=proc_t_frame && _draw_looping){
 			Input_Frame();
-			if(!_proc_func()){
-				done=1;
-			}
+			_proc_func(_data);
 			_accTime-=proc_t_frame;
+			Input_SetKey(InputKey_Exit,0);
 		}
 	}
 
@@ -490,11 +522,11 @@ int Draw_LoopIteration(){
 	if(_draw_func){
 		float frameFactor=0.0f;
 		frameFactor=(float)_accTime/(float)proc_t_frame;
-		_draw_func(frameFactor);
+		_draw_func(_data,frameFactor);
 		Draw_Flush();
 	}
 
-	return done;
+	return _draw_looping;
 }
 
 #ifdef EMSCRIPTEN
@@ -514,16 +546,23 @@ void Draw_LoopIterationAux(){
 // Draw_Loop
 //
 // Loops updating the game window.
-void Draw_Loop(int (*proc)(),void (*draw)(float f)){
+void Draw_Loop(
+	void (*proc)(void *data),
+	void (*draw)(void *data,float f),
+	void *data)
+{
 	long long newTime;
 	long long procTime1,procTime2,drawTime1,drawTime2,waitTime;
 
 	_proc_func=proc;
 	_draw_func=draw;
+	_data=data;
+	if(_draw_looping){return;}
+	_draw_looping=1;
 #ifndef EMSCRIPTEN
 	_accTime=proc_t_frame;
 	procTime1=drawTime1=Time_GetTime();
-	while(!Draw_LoopIteration()){
+	while(Draw_LoopIteration()){
 
 		// Wait to round draw_t_frame
 		drawTime2=Time_GetTime();
@@ -540,8 +579,32 @@ void Draw_Loop(int (*proc)(),void (*draw)(float f)){
 #else
 	_accTime=proc_t_frame;
 	_procTime1=Time_GetTime();
-	emscripten_set_main_loop(Draw_LoopIterationAux, _fps, 1);
+	if(_fps<=50){
+		emscripten_set_main_loop(Draw_LoopIterationAux, _fps, 1);
+	}else{
+		emscripten_set_main_loop(Draw_LoopIterationAux, 0, 1);
+	}
 #endif
+}
+
+
+/////////////////////////////
+// Draw_BreakLoop
+//
+// Breaks the drawing loop
+void Draw_BreakLoop(){
+#ifndef EMSCRIPTEN
+	_draw_looping=0;
+#endif
+}
+
+
+/////////////////////////////
+// Draw_OverrideExit
+//
+// Overrides the default exit mechanism
+void Draw_OverrideExit(int override){
+	_draw_exitoverrided=override;
 }
 
 

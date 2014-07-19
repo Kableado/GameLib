@@ -188,7 +188,7 @@ int GameMap_CreateLevel(int level,int point){
 				// ArrowShooter up
 				GameMapAux_CreateEnt(ent_arrowshooter_up,i,j);
 			}else
-			if(line[i2]=='T'){
+			/*if(line[i2]=='T'){
 				// Teleporter
 				Entity ent=GameMapAux_CreateEnt(ent_teleporter,i,j);
 				ent->A=line[i2+1]-'0';
@@ -198,7 +198,7 @@ int GameMap_CreateLevel(int level,int point){
 				Entity ent=GameMapAux_CreateEnt(ent_teleporter_dest,i,j);
 				ent->A=line[i2+1]-'0';
 			}else
-
+*/
 			{}
 		}
 	}

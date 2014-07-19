@@ -6,14 +6,18 @@
 #include <math.h>
 #include <time.h>
 
+#ifdef EMSCRIPTEN
+#include <emscripten.h>
+#endif
+
+
 #include "GameLib.h"
 extern int gamelib_debug;
 
 #include "GameEnts.h"
 #include "GameMap.h"
 
-int play;
-
+char *saveFilename="saves/game.save";
 int game_started=0;
 int game_level=0;
 int game_level_point=1;
@@ -24,12 +28,18 @@ DrawImg img_end;
 
 DrawFnt font;
 
-int ProcTitle(){
+
+void ProcGame();
+void PostProcGame();
+void DrawGame(float f);
+
+
+void ProcTitle(void *data){
+	int play=0;
 	if(	Input_GetKey(InputKey_Jump)==InputKey_Pressed||
 		Input_GetKey(InputKey_Continue)==InputKey_Pressed)
 	{
 		play=1;
-		return(0);
 	}
 	if(	(Input_GetKey(InputKey_Action1)==InputKey_Pressed||
 		Input_GetKey(InputKey_Action2)==InputKey_Pressed) &&
@@ -37,12 +47,26 @@ int ProcTitle(){
 	{
 		play=1;
 		game_started=0;
-		return(0);
 	}
-	return(1);
+	if(play){
+		if(!game_started){
+			int  pos[2]={0,0};
+			GameLib_SetPos(pos);
+			game_level=0;
+			game_level_point=1;
+			game_level_reset=0;
+
+			GameMap_CreateLevel(game_level,game_level_point);
+			game_started=1;
+		}
+		GameLib_Loop(ProcGame,PostProcGame,NULL,DrawGame);
+	}
+	if(	Input_GetKey(InputKey_Exit)==InputKey_Pressed){
+		Draw_BreakLoop();
+	}
 }
 
-void DrawTitle(){
+void DrawTitle(void *data,float dt){
 	Draw_Clean(0,0,0);
 	Draw_SetColor(1.0f,1.0f,1.0f,1.0f);
 
@@ -55,21 +79,24 @@ void DrawTitle(){
 	}
 
 	Draw_DrawText(font,"By Kableado (VAR)",200,440);
-
 }
 
 
-int ProcEnd(){
+void ProcEnd(void *data){
 	if(	Input_GetKey(InputKey_Jump)==InputKey_Pressed||
-		Input_GetKey(InputKey_Continue)==InputKey_Pressed)
+		Input_GetKey(InputKey_Continue)==InputKey_Pressed ||
+		Input_GetKey(InputKey_Exit)==InputKey_Pressed)
 	{
-		return(0);
+		game_started=0;
+		game_level=0;
+		game_level_point=1;
+		game_level_reset=0;
+		Draw_Loop(ProcTitle,DrawTitle,NULL);
 	}
-	return(1);
 }
 
 
-void DrawEnd(){
+void DrawEnd(void *data,float dt){
 	Draw_Clean(0,0,0);
 	Draw_SetColor(1.0f,1.0f,1.0f,1.0f);
 
@@ -94,10 +121,12 @@ void PostProcGame(){
 				}
 				game_level_reset=0;
 			}else{
-				play=2;
-				GameLib_BreakLoop();
+				Draw_Loop(ProcEnd,DrawEnd,NULL);
 			}
 		}
+	}
+	if(Input_GetKey(InputKey_Exit)==InputKey_Pressed){
+		Draw_Loop(ProcTitle,DrawTitle,NULL);
 	}
 }
 
@@ -107,9 +136,9 @@ void DrawGame(float f){
 	Draw_SetColor(1.0f,1.0f,1.0f,1.0f);
 
 	sprintf(string, "Level: %d.%d",game_level+1,game_level_point);
-		Draw_SetColor(0,0,0,0.5f);
+	Draw_SetColor(0,0,0,0.5f);
 	Draw_DrawText(font,string,17,17);
-		Draw_SetColor(1,1,1,1);
+	Draw_SetColor(1,1,1,1);
 	Draw_DrawText(font,string,16,16);
 
 	if(game_level_reset==2){
@@ -125,21 +154,27 @@ void DrawGame(float f){
 		Draw_DrawText(font,"You are dead.",300,300);
 	}else
 	if(game_level_reset==3){
-		play=2;
-		GameLib_BreakLoop();
+		Draw_Loop(ProcEnd,DrawEnd,NULL);
 	}
 }
 
 
-void LoadGame(char *fname){
+void LoadGame(){
 	FILE *f;
 
-	f=fopen(fname,"rb");
+	mkdir("saves");
+
+	f=fopen(saveFilename,"rb");
 	if(!f)
 		return;
 
 	fread(&game_level,1,sizeof(int),f);
 	fread(&game_level_point,1,sizeof(int),f);
+
+	if(game_level==0 && game_level_point==1){
+		game_started=0;
+		return;
+	}
 
 	GameMap_CreateLevel(game_level,game_level_point);
 	game_started=1;
@@ -147,18 +182,25 @@ void LoadGame(char *fname){
 	fclose(f);
 }
 
-void SaveGame(char *fname){
+void SaveGame(){
 	FILE *f;
 
-	f=fopen(fname,"wb");
+	mkdir("saves");
+
+	f=fopen(saveFilename,"wb");
 	if(!f)
 		return;
 
 	fwrite(&game_level,1,sizeof(int),f);
 	fwrite(&game_level_point,1,sizeof(int),f);
 
-
 	fclose(f);
+#if EMSCRIPTEN
+	EM_ASM(
+		FS.syncfs(function (err) { });
+	);
+#endif
+
 }
 
 
@@ -173,7 +215,7 @@ int main(int argc,char *argv[]){
 		}
 	}
 
-	GameLib_Init(640,480,"Game",60,60);
+	GameLib_Init(640,480,"Game",15,60);
 
 	img_logo=Draw_LoadImage("data/logo.png");
 	img_end=Draw_LoadImage("data/end.png");
@@ -182,40 +224,10 @@ int main(int argc,char *argv[]){
 
 	GameEnts_Init();
 
-	LoadGame("game.save");
-#ifndef EMSCRIPTEN
-	do{
-		play=0;
-		Draw_Loop(ProcTitle,DrawTitle);
-		if(play==1){
-			if(!game_started){
-				int  pos[2]={0,0};
-				GameLib_SetPos(pos);
-				game_level=0;
-				game_level_point=1;
-				game_level_reset=0;
+	LoadGame();
 
-				GameMap_CreateLevel(game_level,game_level_point);
-				game_started=1;
-			}
-			GameLib_Loop(ProcGame,PostProcGame,NULL,DrawGame);
-		}
-		if(play==2){
-			Draw_Loop(ProcEnd,DrawEnd);
-		}
-	}while(play);
+	Draw_OverrideExit(1);
+	Draw_Loop(ProcTitle,DrawTitle,NULL);
 
-
-	SaveGame("game.save");
-#else
-	int  pos[2]={0,0};
-	GameLib_SetPos(pos);
-	game_level=0;
-	game_level_point=1;
-	game_level_reset=0;
-
-	GameMap_CreateLevel(game_level,game_level_point);
-	GameLib_Loop(ProcGame,PostProcGame,NULL,DrawGame);
-#endif
 	return(0);
 }

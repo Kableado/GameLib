@@ -5,6 +5,8 @@ DIRNAME="Lonely_Ruins"
 DATE=$(date +%Y%m%d)
 ZIPNAME="$DIRNAME.$DATE.zip"
 
+make -f Makefile.linux clean
+make -f Makefile.mingw clean
 make -f Makefile.linux
 make -f Makefile.mingw
 

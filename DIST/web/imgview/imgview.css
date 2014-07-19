@@ -1,0 +1,71 @@
+/***********************************************
+ *    Copyright (c) 2010 Valeriano Alfonso     *
+ ***********************************************/
+/*
+	NOTA DE DOMINIO PUBLICO
+	-----------------------
+	ImgView es Dominio Publico. Esto significa que se puede hacer con el
+	lo que se quiera sin haber ninguna garantia de reembolso o idoneidad.
+	Se aprecia que la fuente sea citada.
+*/
+
+#imgview_fondo {
+	background-image: url(fondo.png);
+}
+
+#imgview_imgcargando {
+	border: 10px solid white;
+}
+
+#imgview_fondo a {
+	padding:0px;
+	margin:0px;
+}
+
+#imgview {
+	background-color: white;
+	border: 10px solid white;
+}
+
+#imgview img {
+	border: none;
+	padding:0px;
+	margin:0px;
+}
+
+#imgview a {
+	padding:0px;
+	margin:0px;
+}
+
+#imgview_control {
+	height: 30px;
+	background-color: white;
+}
+
+#imgview_anterior {
+	background-color: white;
+	float: left;
+	width: 50%;
+	height:32px;
+	border:0px;
+	padding:0px;
+	margin:0px;
+	background-image:url('anterior.png');
+	background-repeat:no-repeat;
+	background-position: 50% 0%;
+	cursor:pointer;
+}
+#imgview_siguiente {
+	background-color: white;
+	float: right;
+	width: 50%;
+	height:32px;
+	border:0px;
+	padding:0px;
+	margin:0px;
+	background-image:url('siguiente.png');
+	background-repeat:no-repeat;
+	background-position: 50% 0%;
+	cursor:pointer;
+}
