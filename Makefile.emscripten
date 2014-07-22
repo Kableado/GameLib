@@ -3,7 +3,7 @@ LAUNCHER= start
 RM=rm -rf
 
 LIBS=
-CFLAGS= -s FULL_ES2=1 -s ASM_JS=1 -O1
+CFLAGS= -s FULL_ES2=1 -s ASM_JS=1 -O1 -Wno-implicit-function-declaration
 #LDFLAGS= --embed-file data
 LDFLAGS= --preload-file data
 
@@ -12,7 +12,7 @@ RESULT=game.html
 BUILDDIR=build-emscripten
 
 ifeq ($(target),release)
-	CFLAGS= -s FULL_ES2=1 -s ASM_JS=1 -O2 --llvm-lto 1
+	CFLAGS= -s FULL_ES2=1 -s ASM_JS=1 -O2 --llvm-lto 1 -Wno-implicit-function-declaration
 	BUILDDIR=build-emscripten-release
 endif
 

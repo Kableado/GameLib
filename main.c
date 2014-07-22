@@ -5,9 +5,11 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#include <sys/stat.h>
 
 #ifdef EMSCRIPTEN
 #include <emscripten.h>
+#define time stime
 #endif
 
 
@@ -27,6 +29,14 @@ DrawImg img_logo;
 DrawImg img_end;
 
 DrawFnt font;
+
+void GameLib_MkDir(char *dir){
+#ifdef WIN32
+	mkdir(dir);
+#else
+	mkdir(dir,0777);
+#endif
+}
 
 
 void ProcGame();
@@ -162,7 +172,7 @@ void DrawGame(float f){
 void LoadGame(){
 	FILE *f;
 
-	mkdir("saves");
+	GameLib_MkDir("saves");
 
 	f=fopen(saveFilename,"rb");
 	if(!f)
@@ -185,7 +195,7 @@ void LoadGame(){
 void SaveGame(){
 	FILE *f;
 
-	mkdir("saves");
+	GameLib_MkDir("saves");
 
 	f=fopen(saveFilename,"wb");
 	if(!f)
