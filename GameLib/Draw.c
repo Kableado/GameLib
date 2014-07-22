@@ -451,26 +451,47 @@ int Draw_LoopIteration(){
 	SDL_GL_SwapBuffers();
 
 	// Process Events
+#ifdef EMSCRIPTEN
 	while(SDL_PollEvent(&event) ){
 		if(event.type == SDL_QUIT ){
 			Input_SetKey(InputKey_Exit,1);
-#ifndef EMSCRIPTEN
-			if(!_draw_exitoverrided){
-				_draw_looping=0;
-			}
-#endif
 		}
 		if(event.type == SDL_KEYDOWN ){
 			if(event.key.keysym.sym == SDLK_ESCAPE ) {
 				Input_SetKey(InputKey_Exit,1);
-#ifndef EMSCRIPTEN
+			}
+		}
+		if(event.type==SDL_MOUSEBUTTONDOWN || event.type==SDL_FINGERDOWN || event.type==SDL_TOUCHBUTTONDOWN){
+			Input_SetPointerDown(1);
+		}
+		if(event.type==SDL_MOUSEBUTTONUP || event.type==SDL_FINGERUP || event.type==SDL_TOUCHBUTTONUP){
+			Input_SetPointerDown(0);
+		}
+	}
+#else
+	while(SDL_PollEvent(&event) ){
+		if(event.type == SDL_QUIT ){
+			Input_SetKey(InputKey_Exit,1);
+			if(!_draw_exitoverrided){
+				_draw_looping=0;
+			}
+		}
+		if(event.type == SDL_KEYDOWN ){
+			if(event.key.keysym.sym == SDLK_ESCAPE ) {
+				Input_SetKey(InputKey_Exit,1);
 				if(!_draw_exitoverrided){
 					_draw_looping=0;
 				}
-#endif
 			}
 		}
+		if(event.type==SDL_MOUSEBUTTONDOWN){
+			Input_SetPointerDown(1);
+		}
+		if(event.type==SDL_MOUSEBUTTONUP){
+			Input_SetPointerDown(0);
+		}
 	}
+#endif
 
 #ifndef EMSCRIPTEN
 	// Process keys for Draw

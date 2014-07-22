@@ -67,6 +67,12 @@ InputKeyStatus Input_GetKey(InputKey key);
 
 
 /////////////////////////////
+// Input_SetPointerDown
+//
+void Input_SetPointerDown(int pointerDown);
+
+
+/////////////////////////////
 // Input_AnyKey
 //
 //
