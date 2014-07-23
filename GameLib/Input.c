@@ -2,9 +2,13 @@
 
 #include <math.h>
 #include <SDL/SDL.h>
+#ifdef EMSCRIPTEN
+#define SDL_GetKeyState SDL_GetKeyboardState
+#endif
 
 #include "Util.h"
 #include "Input.h"
+
 
 
 // Globals
