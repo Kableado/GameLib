@@ -22,6 +22,7 @@
 	#include <emscripten.h>
 	#define USE_OpenGL 0
 	#define USE_OpenGLES 1
+	#define SDL_GetKeyState SDL_GetKeyboardState
 #else
 	// UNIX
 	#include <GL/gl.h>
