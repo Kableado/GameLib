@@ -4,7 +4,7 @@
 # GameLib Declarations #
 ########################
 CFLAGS += -IGameLib
-HEADS= \
+GAMELIB_HEADS = \
 	GameLib/Time.h \
 	GameLib/Util.h \
 	GameLib/QuadArray2D.h \
@@ -14,7 +14,7 @@ HEADS= \
 	GameLib/Anim.h \
 	GameLib/Entity.h \
 	GameLib/GameLib.h
-OBJS= \
+GAMELIBS_OBJS = \
 	$(BUILDDIR)/GameLib/Time.o \
 	$(BUILDDIR)/GameLib/Util.o \
 	$(BUILDDIR)/GameLib/QuadArray2D.o \
@@ -23,34 +23,34 @@ OBJS= \
 	$(BUILDDIR)/GameLib/Audio.o \
 	$(BUILDDIR)/GameLib/Anim.o \
 	$(BUILDDIR)/GameLib/Entity.o \
-	$(BUILDDIR)/GameLib/GameLib.o \
-
+	$(BUILDDIR)/GameLib/GameLib.o
+RES_GAMELIB_OUT = $(BUILDDIR)/$(RES_GAMELIB)
 
 #####################
 # Game Declarations #
 #####################
-HEADS+= GameEnts.h GameMap.h
-
-OBJS+= \
+GAME_HEADS = $(GAMELIB_HEADS) GameEnts.h GameMap.h
+GAME_OBJS = \
 	$(BUILDDIR)/GameEnts.o \
 	$(BUILDDIR)/GameMap.o \
 	$(BUILDDIR)/main.o
+RES_GAME_OUT = $(BUILDDIR)/$(RES_GAME)
 
 
 #################
 # General Rules #
 #################
-all: $(BUILDDIR) $(BUILDDIR)/$(RESULT)
+all: $(BUILDDIR) $(RES_GAME_OUT)
 
 $(BUILDDIR):
-	mkdir $(BUILDDIR)
-	mkdir $(BUILDDIR)/GameLib
+	$(MKDIR) $(BUILDDIR)
+	$(MKDIR) $(BUILDDIR)/GameLib
 
 clean:
-	rm -f $(OBJS) $(BUILDDIR)/$(RESULT)
+	$(RM) $(GAMELIBS_OBJS) $(RES_GAMELIB_OUT) $(GAME_OBJS) $(RES_GAME_OUT)
 
-run: $(BUILDDIR) $(BUILDDIR)/$(RESULT)
-	$(LAUNCHER) ./$(BUILDDIR)/$(RESULT) debug
+run: $(BUILDDIR) $(RES_GAME_OUT)
+	$(LAUNCHER) ./$(RES_GAME_OUT) debug
 
 rebuild: clean all
 
@@ -95,8 +95,11 @@ $(BUILDDIR)/main.o: main.c $(HEADS)
 # Result Rules #
 ################
 
-$(BUILDDIR)/$(RESULT): $(OBJS)
-	$(CC) -o $(BUILDDIR)/$(RESULT) $(OBJS) $(LIBS) $(CFLAGS) $(LDFLAGS)
+$(RES_GAMELIB_OUT): $(GAMELIBS_OBJS)
+	$(AR) rcs $(RES_GAMELIB_OUT) $(GAMELIBS_OBJS)
+
+$(RES_GAME_OUT): $(RES_GAMELIB_OUT) $(GAME_OBJS)
+	$(CC) $(GAME_OBJS) $(RES_GAMELIB_OUT) -o $(RES_GAME_OUT) $(LIBS) $(CFLAGS) $(LDFLAGS)
 
 
 
