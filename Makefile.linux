@@ -1,12 +1,15 @@
-CC=gcc
-LAUNCHER=
-RM=rm -rf
+CC       = gcc
+AR       = ar
+LAUNCHER =
+RM       = rm -rf
+MKDIR    = mkdir
 
 LIBS= -lSDL -lpthread -L/usr/X11R6/lib -L/usr/lib -lm -lGL -lX11
 CFLAGS= -Wall -g  -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/
 LDFLAGS=
 
-RESULT=game
+RES_GAMELIB=libgame.a
+RES_GAME=game
 BUILDDIR=build-linux
 
 include Makefile.common

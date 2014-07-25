@@ -1,0 +1,73 @@
+#!/bin/sh
+
+prefix=$( dirname "$0" )
+usage="\
+Uso: gamelib-config [--cflags] [--libs] [--static-libs] [--builddir] [--platform]"
+
+
+# Preparar configuracion
+uname=$( uname )
+unamem=$( uname -m )
+if test $1 = "emscripten"; then
+	uname="EMSCRIPTEN"
+	unamem="EMSCRIPTEN"
+	shift
+fi
+case "$uname" in
+	*MINGW*)
+		# Configuracion de Win32/Mingw
+		libs="-lopengl32"
+		cflags="-Dmain=SDL_main -lmingw32 -lSDLmain -lSDL -mwindows -g"
+		builddir="build-mingw"
+		platform="win32"
+		;;
+	*EMSCRIPTEN*)
+		# Configuracion de Emscripten
+		libs=""
+		cflags="-s FULL_ES2=1 -s ASM_JS=1 -Wno-implicit-function-declaration"
+		builddir="build-emscripten"
+		platform="emscripten"
+		;;
+	*)
+		# Configuracion de Linux
+		libs="-lSDL -lpthread -L/usr/X11R6/lib -L/usr/lib -lm -lGL -lX11"
+		cflags="-Wall -g  -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/"
+		builddir="build-linux-$unamem"
+		platform="linux-$unamem"
+		;;
+esac
+
+
+
+if test $# -eq 0; then
+      echo "${usage}" 1>&2
+      exit 1
+fi
+
+
+
+while test $# -gt 0; do
+  case $1 in
+    --cflags)
+      echo "$cflags -I$prefix/GameLib"
+      ;;
+    --libs)
+      echo "$libs"
+      ;;
+    --static-libs)
+      echo "$prefix/$builddir/libgame.a"
+      ;;
+    --builddir)
+      echo "$builddir"
+      ;;
+    --platform)
+      echo "$platform"
+      ;;
+    *)
+      echo "${usage}" 1>&2
+      exit 1
+      ;;
+  esac
+  shift
+done
+

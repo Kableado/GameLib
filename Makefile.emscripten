@@ -1,14 +1,16 @@
-CC= emcc
-LAUNCHER= start
-RM=rm -rf
+CC       = emcc
+AR       = emar
+LAUNCHER = start
+RM       = rm -rf
+MKDIR    = mkdir
 
 LIBS=
 CFLAGS= -s FULL_ES2=1 -s ASM_JS=1 -O1 -Wno-implicit-function-declaration
 #LDFLAGS= --embed-file data
 LDFLAGS= --preload-file data
 
-
-RESULT=game.html
+RES_GAMELIB=libgame.a
+RES_GAME=game.html
 BUILDDIR=build-emscripten
 
 ifeq ($(target),release)

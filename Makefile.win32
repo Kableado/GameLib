@@ -1,12 +1,15 @@
-CC=gcc
-LAUNCHER=
-RM=rm -rf
+CC       = gcc
+AR       = ar
+LAUNCHER =
+RM       = rm -rf
+MKDIR    = mkdir
 
 LIBS=-I/mingw/include/SDL -D_GNU_SOURCE=1 -Dmain=SDL_main -lopengl32
 CFLAGS= -L/mingw/lib -lmingw32 -lSDLmain -lSDL -mwindows -g
 LDFLAGS=
 
-RESULT=game.exe
+RES_GAMELIB=libgame.a
+RES_GAME=game.exe
 BUILDDIR=build-mingw
 
 include Makefile.common
