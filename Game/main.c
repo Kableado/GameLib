@@ -16,8 +16,6 @@ extern int gamelib_debug;
 DrawFnt font;
 DrawFnt font_shad;
 
-DrawImg img_background;
-
 void ProcGame(){
 
 }
@@ -26,24 +24,6 @@ void PostProcGame(){
 	// Apply gravity to every entity
 	GameLib_ForEachEnt(EntityApplyGravity);
 }
-
-void PreDrawGame(float f){
-	//Draw_Clean(128,128,128);
-	Draw_SetColor(1.0f,1.0f,1.0f,1.0f);
-	Draw_DrawImgResized(img_background,0,0,640,480);
-}
-
-void DrawGame(float f){
-	char cadena[128];
-
-	// Watermark
-	Draw_SetColor(0,0,0,0.3);
-	Draw_DrawText(font,"By Kableado (VAR)",201,461);
-	Draw_SetColor(1.0f,1.0f,1.0f,0.3f);
-	Draw_DrawText(font,"By Kableado (VAR)",200,460);
-
-}
-
 
 
 int main(int argc,char *argv[]){
@@ -70,9 +50,6 @@ int main(int argc,char *argv[]){
 	font=Draw_DefaultFont(255,255,255,255);
 	font_shad=Draw_DefaultFont(0,0,0,127);
 
-	img_background=Draw_LoadImage("data/heaven.png");
-	Draw_SetOffset(img_background,0,0);
-
 	GameEnts_Init();
 
 
@@ -80,14 +57,14 @@ int main(int argc,char *argv[]){
 	// Initialize world.
 	//
 	GameLib_DelEnts();
-	GameMap_LoadLevel("data/level_01.txt",32);
+	GameMap_LoadLevel("data/level_01.txt",64);
 
 
 	/////////////////////////
 	// Run the world.
 	//
 
-	GameLib_Loop(ProcGame,PostProcGame,PreDrawGame,DrawGame);
+	GameLib_Loop(ProcGame,PostProcGame,NULL,NULL);
 
 
 	return(0);

@@ -1,148 +1,63 @@
+######################
+######################
+######################
+######################
+######################
+######################
+######################
+######################
+######################
+######################
+##################  ##
 ###############
-###############
-###############
-###############
-###############
-###############
-###############
-###############
-###############
-###############
-###########  ##
+#############
+#############
+##############
+########## ###
+#########   ###
+########  P  ##
+########     ##
+########    ##  |||||
 ########
-######
-######
-#######
-### ###
-##   ###
-#  P  ##
-#     ##
-#    ##
-#
-##
-###
-####
-#####
-######
-# ## #
-## ###S
-# ## #
-######
-######
-#
-###
-#S
-####
-#
-#
-#####
-#S
-######
-#
-#
-#  #F
-#  #f
-#
-#
-#
-#
-##
-#
-#
-#B
-#
-##
-#
-#
-#
-R
-R
-R
-R
-R
-R
-RR
-RR
-RR
-RR
-RR
-RRR
-RRRR
-RRRR
-RRRR
-RRRR
-RRRR
-RRRR
-RRRR
-RRRR
-RRRR
-RRRR
-RRRR      RRR
-RRRR        RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR  B      RR
-RRRR         RR
-RRRR         RR
-RRRR     B   RR
-RRRR         RR
-RRRR         RR
-RRRR    B    RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRR         RR
-RRRRR        RR
-RRRRR        RR
-RRRRRR       RR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-RRRRRRRRRRRRRRR
-
+#########
+##########
+###########
+############
+#############
+######## ## #
+######### ###
+######## ## #
+#############
+#############
+########
+##########
+########
+###########
+########
+########
+############
+########
+#############
+########
+########
+########  #
+########  #
+########
+########
+########
+########
+#########
+########
+########
+#########
+######################
+######################
+######################
+######################
+######################
+######################
+######################
+######################
+######################
+######################
 
