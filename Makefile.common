@@ -29,11 +29,11 @@ RES_GAMELIB_OUT = $(BUILDDIR)/$(RES_GAMELIB)
 #####################
 # Game Declarations #
 #####################
-GAME_HEADS = $(GAMELIB_HEADS) GameEnts.h GameMap.h
+GAME_HEADS = $(GAMELIB_HEADS) Game/GameEnts.h Game/GameMap.h
 GAME_OBJS = \
-	$(BUILDDIR)/GameEnts.o \
-	$(BUILDDIR)/GameMap.o \
-	$(BUILDDIR)/main.o
+	$(BUILDDIR)/Game/GameEnts.o \
+	$(BUILDDIR)/Game/GameMap.o \
+	$(BUILDDIR)/Game/main.o
 RES_GAME_OUT = $(BUILDDIR)/$(RES_GAME)
 
 
@@ -45,6 +45,7 @@ all: $(BUILDDIR) $(RES_GAME_OUT)
 $(BUILDDIR):
 	$(MKDIR) $(BUILDDIR)
 	$(MKDIR) $(BUILDDIR)/GameLib
+	$(MKDIR) $(BUILDDIR)/Game
 
 clean:
 	$(RM) $(GAMELIBS_OBJS) $(RES_GAMELIB_OUT) $(GAME_OBJS) $(RES_GAME_OUT)
@@ -81,14 +82,14 @@ $(BUILDDIR)/GameLib/GameLib.o: GameLib/GameLib.c $(HEADS)
 # Game Rules #
 ##############
 
-$(BUILDDIR)/GameEnts.o: GameEnts.c $(HEADS)
-	$(CC) -c GameEnts.c -o $(BUILDDIR)/GameEnts.o $(CFLAGS)
+$(BUILDDIR)/Game/GameEnts.o: Game/GameEnts.c $(HEADS)
+	$(CC) -c Game/GameEnts.c -o $(BUILDDIR)/Game/GameEnts.o $(CFLAGS)
 
-$(BUILDDIR)/GameMap.o: GameMap.c $(HEADS)
-	$(CC) -c GameMap.c -o $(BUILDDIR)/GameMap.o $(CFLAGS)
+$(BUILDDIR)/Game/GameMap.o: Game/GameMap.c $(HEADS)
+	$(CC) -c Game/GameMap.c -o $(BUILDDIR)/Game/GameMap.o $(CFLAGS)
 
-$(BUILDDIR)/main.o: main.c $(HEADS)
-	$(CC) -c main.c -o $(BUILDDIR)/main.o $(CFLAGS)
+$(BUILDDIR)/Game/main.o: Game/main.c $(HEADS)
+	$(CC) -c Game/main.c -o $(BUILDDIR)/Game/main.o $(CFLAGS)
 
 
 ################

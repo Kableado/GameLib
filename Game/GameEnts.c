@@ -42,8 +42,6 @@ DrawImg img_axe[2];
 DrawImg img_goatMan[2];
 DrawImg img_Princess[2];
 
-	float grav=0.5f;
-	float vTerminal=10.0f;
 Entity ent_Wizard;
 Entity ent_MagikBall;
 Entity ent_Earth;
@@ -67,6 +65,8 @@ Entity ent_Princess;
 
 
 int EntityApplyGravity(Entity e){
+	float grav=10.0f;
+	float vTerminal=50.0f;
 	vec2 vGrav;
 
 	// Only apply gravity to some entity types
@@ -171,11 +171,11 @@ void player_proc(Entity e,int ft){
 
 
 
-	float acel=1.0f;
-	float maxVel=6.0f;
-	float jumpVel=8.0f;
-	float shootVel=10.0f;
 void wizard_proc(Entity e,int ft){
+	float acel=8.0f;
+	float maxVel=30.0f;
+	float jumpVel=50.0f;
+	float shootVel=50.0f;
 
 	if(Input_GetKey(InputKey_Jump)==InputKey_Pressed ||
 		Input_GetKey(InputKey_Up)==InputKey_Pressed)
@@ -233,7 +233,7 @@ void wizard_proc(Entity e,int ft){
 
 
 	// Scroll View
-	GameLib_MoveToPosH(e->pos,0.1f);
+	GameLib_MoveToPosH(e->pos,0.6f);
 }
 
 
@@ -361,7 +361,6 @@ void bunny_proc(Entity e,int ft){
 		// Apply left movement
 		vec2_set(left,-acel,0.0f);
 		Entity_AddVelLimit(e,left,maxVel);
-
 
 		AnimPlay_SetImg(&e->anim,img_bunny[0]);
 	}
@@ -602,6 +601,7 @@ void GameEnts_Init(){
 	ent_Wizard->radius=24;
 	ent_Wizard->width=24;
 	ent_Wizard->height=58;
+	ent_Wizard->elast=0.1f;
 	ent_Wizard->fric_static=0.0f;
 	ent_Wizard->fric_dynamic=0.2f;
 	ent_Wizard->child=ent_MagikBall;
@@ -636,7 +636,7 @@ void GameEnts_Init(){
 	ent_StoneBrick->width=32;
 	ent_StoneBrick->height=32;
 	ent_StoneBrick->fric_static=0.0f;
-	ent_StoneBrick->fric_dynamic=0.2f;
+	ent_StoneBrick->fric_dynamic=-0.01f;
 
 	// FIXME: Stone Bricks back
 

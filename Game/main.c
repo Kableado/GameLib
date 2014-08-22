@@ -60,7 +60,7 @@ int main(int argc,char *argv[]){
 		}
 	}
 
-	GameLib_Init(640,480,"Game",60,60);
+	GameLib_Init(640,480,"Game",20,60);
 
 
 
