@@ -3,3 +3,4 @@ build-*
 *.exe
 *.so
 *.so.*
+DIST/*
