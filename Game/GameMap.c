@@ -105,64 +105,17 @@ int GameMap_LoadLevel(char *filename,int res){
 
 			if(MAP(i,j)=='P'){
 				// Player
-				GameMapAux_CreateEnt(ent_Wizard,i,j,res);
+				GameMapAux_CreateEnt(ent_Player,i,j,res);
 			}
 			if(MAP(i,j)=='#'){
-				// Earth
-				int x,y;
-				int up,down,left,right;
-
-				ent=GameMapAux_CreateEnt(ent_Earth,i,j,res);
-
-				x=i;y=j-1;if(y<0)y=0;
-				up=MAP(x,y)=='#'?0:1;
-				x=i;y=j+1;if(y>=height)y=height-1;
-				down=MAP(x,y)=='#'?0:1;
-				x=i-1;y=j;if(x<0)x=0;
-				left=MAP(x,y)=='#'?0:1;
-				x=i+1;y=j;if(x>=width)x=width-1;
-				right=MAP(x,y)=='#'?0:1;
-
-				EntEarth_Init(ent,up,down,left,right);
+				// Block
+				ent=GameMapAux_CreateEnt(ent_Block,i,j,res);
 			}
-			if(MAP(i,j)=='R'){
-				// StoneBrick
-				int x,y;
-				int up,down,left,right;
-
-				ent=GameMapAux_CreateEnt(ent_StoneBrick,i,j,res);
-
-				x=i;y=j-1;if(y<0)y=0;
-				up=MAP(x,y)=='R'?0:1;
-				x=i;y=j+1;if(y>=height)y=height-1;
-				down=MAP(x,y)=='R'?0:1;
-				x=i-1;y=j;if(x<0)x=0;
-				left=MAP(x,y)=='R'?0:1;
-				x=i+1;y=j;if(x>=width)x=width-1;
-				right=MAP(x,y)=='R'?0:1;
-
-				EntStoneBrick_Init(ent,up,down,left,right);
+			if(MAP(i,j)=='|'){
+				// Platform
+				ent=GameMapAux_CreateEnt(ent_Platform,i,j,res);
 			}
 
-
-			if(MAP(i,j)=='S'){
-				// Spiked Bush
-				ent=GameMapAux_CreateEnt(ent_SpikedBush,i,j,res);
-			}
-
-			if(MAP(i,j)=='F'){
-				// Flower
-				ent=GameMapAux_CreateEnt(ent_Flower[0],i,j,res);
-			}
-			if(MAP(i,j)=='f'){
-				// Flower
-				ent=GameMapAux_CreateEnt(ent_Flower[1],i,j,res);
-			}
-
-			if(MAP(i,j)=='B'){
-				// Bunny
-				ent=GameMapAux_CreateEnt(ent_Bunny,i,j,res);
-			}
 		}
 	}
 
