@@ -33,7 +33,8 @@ long long Time_GetTime(){
 void Time_Pause(int pausa){
 	long long tend,t,diff;
 
-	tend=Time_GetTime()+pausa;
+	t=Time_GetTime();
+	tend=t+pausa;
 	do{
 		diff=tend-t;
 		if(diff>1000){

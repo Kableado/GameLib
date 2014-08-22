@@ -447,9 +447,6 @@ int _draw_exitoverrided=0;
 long long _accTime;
 int Draw_LoopIteration(){
 	SDL_Event event;
-	Uint8* keys;
-	// Update screen
-	SDL_GL_SwapBuffers();
 
 	// Process Events
 #ifdef EMSCRIPTEN
@@ -496,15 +493,13 @@ int Draw_LoopIteration(){
 
 #ifndef EMSCRIPTEN
 	// Process keys for Draw
+	Uint8* keys;
 	keys=(Uint8 *)SDL_GetKeyState(NULL);
 	if(keys[SDLK_F12]){
 		// Screenshot key
 		Draw_SaveScreenshoot("shot.bmp");
 	}
 #endif
-
-	// Sound Frame
-	Audio_Frame();
 
 	// Process
 	if(_proc_func){
@@ -519,11 +514,13 @@ int Draw_LoopIteration(){
 		}
 	}
 
+	// Sound Frame
+	Audio_Frame();
+
 	// Draw
+	SDL_GL_SwapBuffers();
 	if(_draw_func){
-		float frameFactor=0.0f;
-		frameFactor=(float)_accTime/(float)proc_t_frame;
-		_draw_func(_data,frameFactor);
+		_draw_func(_data, (float)_accTime/(float)proc_t_frame);
 		Draw_Flush();
 	}
 
@@ -552,8 +549,6 @@ void Draw_Loop(
 	void (*draw)(void *data,float f),
 	void *data)
 {
-	long long newTime;
-	long long procTime1,procTime2,drawTime1,drawTime2,waitTime;
 
 	_proc_func=proc;
 	_draw_func=draw;
@@ -561,14 +556,14 @@ void Draw_Loop(
 	if(_draw_looping){return;}
 	_draw_looping=1;
 #ifndef EMSCRIPTEN
+	long long procTime1,procTime2,drawTime1,drawTime2;
 	_accTime=proc_t_frame;
 	procTime1=drawTime1=Time_GetTime();
 	while(Draw_LoopIteration()){
 
 		// Wait to round draw_t_frame
 		drawTime2=Time_GetTime();
-		waitTime=draw_t_frame-(drawTime2-drawTime1);
-		Time_Pause(waitTime);
+		Time_Pause(draw_t_frame-(drawTime2-drawTime1));
 		drawTime2=Time_GetTime();
 		drawTime1=drawTime2;
 
@@ -811,7 +806,6 @@ DrawImage Draw_DefaultFontImage(
 {
 	DrawImage img;
 	int x,y,c;
-	Uint32 color,color2;
 
 	// Create the image and colors
 	img=Draw_CreateImage(8*256,8);
@@ -825,7 +819,7 @@ DrawImage Draw_DefaultFontImage(
 				img->data[offset+1]=g;
 				img->data[offset+2]=b;
 				if(((fontdata_8x8[c*8+y]>>(7-x)) & 0x01)==1){
-					img->data[offset+3]=0xFF;
+					img->data[offset+3]=a;
 				}else{
 					img->data[offset+3]=0x00;
 				}

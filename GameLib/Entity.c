@@ -384,7 +384,7 @@ int CollisionInfo_CheckRepetition(CollisionInfo collInfo,Entity ent1,Entity ent2
 //
 int Entity_CheckCollision(Entity ent1,Entity ent2,CollisionInfo *collInfoRef){
 	float t;
-	vec2 n,p;
+	vec2 n;
 	vec2 vel;
 	int flags=ent1->flags|ent2->flags;
 

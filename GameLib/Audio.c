@@ -198,7 +198,6 @@ void Audio_Frame(){
 //
 // Loads a sound, giving a reference.
 AudioSnd Audio_LoadSound(char *filename){
-	int error = 0;
 	FILE *f;
 	char id[5] = { 0, 0, 0, 0, 0 }, *sndBuffer = NULL;
 	short formatTag, channels, bitsPerSample;
@@ -289,7 +288,7 @@ AudioSnd Audio_LoadSound(char *filename){
 	wave->channels = channels;
 	wave->buffer = (Uint8 *) sndBuffer;
 	wave->BPB = bitsPerSample;
-	wave->bpb = wave->bpb * 8;
+	wave->bpb = wave->BPB * 8;
 	wave->len = dataSize / (wave->BPB * wave->channels);
 
 	// Take a reference
