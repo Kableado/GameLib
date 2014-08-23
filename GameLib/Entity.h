@@ -50,6 +50,7 @@ struct TEntity {
 
 	float color[4];
 	float light[4];
+	float defaultColor[4];
 
 	void (*oncopy)(Entity ent);
 	void (*ondelete)(Entity ent);
@@ -244,6 +245,12 @@ void Entity_AddColor(Entity e,float r,float g,float b,float a);
 // Entity_AddColor
 //
 void Entity_SetLight(Entity e,float r,float g,float b,float rad);
+
+
+/////////////////////////////
+// Entity_SetDefaultColor
+//
+void Entity_SetDefaultColor(Entity e,float r,float g,float b,float a);
 
 
 /////////////////////////////
