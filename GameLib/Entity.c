@@ -854,25 +854,26 @@ void Entity_MarkUpdateLight(Entity e,Entity *elist,int n){
 		int i;
 		vec2 max,min;
 
-		if(e->pos[0]<e->oldpos[0]){
-			min[0]=e->pos[0]-e->light[3];
+		if(e->pos0[0]<e->oldpos[0]){
+			min[0]=e->pos0[0]-e->light[3];
 			max[0]=e->oldpos[0]+e->light[3];
 		}else{
 			min[0]=e->oldpos[0]-e->light[3];
-			max[0]=e->pos[0]+e->light[3];
+			max[0]=e->pos0[0]+e->light[3];
 		}
-		if(e->pos[1]<e->oldpos[1]){
-			min[1]=e->pos[1]-e->light[3];
+		if(e->pos0[1]<e->oldpos[1]){
+			min[1]=e->pos0[1]-e->light[3];
 			max[1]=e->oldpos[1]+e->light[3];
 		}else{
 			min[1]=e->oldpos[1]-e->light[3];
-			max[1]=e->pos[1]+e->light[3];
+			max[1]=e->pos0[1]+e->light[3];
 		}
 		for(i=0;i<n;i++){
-			if(	min[0]<=elist[i]->pos[0] &&
-				max[0]>=elist[i]->pos[0] &&
-				min[1]<=elist[i]->pos[1] &&
-				max[1]>=elist[i]->pos[1])
+			if(	elist[i]!=NULL &&
+				min[0]<=elist[i]->pos0[0] &&
+				max[0]>=elist[i]->pos0[0] &&
+				min[1]<=elist[i]->pos0[1] &&
+				max[1]>=elist[i]->pos0[1])
 			{
 				elist[i]->flags|=EntityFlag_UpdateLight;
 			}
