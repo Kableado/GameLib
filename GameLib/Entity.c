@@ -53,6 +53,8 @@ Entity Entity_New(){
 
 	e->color[0]=e->color[1]=e->color[2]=e->color[3]=1.0f;
 	e->light[0]=e->light[1]=e->light[2]=e->light[3]=1.0f;
+	e->defaultColor[0]=e->defaultColor[1]=
+		e->defaultColor[2]=e->defaultColor[3]=1.0f;
 
 	e->oncopy=NULL;
 	e->ondelete=NULL;
@@ -122,6 +124,10 @@ Entity Entity_Copy(Entity e){
 	n->light[1]=e->light[1];
 	n->light[2]=e->light[2];
 	n->light[3]=e->light[3];
+	n->defaultColor[0]=e->defaultColor[0];
+	n->defaultColor[1]=e->defaultColor[1];
+	n->defaultColor[2]=e->defaultColor[2];
+	n->defaultColor[3]=e->defaultColor[3];
 
 	n->oncopy=e->oncopy;
 	n->ondelete=e->ondelete;
@@ -804,6 +810,17 @@ void Entity_SetLight(Entity e,float r,float g,float b,float rad){
 }
 
 
+/////////////////////////////
+// Entity_SetDefaultColor
+//
+//
+void Entity_SetDefaultColor(Entity e,float r,float g,float b,float a){
+	e->defaultColor[0]=r;
+	e->defaultColor[1]=g;
+	e->defaultColor[2]=b;
+	e->defaultColor[3]=a;
+}
+
 
 /////////////////////////////
 // Entity_Iluminate
@@ -817,12 +834,16 @@ void Entity_Iluminate(Entity e,Entity *elist,int n){
 
 	if(!(e->flags&EntityFlag_Light)){
 		Entity_SetColor(e,
-			e->light[0],
-			e->light[1],
-			e->light[2],
-			1.0f);
+			e->defaultColor[0]*e->light[0],
+			e->defaultColor[1]*e->light[1],
+			e->defaultColor[2]*e->light[2],
+			e->defaultColor[3]);
 	}else{
-		Entity_SetColor(e,1.0f,1.0f,1.0f,1.0f);
+		Entity_SetColor(e,
+			e->defaultColor[0],
+			e->defaultColor[1],
+			e->defaultColor[2],
+			e->defaultColor[2]);
 		return;
 	}
 
@@ -836,10 +857,10 @@ void Entity_Iluminate(Entity e,Entity *elist,int n){
 		if(qdist<qrad){
 			f=1.0f-qdist/qrad;
 			Entity_AddColor(e,
-				f*elist[i]->light[0],
-				f*elist[i]->light[1],
-				f*elist[i]->light[2],
-				1.0f);
+				f*elist[i]->light[0]*e->defaultColor[0],
+				f*elist[i]->light[1]*e->defaultColor[1],
+				f*elist[i]->light[2]*e->defaultColor[2],
+				0.0f);
 		}
 	}
 }
