@@ -106,7 +106,14 @@ void Draw_DrawImgResized(DrawImg img,int x,int y,float w,float h);
 // Draw_DrawImgPart
 //
 // Draws an image part.
-void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int i);
+void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int h,int i,int j);
+
+
+/////////////////////////////
+// Draw_DrawImgPartHoriz
+//
+// Draws an image part horizontally.
+void Draw_DrawImgPartHoriz(DrawImg img,int x,int y,int w,int i);
 
 
 /////////////////////////////

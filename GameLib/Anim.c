@@ -102,7 +102,7 @@ void Anim_Draw(Anim a,int time_ms,int x,int y){
 	int frame;
 
 	frame=(time_ms/anim->ftime)%anim->frames;
-	Draw_DrawImgPart(anim->img,x,y,anim->w,frame);
+	Draw_DrawImgPartHoriz(anim->img,x,y,anim->w,frame);
 }
 
 
