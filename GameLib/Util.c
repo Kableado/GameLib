@@ -280,3 +280,77 @@ int EndsWith(char *str, char *suffix){
 }
 
 
+/////////////////////////////
+// Rand
+//
+// (LGC++) + cambio de semilla
+
+#define __seed_n 30
+#define __seed_a 30
+#define __seed_b 5
+#define __seed_c 10
+#define __seed_d 15
+//#define __LGC_a 1664525ul
+//#define __LGC_c 1013904223ul
+//#define __LGC_m 4294967296ul
+#define __LGC_a 16807ul
+#define __LGC_c 2
+#define __LGC_m 2147483647ul
+unsigned __seeds[30];
+int __seed_i = -1;
+
+unsigned __rand_count;
+unsigned __rand_orig_seed;
+
+void Rand_Seed(unsigned seed) {
+	int i;
+	__seeds[0] = seed;
+	for (i = 1; i < 30; i++) {
+		__seeds[i] = (__seeds[i - 1] * __LGC_a + __LGC_c) % __LGC_m;
+		//__seeds[i]=(__seeds[i-1]*__LGC_a+__LGC_c);
+	}
+	__seed_i = 29;
+
+	// Cambio de semilla
+	__rand_count = 0;
+	__rand_orig_seed = seed;
+}
+unsigned Rand_Get() {
+	unsigned val;
+	int a, b, c, d;
+
+	if (__seed_i == -1) {
+		Rand_Seed(1);
+	}
+
+	a = __seed_i - __seed_a;
+	if (a < 0)
+		a += __seed_n;
+	b = __seed_i - __seed_b;
+	if (b < 0)
+		b += __seed_n;
+	c = __seed_i - __seed_c;
+	if (c < 0)
+		c += __seed_n;
+	d = __seed_i - __seed_d;
+	if (d < 0)
+		d += __seed_n;
+	val = __seeds[a] ^ __seeds[b] ^ __seeds[c] ^ __seeds[d];
+
+	a = __seed_i - 1;
+	if (a < 0)
+		a = __seed_n - 1;
+	__seeds[__seed_i] = (__seeds[a] * __LGC_a + __LGC_c) % __LGC_m;
+	//__seeds[__seed_i]=(__seeds[a]*__LGC_a+__LGC_c);
+	__seed_i++;
+	if (__seed_i == __seed_n)
+		__seed_i = 0;
+
+	// Cambio de semilla
+	__rand_count++;
+	if (__rand_count > (1 << 15)) {
+		Rand_Seed(__rand_orig_seed + 1);
+	}
+
+	return (val);
+}
