@@ -739,12 +739,45 @@ void Draw_DrawImgResized(DrawImg img,int x,int y,float w,float h){
 }
 
 
-
 /////////////////////////////
 // Draw_DrawImgPart
 //
 // Draws an image part.
-void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int i){
+void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int h,int i,int j){
+	DrawImage image=img;
+	int x1,x2,y1,y2;
+	float us,u1,u2;
+	float vs,v1,v2;
+
+	// Prepare
+	x1=x+image->x;
+	y1=_height-(y+image->y);
+	x2=(x+image->x)+w;
+	y2=_height-((y+image->y)+h);
+	us=1.0f/image->w;
+	u1=us*i*w;
+	u2=u1+(us*w);
+	vs=1.0f/image->h;
+	v1=vs*j*h;
+	v2=v1+(vs*h);
+
+	// Draw a quad
+	if(_currentImg!=image){
+		Draw_Flush();
+		_currentImg=image;
+	}
+	QuadArray2D_AddQuad(_quadArray,
+		x1,y1,u1,v1,
+		x2,y2,u2,v2,
+		_color);
+}
+
+
+/////////////////////////////
+// Draw_DrawImgPartHoriz
+//
+// Draws an image part horizontally.
+void Draw_DrawImgPartHoriz(DrawImg img,int x,int y,int w,int i){
 	DrawImage image=img;
 	int x1,x2,y1,y2;
 	float us,u1,u2;
@@ -885,7 +918,7 @@ void Draw_DrawText(DrawFnt f,char *text,int x,int y){
 	ptr=text;
 	while(*ptr){
 		if((*ptr)<font->max){
-			Draw_DrawImgPart(font->img,x,y,font->w,(*ptr)-font->min);
+			Draw_DrawImgPartHoriz(font->img,x,y,font->w,(*ptr)-font->min);
 		}
 		x+=font->w;
 		ptr++;
