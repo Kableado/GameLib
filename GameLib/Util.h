@@ -80,4 +80,12 @@ int IsBigEndian();
 int EndsWith(char *str, char *suffix);
 
 
+/////////////////////////////
+// Rand
+//
+void Rand_Seed(unsigned seed);
+unsigned Rand_Get();
+#define Rand_GetFloat(x) (((float)(Rand_Get()%1048576))/1048576.0f)
+
+
 #endif
