@@ -68,6 +68,8 @@ float _color[4];
 
 #if USE_OpenGLES
 
+GLuint _whiteTex;
+
 GLuint Draw_CompileShader(GLenum type, const char *source){
 	GLuint shader = glCreateShader(type);
 	if (shader == 0) {
@@ -131,6 +133,8 @@ GLuint vertexObject;
 #define Max_Vertices 6000
 
 #endif
+
+GLuint Draw_UploadGLTexture(int w, int h, unsigned char *pixels);
 
 /////////////////////////////
 // Draw_Init
@@ -303,6 +307,9 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 	glUniformMatrix4fv(projectionMatrixLoc,
 		1, GL_FALSE, projectionMatrix);
 
+	unsigned char whiteTexData[4]={255,255,255,255};
+	_whiteTex=Draw_UploadGLTexture(1, 1, whiteTexData);
+
 #endif
 
 	// Enable Alpha blending
@@ -429,6 +436,7 @@ void Draw_Clean(
 		 0.0,  0.0,  // TexCoord 0
 		 fr,  fg,  fb,  1.0, // Color
 	};
+	glBindTexture(GL_TEXTURE_2D, _whiteTex);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vVertices), vVertices);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 #endif
