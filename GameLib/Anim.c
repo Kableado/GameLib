@@ -112,6 +112,13 @@ void Anim_Draw(Anim a,int time_ms,int x,int y){
 //
 void AnimPlay_Copy(AnimPlay *ad,AnimPlay *ao){
 	ad->img=ao->img;
+
+	ad->imgPart=ao->imgPart;
+	ad->w=ao->w;
+	ad->h=ao->h;
+	ad->i=ao->i;
+	ad->j=ao->j;
+
 	ad->anim=ao->anim;
 	ad->time_ms=ao->time_ms;
 }
@@ -120,12 +127,14 @@ void AnimPlay_Copy(AnimPlay *ad,AnimPlay *ao){
 /////////////////////////////
 // AnimPlay_SetImg
 // AnimPlay_SetAnim
+// AnimPlay_SetImgPart
 //
 //
 void AnimPlay_SetImg(AnimPlay *ap,DrawImg img){
 	ap->anim=NULL;
-	ap->img=img;
 	ap->time_ms=0;
+
+	ap->img=img;
 }
 void AnimPlay_SetAnim(AnimPlay *ap,Anim ani){
 	ap->pause=0;
@@ -133,8 +142,23 @@ void AnimPlay_SetAnim(AnimPlay *ap,Anim ani){
 		return;
 	}
 	ap->anim=ani;
-	ap->img=NULL;
 	ap->time_ms=0;
+
+	ap->img=NULL;
+
+	ap->imgPart=NULL;
+}
+void AnimPlay_SetImgPart(AnimPlay *ap,DrawImg img,int w,int h,int i,int j){
+	ap->anim=NULL;
+	ap->time_ms=0;
+
+	ap->img=NULL;
+
+	ap->imgPart=img;
+	ap->w=w;
+	ap->h=h;
+	ap->i=i;
+	ap->j=j;
 }
 
 
@@ -145,9 +169,15 @@ void AnimPlay_SetAnim(AnimPlay *ap,Anim ani){
 void AnimPlay_Draw(AnimPlay *ani,int x,int y){
 	if(ani->anim){
 		Anim_Draw(ani->anim,ani->time_ms,x,y);
-	}else
+		return;
+	}
 	if(ani->img){
 		Draw_DrawImg(ani->img,x,y);
+		return;
+	}
+	if(ani->imgPart){
+		Draw_DrawImgPart(ani->imgPart,x,y,ani->w,ani->h,ani->i,ani->j);
+		return;
 	}
 }
 
@@ -160,17 +190,29 @@ void AnimPlay_Draw(AnimPlay *ani,int x,int y){
 void AnimPlay_GetOffset(AnimPlay *ani,int *x,int *y){
 	if(ani->anim){
 		Anim_GetOffset(ani->anim,x,y);
-	}else
+		return;
+	}
 	if(ani->img){
 		Draw_GetOffset(ani->img,x,y);
+		return;
+	}
+	if(ani->imgPart){
+		Draw_GetOffset(ani->imgPart,x,y);
+		return;
 	}
 }
 void AnimPlay_GetSize(AnimPlay *ani,int *w,int *h){
 	if(ani->anim){
 		Anim_GetSize(ani->anim,w,h);
+		return;
 	}else
 	if(ani->img){
 		Draw_GetSize(ani->img,w,h);
+		return;
+	}
+	if(ani->imgPart){
+		Draw_GetSize(ani->imgPart,w,h);
+		return;
 	}
 }
 

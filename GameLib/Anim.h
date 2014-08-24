@@ -56,9 +56,14 @@ void Anim_Draw(Anim anim,int time_ms,int x,int y);
 //
 typedef struct {
 	Anim anim;
-	DrawImg img;
 	int pause;
 	int time_ms;
+
+	DrawImg img;
+
+	DrawImg imgPart;
+	int w,h,i,j;
+
 } AnimPlay;
 
 
@@ -72,10 +77,12 @@ void AnimPlay_Copy(AnimPlay *ad,AnimPlay *ao);
 /////////////////////////////
 // AnimPlay_SetImg
 // AnimPlay_SetAnim
+// AnimPlay_SetImgPart
 //
 //
 void AnimPlay_SetImg(AnimPlay *ap,DrawImg img);
 void AnimPlay_SetAnim(AnimPlay *ap,Anim ani);
+void AnimPlay_SetImgPart(AnimPlay *ap,DrawImg img,int w,int h,int i,int j);
 
 
 /////////////////////////////
