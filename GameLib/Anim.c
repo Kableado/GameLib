@@ -35,6 +35,7 @@ Anim Anim_LoadAnim(char *fichero,int width,int frames,float fps){
 		return(NULL);
 	}
 	Draw_GetSize(img,&w,&h);
+	Draw_SetOffset(img,-(width/2),-(h/2));
 
 	// Create the animation container
 	anim=malloc(sizeof(Animation));
