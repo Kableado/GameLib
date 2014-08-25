@@ -153,6 +153,8 @@ void AnimPlay_SetImg(AnimPlay *ap,DrawImg img){
 	ap->time_ms=0;
 
 	ap->img=img;
+
+	ap->imgPart=NULL;
 }
 void AnimPlay_SetAnim(AnimPlay *ap,Anim ani){
 	ap->pause=0;
