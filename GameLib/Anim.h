@@ -44,6 +44,15 @@ void Anim_GetOffset(Anim anim,int *x,int *y);
 
 
 /////////////////////////////
+// Anim_SetFlip
+// Draw_GetFlip
+//
+//
+void Anim_SetFlip(Anim anim,int flip);
+int Anim_GetFlip(Anim anim);
+
+
+/////////////////////////////
 // Anim_Draw
 //
 //
