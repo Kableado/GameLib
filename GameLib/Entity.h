@@ -242,6 +242,13 @@ void Entity_AddColor(Entity e,float r,float g,float b,float a);
 
 
 /////////////////////////////
+// Entity_MultColor
+//
+//
+void Entity_MultColor(Entity e,float r,float g,float b,float a);
+
+
+/////////////////////////////
 // Entity_AddColor
 //
 void Entity_SetLight(Entity e,float r,float g,float b,float rad);

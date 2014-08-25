@@ -21,12 +21,31 @@ Entity _free_entity=NULL;
 Entity Entity_New(){
 	Entity e;
 
+#if 1
 	if(!_free_entity){
 		e=malloc(sizeof(TEntity));
 	}else{
 		e=_free_entity;
 		_free_entity=e->next;
 	}
+#else
+	if(!_free_entity){
+		// Allocate a big block of entities
+		int n=1024,i;
+		TEntity *newEnts=malloc(sizeof(TEntity)*n);
+		for(i=0;i<n;i++){
+			if(i<(n-1)){
+				newEnts[i].next=&newEnts[i+1];
+			}else{
+				newEnts[i].next=NULL;
+			}
+		}
+		_free_entity=newEnts;
+	}
+
+	e=_free_entity;
+	_free_entity=e->next;
+#endif
 
 	e->base=NULL;
 	e->type=0;
@@ -797,6 +816,17 @@ void Entity_AddColor(Entity e,float r,float g,float b,float a){
 		e->color[3]=1.0f;
 }
 
+/////////////////////////////
+// Entity_MultColor
+//
+//
+void Entity_MultColor(Entity e,float r,float g,float b,float a){
+	e->color[0]*=r;
+	e->color[1]*=g;
+	e->color[2]*=b;
+	e->color[3]*=a;
+}
+
 
 /////////////////////////////
 // Entity_SetLight
@@ -834,10 +864,10 @@ void Entity_Iluminate(Entity e,Entity *elist,int n){
 
 	if(!(e->flags&EntityFlag_Light)){
 		Entity_SetColor(e,
-			e->defaultColor[0]*e->light[0],
-			e->defaultColor[1]*e->light[1],
-			e->defaultColor[2]*e->light[2],
-			e->defaultColor[3]);
+			e->light[0],
+			e->light[1],
+			e->light[2],
+			1.0f);
 	}else{
 		Entity_SetColor(e,
 			e->defaultColor[0],
@@ -857,12 +887,18 @@ void Entity_Iluminate(Entity e,Entity *elist,int n){
 		if(qdist<qrad){
 			f=1.0f-qdist/qrad;
 			Entity_AddColor(e,
-				f*elist[i]->light[0]*e->defaultColor[0],
-				f*elist[i]->light[1]*e->defaultColor[1],
-				f*elist[i]->light[2]*e->defaultColor[2],
+				f*elist[i]->light[0],
+				f*elist[i]->light[1],
+				f*elist[i]->light[2],
 				0.0f);
 		}
 	}
+
+	Entity_MultColor(e,
+		e->defaultColor[0],
+		e->defaultColor[1],
+		e->defaultColor[2],
+		e->defaultColor[3]);
 }
 
 
@@ -891,6 +927,7 @@ void Entity_MarkUpdateLight(Entity e,Entity *elist,int n){
 		}
 		for(i=0;i<n;i++){
 			if(	elist[i]!=NULL &&
+				elist[i]->flags|EntityFlag_UpdateLight!=EntityFlag_UpdateLight &&
 				min[0]<=elist[i]->pos0[0] &&
 				max[0]>=elist[i]->pos0[0] &&
 				min[1]<=elist[i]->pos0[1] &&
