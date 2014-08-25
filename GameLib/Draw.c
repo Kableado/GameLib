@@ -50,6 +50,7 @@ struct TDrawImage {
 	unsigned char *data;
 	int x,y;
 	int w,h;
+	int flip;
 	GLuint tex;
 };
 
@@ -625,6 +626,7 @@ DrawImg Draw_CreateImage(int w,int h){
 	image->y=0;
 	image->w=w;
 	image->h=h;
+	image->flip=0;
 	image->tex=-1;
 
 	return((DrawImg)image);
@@ -652,6 +654,7 @@ DrawImg Draw_LoadImage(char *filename){
 		}
 		image->x=-(int)(image->w/2);
 		image->y=-(int)(image->h/2);
+		image->flip=0;
 		image->tex=-1;
 		return (DrawImg)image;
 	}
@@ -696,12 +699,29 @@ void Draw_GetOffset(DrawImg img,int *x,int *y){
 
 
 /////////////////////////////
+// Draw_SetFlip
+// Draw_GetFlip
+//
+//
+void Draw_SetFlip(DrawImg img,int flip){
+	DrawImage image=img;
+	image->flip=flip;
+}
+int Draw_GetFlip(DrawImg img){
+	DrawImage image=img;
+	return image->flip;
+}
+
+
+/////////////////////////////
 // Draw_DrawImg
 //
 // Draws an image.
 void Draw_DrawImg(DrawImg img,int x,int y){
 	DrawImage image=img;
 	float x1,x2,y1,y2;
+	float u1=0.0f,u2=1.0f;
+	float v1=0.0f,v2=1.0f;
 
 	// Prepare
 	x1=x+image->x;
@@ -709,14 +729,22 @@ void Draw_DrawImg(DrawImg img,int x,int y){
 	x2=(x+image->x)+image->w;
 	y2=_height-((y+image->y)+image->h);
 
+	// Apply flipping
+	if(image->flip&1){
+		float t=u1; u1=u2; u2=t;
+	}
+	if(image->flip&2){
+		float t=v1; v1=v2; v2=t;
+	}
+
 	// Draw a quad
 	if(_currentImg!=image){
 		Draw_Flush();
 		_currentImg=image;
 	}
 	QuadArray2D_AddQuad(_quadArray,
-		x1,y1,0.0f,0.0f,
-		x2,y2,1.0f,1.0f,
+		x1,y1,u1,v1,
+		x2,y2,u2,v2,
 		_color);
 }
 
@@ -728,6 +756,8 @@ void Draw_DrawImg(DrawImg img,int x,int y){
 void Draw_DrawImgResized(DrawImg img,int x,int y,float w,float h){
 	DrawImage image=img;
 	int x1,x2,y1,y2;
+	float u1=0.0f,u2=1.0f;
+	float v1=0.0f,v2=1.0f;
 
 	// Prepare
 	x1=x+image->x;
@@ -735,14 +765,22 @@ void Draw_DrawImgResized(DrawImg img,int x,int y,float w,float h){
 	x2=(x+image->x)+w;
 	y2=_height-((y+image->y)+h);
 
+	// Apply flipping
+	if(image->flip&1){
+		float t=u1; u1=u2; u2=t;
+	}
+	if(image->flip&2){
+		float t=v1; v1=v2; v2=t;
+	}
+
 	// Draw a quad
 	if(_currentImg!=image){
 		Draw_Flush();
 		_currentImg=image;
 	}
 	QuadArray2D_AddQuad(_quadArray,
-		x1,y1,0.0f,0.0f,
-		x2,y2,1.0f,1.0f,
+		x1,y1,u1,v1,
+		x2,y2,u2,v2,
 		_color);
 }
 
@@ -769,6 +807,14 @@ void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int h,int i,int j){
 	v1=vs*j*h;
 	v2=v1+(vs*h);
 
+	// Apply flipping
+	if(image->flip&1){
+		float t=u1; u1=u2; u2=t;
+	}
+	if(image->flip&2){
+		float t=v1; v1=v2; v2=t;
+	}
+
 	// Draw a quad
 	if(_currentImg!=image){
 		Draw_Flush();
@@ -789,6 +835,7 @@ void Draw_DrawImgPartHoriz(DrawImg img,int x,int y,int w,int i){
 	DrawImage image=img;
 	int x1,x2,y1,y2;
 	float us,u1,u2;
+	float v1=0.0f,v2=1.0f;
 
 	// Prepare
 	x1=x+image->x;
@@ -799,14 +846,22 @@ void Draw_DrawImgPartHoriz(DrawImg img,int x,int y,int w,int i){
 	u1=us*i*w;
 	u2=u1+us*w;
 
+	// Apply flipping
+	if(image->flip&1){
+		float t=u1; u1=u2; u2=t;
+	}
+	if(image->flip&2){
+		float t=v1; v1=v2; v2=t;
+	}
+
 	// Draw a quad
 	if(_currentImg!=image){
 		Draw_Flush();
 		_currentImg=image;
 	}
 	QuadArray2D_AddQuad(_quadArray,
-		x1,y1,u1,0.0f,
-		x2,y2,u2,1.0f,
+		x1,y1,u1,v1,
+		x2,y2,u2,v2,
 		_color);
 }
 

@@ -89,6 +89,15 @@ void Draw_GetOffset(DrawImg img,int *x,int *y);
 
 
 /////////////////////////////
+// Draw_SetFlip
+// Draw_GetFlip
+//
+//
+void Draw_SetFlip(DrawImg img,int flip);
+int Draw_GetFlip(DrawImg img);
+
+
+/////////////////////////////
 // Draw_DrawImg
 //
 // Draws an image.

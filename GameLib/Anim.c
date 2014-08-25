@@ -95,6 +95,23 @@ void Anim_GetOffset(Anim a,int *x,int *y){
 
 
 /////////////////////////////
+// Anim_SetFlip
+// Anim_GetFlip
+//
+//
+void Anim_SetFlip(Anim a,int flip){
+	Animation *anim=a;
+
+	Draw_SetFlip(anim->img,flip);
+}
+int Anim_GetFlip(Anim a){
+	Animation *anim=a;
+
+	return Draw_GetFlip(anim->img);
+}
+
+
+/////////////////////////////
 // Anim_Draw
 //
 //
