@@ -873,7 +873,7 @@ void Entity_Iluminate(Entity e,Entity *elist,int n){
 			e->defaultColor[0],
 			e->defaultColor[1],
 			e->defaultColor[2],
-			e->defaultColor[2]);
+			e->defaultColor[3]);
 		return;
 	}
 
@@ -927,7 +927,6 @@ void Entity_MarkUpdateLight(Entity e,Entity *elist,int n){
 		}
 		for(i=0;i<n;i++){
 			if(	elist[i]!=NULL &&
-				elist[i]->flags|EntityFlag_UpdateLight!=EntityFlag_UpdateLight &&
 				min[0]<=elist[i]->pos0[0] &&
 				max[0]>=elist[i]->pos0[0] &&
 				min[1]<=elist[i]->pos0[1] &&
