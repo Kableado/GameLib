@@ -21,7 +21,7 @@ Entity _free_entity=NULL;
 Entity Entity_New(){
 	Entity e;
 
-#if 1
+#if 0
 	if(!_free_entity){
 		e=malloc(sizeof(TEntity));
 	}else{
@@ -64,13 +64,16 @@ Entity Entity_New(){
 	e->mass=1.0f;
 	e->elast=0.0f;
 	e->backFric_static=0.0f;
+
 	e->backFric_dynamic=0.0f;
 	e->fric_static=0.0f;
 	e->fric_dynamic=0.0f;
 
 	AnimPlay_SetImg(&e->anim,NULL);
 
+	e->color0[0]=e->color0[1]=e->color0[2]=e->color0[3]=1.0f;
 	e->color[0]=e->color[1]=e->color[2]=e->color[3]=1.0f;
+
 	e->light[0]=e->light[1]=e->light[2]=e->light[3]=1.0f;
 	e->defaultColor[0]=e->defaultColor[1]=
 		e->defaultColor[2]=e->defaultColor[3]=1.0f;
@@ -135,6 +138,10 @@ Entity Entity_Copy(Entity e){
 	n->fric_dynamic=e->fric_dynamic;
 
 	AnimPlay_Copy(&n->anim,&e->anim);
+	n->color0[0]=e->color0[0];
+	n->color0[1]=e->color0[1];
+	n->color0[2]=e->color0[2];
+	n->color0[3]=e->color0[3];
 	n->color[0]=e->color[0];
 	n->color[1]=e->color[1];
 	n->color[2]=e->color[2];
@@ -218,7 +225,16 @@ int Entity_BBoxIntersect(Entity ent1,Entity ent2){
 //
 void Entity_Draw(Entity e,int x,int y,float f){
 	vec2 fPos;
-	Draw_SetColor(e->color[0],e->color[1],e->color[2],e->color[3]);
+	if(e->flags&EntityFlag_UpdatedColor){
+		Draw_SetColor(
+			e->color0[0]-f*(e->color0[0]-e->color[0]),
+			e->color0[1]-f*(e->color0[1]-e->color[1]),
+			e->color0[2]-f*(e->color0[2]-e->color[2]),
+			e->color0[3]-f*(e->color0[3]-e->color[3])
+			);
+	}else{
+		Draw_SetColor(e->color[0],e->color[1],e->color[2],e->color[3]);
+	}
 	if(e->flags&EntityFlag_UpdatedPos){
 		vec2_interpol(fPos,e->pos0,e->pos,f);
 		AnimPlay_Draw(&e->anim,fPos[0]+x,fPos[1]+y);
@@ -278,6 +294,12 @@ void Entity_PostProcess(Entity e,int ft){
 	float qlen,len;
 
 	vec2_copy(e->pos0,e->pos);
+
+	e->color0[0]=e->color[0];
+	e->color0[1]=e->color[1];
+	e->color0[2]=e->color[2];
+	e->color0[3]=e->color[3];
+	e->flags&=~EntityFlag_UpdatedColor;
 
 	// Determine if there is movement
 	qlen=vec2_dot(e->vel,e->vel);
@@ -794,6 +816,7 @@ void Entity_SetColor(Entity e,float r,float g,float b,float a){
 	e->color[1]=g;
 	e->color[2]=b;
 	e->color[3]=a;
+	e->flags|=EntityFlag_UpdatedColor;
 }
 
 
@@ -814,6 +837,7 @@ void Entity_AddColor(Entity e,float r,float g,float b,float a){
 	e->color[3]+=a;
 	if(e->color[3]>1.0f)
 		e->color[3]=1.0f;
+	e->flags|=EntityFlag_UpdatedColor;
 }
 
 /////////////////////////////
@@ -825,6 +849,7 @@ void Entity_MultColor(Entity e,float r,float g,float b,float a){
 	e->color[1]*=g;
 	e->color[2]*=b;
 	e->color[3]*=a;
+	e->flags|=EntityFlag_UpdatedColor;
 }
 
 
