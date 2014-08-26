@@ -20,6 +20,7 @@
 #define EntityFlag_Light 16
 #define EntityFlag_UpdateLight 32
 #define EntityFlag_UpdatedPos 64
+#define EntityFlag_UpdatedColor 128
 typedef struct TEntity TEntity, *Entity;
 struct TEntity {
 	Entity base;
@@ -48,7 +49,9 @@ struct TEntity {
 
 	AnimPlay anim;
 
+	float color0[4];
 	float color[4];
+
 	float light[4];
 	float defaultColor[4];
 
