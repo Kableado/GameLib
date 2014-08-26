@@ -12,6 +12,12 @@
 
 
 
+#define EntityIntFlag_UpdateLight 1
+#define EntityIntFlag_UpdatedPos 2
+#define EntityIntFlag_UpdatedColor 4
+#define EntityIntFlag_UpdateColor 8
+
+
 
 /////////////////////////////
 // Entity_New
@@ -52,6 +58,7 @@ Entity Entity_New(){
 	vec2_set(e->pos0,0.0f,0.0f);
 	vec2_set(e->pos,0.0f,0.0f);
 	e->flags=EntityFlag_Collision|EntityFlag_Overlap;
+	e->internalFlags=EntityIntFlag_UpdateColor;
 	e->zorder=1;
 	e->sortYOffset=0;
 
@@ -123,6 +130,7 @@ Entity Entity_Copy(Entity e){
 	n->type=e->type;
 	vec2_set(n->pos,e->pos[0],e->pos[1]);
 	n->flags=e->flags;
+	n->internalFlags=e->internalFlags;
 	n->zorder=e->zorder;
 	n->sortYOffset=e->sortYOffset;
 
@@ -225,7 +233,7 @@ int Entity_BBoxIntersect(Entity ent1,Entity ent2){
 //
 void Entity_Draw(Entity e,int x,int y,float f){
 	vec2 fPos;
-	if(e->flags&EntityFlag_UpdatedColor){
+	if(e->internalFlags&EntityIntFlag_UpdatedColor){
 		Draw_SetColor(
 			e->color0[0]-f*(e->color0[0]-e->color[0]),
 			e->color0[1]-f*(e->color0[1]-e->color[1]),
@@ -235,7 +243,7 @@ void Entity_Draw(Entity e,int x,int y,float f){
 	}else{
 		Draw_SetColor(e->color[0],e->color[1],e->color[2],e->color[3]);
 	}
-	if(e->flags&EntityFlag_UpdatedPos){
+	if(e->internalFlags&EntityIntFlag_UpdatedPos){
 		vec2_interpol(fPos,e->pos0,e->pos,f);
 		AnimPlay_Draw(&e->anim,fPos[0]+x,fPos[1]+y);
 	}else{
@@ -277,7 +285,7 @@ int Entity_IsVisible(Entity e,int x,int y,int w,int h){
 //
 //
 void Entity_Process(Entity b,int ft){
-	b->flags&=~EntityFlag_UpdatedPos;
+	b->internalFlags&=~EntityIntFlag_UpdatedPos;
 
 	// Launch method
 	if(b->proc){
@@ -299,7 +307,7 @@ void Entity_PostProcess(Entity e,int ft){
 	e->color0[1]=e->color[1];
 	e->color0[2]=e->color[2];
 	e->color0[3]=e->color[3];
-	e->flags&=~EntityFlag_UpdatedColor;
+	e->internalFlags&=~EntityIntFlag_UpdatedColor;
 
 	// Determine if there is movement
 	qlen=vec2_dot(e->vel,e->vel);
@@ -321,7 +329,7 @@ void Entity_PostProcess(Entity e,int ft){
 
 		// Mark the update of the position.
 		vec2_copy(e->oldpos,e->pos);
-		e->flags|=EntityFlag_UpdatedPos;
+		e->internalFlags|=EntityIntFlag_UpdatedPos;
 
 		Entity_CalcBBox(e);
 	}
@@ -776,7 +784,7 @@ void Entity_UpdatePos(Entity e,vec2 pos){
 
 	// Mark the update of the position.
 	vec2_copy(e->oldpos,e->pos);
-	e->flags|=EntityFlag_UpdatedPos;
+	e->internalFlags|=EntityIntFlag_UpdatedPos;
 
 	vec2_copy(e->pos,pos);
 }
@@ -816,7 +824,11 @@ void Entity_SetColor(Entity e,float r,float g,float b,float a){
 	e->color[1]=g;
 	e->color[2]=b;
 	e->color[3]=a;
-	e->flags|=EntityFlag_UpdatedColor;
+	e->color0[0]=r;
+	e->color0[1]=g;
+	e->color0[2]=b;
+	e->color0[3]=a;
+	e->internalFlags&=~EntityIntFlag_UpdatedColor;
 }
 
 
@@ -837,7 +849,7 @@ void Entity_AddColor(Entity e,float r,float g,float b,float a){
 	e->color[3]+=a;
 	if(e->color[3]>1.0f)
 		e->color[3]=1.0f;
-	e->flags|=EntityFlag_UpdatedColor;
+	e->internalFlags|=EntityIntFlag_UpdatedColor;
 }
 
 /////////////////////////////
@@ -849,7 +861,7 @@ void Entity_MultColor(Entity e,float r,float g,float b,float a){
 	e->color[1]*=g;
 	e->color[2]*=b;
 	e->color[3]*=a;
-	e->flags|=EntityFlag_UpdatedColor;
+	e->internalFlags|=EntityIntFlag_UpdatedColor;
 }
 
 
@@ -862,6 +874,10 @@ void Entity_SetLight(Entity e,float r,float g,float b,float rad){
 	e->light[1]=g;
 	e->light[2]=b;
 	e->light[3]=rad;
+
+	if(!(e->flags&EntityFlag_Light)){
+		e->internalFlags|=EntityIntFlag_UpdateLight;
+	}
 }
 
 
@@ -887,13 +903,7 @@ void Entity_Iluminate(Entity e,Entity *elist,int n){
 	float qdist,f;
 	float qrad;
 
-	if(!(e->flags&EntityFlag_Light)){
-		Entity_SetColor(e,
-			e->light[0],
-			e->light[1],
-			e->light[2],
-			1.0f);
-	}else{
+	if(e->flags&EntityFlag_Light){
 		Entity_SetColor(e,
 			e->defaultColor[0],
 			e->defaultColor[1],
@@ -901,6 +911,11 @@ void Entity_Iluminate(Entity e,Entity *elist,int n){
 			e->defaultColor[3]);
 		return;
 	}
+
+	e->color[0]=e->light[0];
+	e->color[1]=e->light[1];
+	e->color[2]=e->light[2];
+	e->color[3]=1.0f;
 
 	for(i=0;i<n;i++){
 		if(e==elist[i] || !(elist[i]->flags&EntityFlag_Light))
@@ -924,6 +939,15 @@ void Entity_Iluminate(Entity e,Entity *elist,int n){
 		e->defaultColor[1],
 		e->defaultColor[2],
 		e->defaultColor[3]);
+	e->internalFlags&=~EntityIntFlag_UpdateLight;
+
+	if(e->internalFlags&EntityIntFlag_UpdateColor){
+		e->color0[0]=e->color[0];
+		e->color0[1]=e->color[1];
+		e->color0[2]=e->color[2];
+		e->color0[3]=e->color[3];
+		e->internalFlags&=~EntityIntFlag_UpdateColor;
+	}
 }
 
 
@@ -957,12 +981,37 @@ void Entity_MarkUpdateLight(Entity e,Entity *elist,int n){
 				min[1]<=elist[i]->pos0[1] &&
 				max[1]>=elist[i]->pos0[1])
 			{
-				elist[i]->flags|=EntityFlag_UpdateLight;
+				elist[i]->internalFlags|=EntityIntFlag_UpdateLight;
 			}
 		}
 	}else{
-		e->flags|=EntityFlag_UpdateLight;
+		e->internalFlags|=EntityIntFlag_UpdateLight;
 	}
 }
+
+
+/////////////////////////////
+// Entity_IsLight
+//
+int Entity_IsLight(Entity e){
+	return (e->flags&EntityFlag_Light);
+}
+
+
+/////////////////////////////
+// Entity_IsUpdateLight
+//
+int Entity_IsUpdateLight(Entity e){
+	return (e->internalFlags&EntityIntFlag_UpdateLight);
+}
+
+
+/////////////////////////////
+// Entity_IsMoving
+//
+int Entity_IsMoving(Entity e){
+	return (e->internalFlags&EntityIntFlag_UpdatedPos);
+}
+
 
 

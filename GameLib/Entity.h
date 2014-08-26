@@ -18,9 +18,6 @@
 #define EntityFlag_BlockCollision 5
 #define EntityFlag_Overlap 8
 #define EntityFlag_Light 16
-#define EntityFlag_UpdateLight 32
-#define EntityFlag_UpdatedPos 64
-#define EntityFlag_UpdatedColor 128
 typedef struct TEntity TEntity, *Entity;
 struct TEntity {
 	Entity base;
@@ -30,6 +27,7 @@ struct TEntity {
 	vec2 pos0;
 	vec2 pos;
 	int flags;
+	int internalFlags;
 	int zorder;
 	float sortYOffset;
 
@@ -264,7 +262,7 @@ void Entity_SetDefaultColor(Entity e,float r,float g,float b,float a);
 
 
 /////////////////////////////
-// Entity_AddColor
+// Entity_Iluminate
 //
 void Entity_Iluminate(Entity e,Entity *elist,int n);
 
@@ -273,6 +271,24 @@ void Entity_Iluminate(Entity e,Entity *elist,int n);
 // Entity_MarkUpdateLight
 //
 void Entity_MarkUpdateLight(Entity e,Entity *elist,int n);
+
+
+/////////////////////////////
+// Entity_IsLight
+//
+int Entity_IsLight(Entity e);
+
+
+/////////////////////////////
+// Entity_IsUpdateLight
+//
+int Entity_IsUpdateLight(Entity e);
+
+
+/////////////////////////////
+// Entity_IsMoving
+//
+int Entity_IsMoving(Entity e);
 
 
 #endif

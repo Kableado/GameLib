@@ -318,7 +318,7 @@ void GameLib_ProcLoop(void *data){
 	GameLib_Compactate();_entities_lock=1;
 	for(i=0;i<_n_entities;i++){
 		Entity_PostProcess(_entity[i],_pft);
-		if(_entity[i]->flags&EntityFlag_UpdatedPos){
+		if(Entity_IsMoving(_entity[i])){
 			Entity_MarkUpdateLight(_entity[i],_entity,_n_entities);
 		}
 	}
@@ -368,9 +368,8 @@ void GameLib_DrawLoop(void *data, float f){
 		}
 
 		// Update ilumination of this entity
-		if(e->flags&EntityFlag_UpdateLight){
+		if(Entity_IsUpdateLight(e)){
 			Entity_Iluminate(e,_entity,_n_entities);
-			e->flags&=~EntityFlag_UpdateLight;
 		}
 
 		Entity_Draw(e,-game_pos[0],-game_pos[1],f);
@@ -578,7 +577,7 @@ void GameLib_PlaySound(AudioSnd snd,int x,int y){
 //
 //
 void GameLib_EntitySetLight(Entity e,float r,float g,float b,float rad){
-	if(e->flags&EntityFlag_Light){
+	if(Entity_IsLight(e)){
 		Entity_MarkUpdateLight(e,_entity,_n_entities);
 		Entity_SetLight(e,r,g,b,rad);
 		Entity_MarkUpdateLight(e,_entity,_n_entities);
