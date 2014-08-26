@@ -574,19 +574,6 @@ void GameLib_PlaySound(AudioSnd snd,int x,int y){
 
 
 /////////////////////////////
-// GameLib_Iluminate
-//
-//
-void GameLib_Iluminate(){
-	int i;
-
-	for(i=0;i<_n_entities;i++){
-		Entity_Iluminate(_entity[i],_entity,_n_entities);
-	}
-}
-
-
-/////////////////////////////
 // GameLib_EntitySetLight
 //
 //
@@ -597,24 +584,6 @@ void GameLib_EntitySetLight(Entity e,float r,float g,float b,float rad){
 		Entity_MarkUpdateLight(e,_entity,_n_entities);
 	}else{
 		Entity_SetLight(e,r,g,b,rad);
-		e->flags|=EntityFlag_UpdateLight;
 	}
 }
-
-
-/////////////////////////////
-// GameLib_UpdateIlumination
-//
-//
-void GameLib_UpdateIlumination(){
-	int i;
-
-	for(i=0;i<_n_entities;i++){
-		if(_entity[i]->flags&EntityFlag_UpdateLight){
-			Entity_Iluminate(_entity[i],_entity,_n_entities);
-			_entity[i]->flags&=~EntityFlag_UpdateLight;
-		}
-	}
-}
-
 
