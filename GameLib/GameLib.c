@@ -530,6 +530,41 @@ Entity GameLib_SearchEnt(int (*func)(Entity ent,void *d),void *d){
 
 
 /////////////////////////////
+// GameLib_EntityCustomCheckCollision
+//
+//
+int GameLib_EntityCustomCheckCollision(Entity ent,vec2 vel){
+	int collision=0;
+	CollisionInfo collInfo=NULL;
+	vec2 originalVel;
+	int j;
+
+	vec2_copy(originalVel,ent->vel);
+	vec2_copy(ent->vel,vel);
+	Entity_CalcBBox(ent);
+
+	for(j=0;j<_n_entities;j++){
+		if(!(_entity[j]->flags&EntityFlag_Collision) ||
+			!Entity_BBoxIntersect(ent,_entity[j]))
+		{
+			continue;
+		}
+		Entity_CheckCollision(ent,_entity[j],&collInfo);
+		if(collInfo!=NULL){
+			collision=1;
+			break;
+		}
+	}
+
+	vec2_copy(ent->vel,originalVel);
+	Entity_CalcBBox(ent);
+
+	CollisionInfo_Destroy(&collInfo);
+	return collision;
+}
+
+
+/////////////////////////////
 // GameLib_PlaySound
 //
 //
