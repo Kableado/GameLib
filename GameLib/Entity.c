@@ -644,10 +644,6 @@ void Entity_CollisionResponseLine(
 	vec2 pos2,vel2,velFric,intersection;
 	float dist,fric_static,fric_dynamic,fricLen;
 
-	// Calculate friction
-	fric_static=(ent->fric_static+ent2->fric_static)/2;
-	fric_dynamic=(ent->fric_dynamic+ent2->fric_dynamic)/2;
-
 	// Calculate end position
 	vec2_scale(vel2,ent->vel,1.0f-t);
 	dist=-vec2_dot(norm,vel2);
@@ -658,6 +654,10 @@ void Entity_CollisionResponseLine(
 	vec2_scaleadd(intersection,ent->pos,ent->vel,t);
 
 	if(applyFriction){
+		// Calculate friction
+		fric_static=(ent->fric_static+ent2->fric_static)/2;
+		fric_dynamic=(ent->fric_dynamic+ent2->fric_dynamic)/2;
+
 		// Apply friction
 		vec2_minus(velFric,pos2,intersection);
 		fricLen=sqrtf(vec2_dot(velFric,velFric));

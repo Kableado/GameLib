@@ -95,6 +95,13 @@ Entity GameLib_SearchEnt(int (*func)(Entity ent,void *d),void *d);
 
 
 /////////////////////////////
+// GameLib_EntityCustomCheckCollision
+//
+//
+int GameLib_EntityCustomCheckCollision(Entity ent,vec2 vel);
+
+
+/////////////////////////////
 // GameLib_PlaySound
 //
 // Play a sound position aware.
