@@ -200,7 +200,7 @@ void GameLib_ProcLoop(void *data){
 
 	// Process
 	time=Time_GetTime();
-	GameLib_Compactate();_entities_lock=1;
+	_entities_lock=1;
 	if(_gameproc){
 		_gameproc();
 	}
@@ -214,7 +214,7 @@ void GameLib_ProcLoop(void *data){
 
 	// Colisions between entities
 	time=Time_GetTime();
-	GameLib_Compactate();_entities_lock=1;
+	_entities_lock=1;
 	count=0;
 	do{
 		repeat=0;
@@ -266,7 +266,7 @@ void GameLib_ProcLoop(void *data){
 
 	// Process Overlaps
 	time=Time_GetTime();
-	GameLib_Compactate();_entities_lock=1;
+	_entities_lock=1;
 	for(i=0;i<_n_entities;i++){
 		if(!(_entity[i]->flags&EntityFlag_Overlap) || _entity[i]->mass<0.0f)
 			continue;
@@ -315,7 +315,7 @@ void GameLib_ProcLoop(void *data){
 
 	// PostProcess
 	time=Time_GetTime();
-	GameLib_Compactate();_entities_lock=1;
+	_entities_lock=1;
 	for(i=0;i<_n_entities;i++){
 		Entity_PostProcess(_entity[i],_pft);
 		if(Entity_IsMoving(_entity[i])){
