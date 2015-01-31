@@ -12,12 +12,16 @@
 // Entity
 //
 #define EntityFlag_Collision 1
-#define EntityFlag_Platform 2
-#define EntityFlag_Block 4
-#define EntityFlag_PlatformCollision 3
-#define EntityFlag_BlockCollision 5
-#define EntityFlag_Overlap 8
-#define EntityFlag_Light 16
+#define EntityFlag_Overlap 2
+#define EntityFlag_Light 4
+#define EntityFlag_BlockTop 0x00000100
+#define EntityFlag_BlockRight 0x00000200
+#define EntityFlag_BlockBottom 0x00000400
+#define EntityFlag_BlockLeft 0x00000800
+#define EntityFlag_Block 0x0000FF00
+#define EntityFlag_PlatformCollision 0x00000101
+#define EntityFlag_BlockCollision 0x0000FF01
+
 typedef struct TEntity TEntity, *Entity;
 struct TEntity {
 	Entity base;

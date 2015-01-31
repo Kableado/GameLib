@@ -443,49 +443,15 @@ int Entity_CheckCollision(Entity ent1,Entity ent2,CollisionInfo *collInfoRef){
 	vec2 vel;
 	int flags=ent1->flags|ent2->flags;
 
-	if(flags&EntityFlag_Platform && !(flags&EntityFlag_Block)){
-		// One of the entities is a platform and none is a block
-		Entity ent,ent_plat;
-		float plat_width;
-		vec2 p;
 
-		// Decide who is the platform and who is the ent
-		if(ent1->mass<=0.0f && ent2->mass>0.0f){
-			ent=ent2;
-			ent_plat=ent1;
-		}else
-		if(ent2->mass<=0.0f && ent1->mass>0.0f){
-			ent=ent1;
-			ent_plat=ent2;
-		}else{
-			// Two static or two dinamic entities?!?
-			return(0);
-		}
-
-		// Check Top
-		vec2_set(n,0,-1);
-		vec2_scaleadd(p,ent_plat->pos,n,(ent->height+ent_plat->height)/2);
-		plat_width=ent_plat->width+ent->width;
-		if(Intersect_RayEdge(ent->pos,ent->vel,
-			n,p,plat_width,&t))
-		{
-			// Keep colision info
-			CollisionInfo_Add(collInfoRef,
-				CollisionResponse_Line,ent,ent_plat,t,n,1);
-			return(1);
-		}
-
-		return(0);
-	}
-
-	if(flags&EntityFlag_Block && !(flags&EntityFlag_Platform)){
+	if(flags&EntityFlag_Block ){
 		// One of the entities is a block and none is a platform
 		Entity ent,ent_block;
 		float auxT,block_len;
 		vec2 auxN,p;
 		int applyFriction;
 
-		// Decide who is the platform and who is the ent
+		// Decide who is the block and who is the ent
 		if(ent1->mass<=0.0f && ent2->mass>0.0f){
 			ent=ent2;
 			ent_block=ent1;
@@ -502,64 +468,67 @@ int Entity_CheckCollision(Entity ent1,Entity ent2,CollisionInfo *collInfoRef){
 		t=1.0f;
 		applyFriction=1;
 
-		// Check Top
-		vec2_set(auxN,0,-1);
-		vec2_scaleadd(p,ent_block->pos,auxN,(ent->height+ent_block->height)/2);
-		block_len=ent_block->width+ent->width;
-		if(Intersect_RayEdge(ent->pos,ent->vel,
-			auxN,p,block_len,&auxT))
-		{
-			if(auxT<t){
-				vec2_copy(n,auxN);
-				t=auxT;
-				applyFriction=1;
+		if(flags&EntityFlag_BlockTop){
+			vec2_set(auxN,0,-1);
+			vec2_scaleadd(p,ent_block->pos,auxN,(ent->height+ent_block->height)/2);
+			block_len=ent_block->width+ent->width;
+			if(Intersect_RayEdge(ent->pos,ent->vel,
+				auxN,p,block_len,&auxT))
+			{
+				if(auxT<t){
+					vec2_copy(n,auxN);
+					t=auxT;
+					applyFriction=1;
+				}
 			}
 		}
 
-		// Check Bottom
-		vec2_set(auxN,0,1);
-		vec2_scaleadd(p,ent_block->pos,auxN,(ent->height+ent_block->height)/2);
-		block_len=ent_block->width+ent->width;
-		if(Intersect_RayEdge(ent->pos,ent->vel,
-			auxN,p,block_len,&auxT))
-		{
-			if(auxT<t){
-				vec2_copy(n,auxN);
-				t=auxT;
-				applyFriction=1;
+		if(flags&EntityFlag_BlockBottom){
+			vec2_set(auxN,0,1);
+			vec2_scaleadd(p,ent_block->pos,auxN,(ent->height+ent_block->height)/2);
+			block_len=ent_block->width+ent->width;
+			if(Intersect_RayEdge(ent->pos,ent->vel,
+				auxN,p,block_len,&auxT))
+			{
+				if(auxT<t){
+					vec2_copy(n,auxN);
+					t=auxT;
+					applyFriction=1;
+				}
 			}
 		}
 
-		// Check Left
-		vec2_set(auxN,1,0);
-		vec2_scaleadd(p,ent_block->pos,auxN,(ent->width+ent_block->width)/2);
-		block_len=ent_block->height+ent->height;
-		if(Intersect_RayEdge(ent->pos,ent->vel,
-			auxN,p,block_len,&auxT))
-		{
-			if(auxT<t){
-				vec2_copy(n,auxN);
-				t=auxT;
-				applyFriction=0;
+		if(flags&EntityFlag_BlockRight){
+			vec2_set(auxN,1,0);
+			vec2_scaleadd(p,ent_block->pos,auxN,(ent->width+ent_block->width)/2);
+			block_len=ent_block->height+ent->height;
+			if(Intersect_RayEdge(ent->pos,ent->vel,
+				auxN,p,block_len,&auxT))
+			{
+				if(auxT<t){
+					vec2_copy(n,auxN);
+					t=auxT;
+					applyFriction=0;
+				}
 			}
 		}
 
-		// Check Right
-		vec2_set(auxN,-1,0);
-		vec2_scaleadd(p,ent_block->pos,auxN,(ent->width+ent_block->width)/2);
-		block_len=ent_block->height+ent->height;
-		if(Intersect_RayEdge(ent->pos,ent->vel,
-			auxN,p,block_len,&auxT))
-		{
-			if(auxT<t){
-				vec2_copy(n,auxN);
-				t=auxT;
-				applyFriction=0;
+		if(flags&EntityFlag_BlockLeft){
+			vec2_set(auxN,-1,0);
+			vec2_scaleadd(p,ent_block->pos,auxN,(ent->width+ent_block->width)/2);
+			block_len=ent_block->height+ent->height;
+			if(Intersect_RayEdge(ent->pos,ent->vel,
+				auxN,p,block_len,&auxT))
+			{
+				if(auxT<t){
+					vec2_copy(n,auxN);
+					t=auxT;
+					applyFriction=0;
+				}
 			}
 		}
 
 		if(t<1.0f){
-			// Keep colision info
  			CollisionInfo_Add(collInfoRef,
 				CollisionResponse_Line,ent,ent_block,t,n,applyFriction);
 			return(1);
@@ -568,10 +537,9 @@ int Entity_CheckCollision(Entity ent1,Entity ent2,CollisionInfo *collInfoRef){
 		return(0);
 	}
 
-	// Test relative to ent1
+	// Circle-Circle test from ent1
 	vec2_minus(vel,ent1->vel,ent2->vel);
 	if(Colision_CircleCircle(ent1->pos,ent1->radius,vel,ent2->pos,ent2->radius,&t,n)){
-		// Keep colision info
 		CollisionInfo_Add(collInfoRef,
 			CollisionResponse_Circle,ent1,ent2,t,n,0);
 		return(1);
