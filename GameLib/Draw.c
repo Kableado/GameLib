@@ -121,6 +121,8 @@ GLuint Draw_BuildProgram(
 	return programObject;
 }
 
+GLuint programObject;
+
 GLuint vertPosLoc;
 GLuint vertTexLoc;
 GLuint vertColorLoc;
@@ -128,13 +130,13 @@ GLuint vertColorLoc;
 GLuint textureLoc;
 GLuint projectionMatrixLoc;
 
-
 GLuint vertexObject;
 
 #define Max_Vertices 6000
 
 #endif
 
+void Draw_SetMatrix(float matrix[16]);
 GLuint Draw_UploadGLTexture(int w, int h, unsigned char *pixels);
 
 /////////////////////////////
@@ -219,18 +221,14 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 	printf(" Version: %s\n",str);
 	printf("*********************************\n");
 
-	// Set the proyection (Ortographic)
-	glMatrixMode (GL_PROJECTION);
-	glLoadIdentity ();
-	glOrtho (0,_width, 0, _height, -1000, 1000);
-	glMatrixMode (GL_MODELVIEW);
-	glLoadIdentity ();
 
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_VERTEX_ARRAY);
 
-#else
+#endif
+
+#if USE_OpenGLES
 
 	// Show device info
 	char *str;
@@ -245,18 +243,18 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 	printf("*********************************\n");
 
 	const char vertexShaderSource[] =
-		"attribute vec4 aPosition;      \n"
-		"attribute vec2 aTexCoord;      \n"
-		"attribute vec4 aColor;         \n"
-		"varying vec2 vTexCoord;        \n"
-		"varying vec4 vColor;           \n"
+		"attribute vec4 aPosition;       \n"
+		"attribute vec2 aTexCoord;       \n"
+		"attribute vec4 aColor;          \n"
+		"varying vec2 vTexCoord;         \n"
+		"varying vec4 vColor;            \n"
 		"uniform mat4 sProjectionMatrix; \n"
-		"void main() {                  \n"
-		"   gl_Position = aPosition *   \n"
+		"void main() {                   \n"
+		"   gl_Position = aPosition *    \n"
 		"            sProjectionMatrix;  \n"
-		"   vTexCoord = aTexCoord;      \n"
-		"   vColor = aColor;            \n"
-		"}                              \n";
+		"   vTexCoord = aTexCoord;       \n"
+		"   vColor = aColor;             \n"
+		"}                               \n";
 
 	const char fragmentShaderSource[] =
 		"precision mediump float;                                \n"
@@ -267,7 +265,7 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 		"  gl_FragColor = texture2D(sTexture, vTexCoord)*vColor; \n"
 		"}                                                       \n";
 
-	GLuint programObject=Draw_BuildProgram(
+	programObject=Draw_BuildProgram(
 		vertexShaderSource,
 		fragmentShaderSource);
 	glUseProgram(programObject);
@@ -299,19 +297,24 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 
 	glUniform1i(textureLoc, 0);
 
-	GLfloat projectionMatrix[16]={
-			2.0f/(float)_width, 0.0, 0.0, -1.0,
-			0.0, 2.0/(float)_height, 0.0, -1.0,
-			0.0, 0.0, 1.0, 0.0,
-			0.0, 0.0, 0.0, 1.0
-		};
-	glUniformMatrix4fv(projectionMatrixLoc,
-		1, GL_FALSE, projectionMatrix);
-
 	unsigned char whiteTexData[4]={255,255,255,255};
 	_whiteTex=Draw_UploadGLTexture(1, 1, whiteTexData);
 
 #endif
+
+	// Set the proyection (2D)
+	glViewport(0, 0, _width, _height);
+	float projectionMatrix[16] = {
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1 };
+	projectionMatrix[0] = (2.0 / _width);
+	projectionMatrix[5] = -(2.0 / _height);
+	projectionMatrix[10] = -0.001;
+	projectionMatrix[3] = -1;
+	projectionMatrix[7] = 1;
+	Draw_SetMatrix(projectionMatrix);
 
 	// Enable Alpha blending
 	glEnable(GL_BLEND);
@@ -325,6 +328,25 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 	return(1);
 }
 
+
+/////////////////////////////
+// Draw_SetMatrix
+//
+// Sets the render matrix
+void Draw_SetMatrix(float matrix[16]){
+#if USE_OpenGL
+	float tempMatrix[16] = {
+		matrix[0], matrix[4], matrix[ 8], matrix[12],
+		matrix[1], matrix[5], matrix[ 9], matrix[13],
+		matrix[2], matrix[6], matrix[10], matrix[14],
+		matrix[3], matrix[7], matrix[11], matrix[15]};
+	glLoadMatrixf(tempMatrix);
+#endif
+#if USE_OpenGLES
+	glUniformMatrix4fv(projectionMatrixLoc,
+		1, GL_FALSE, matrix);
+#endif
+}
 
 
 /////////////////////////////
@@ -468,10 +490,16 @@ int Draw_LoopIteration(){
 				Input_SetKey(InputKey_Exit,1);
 			}
 		}
-		if(event.type==SDL_MOUSEBUTTONDOWN || event.type==SDL_FINGERDOWN || event.type==SDL_TOUCHBUTTONDOWN){
+		if(event.type==SDL_MOUSEBUTTONDOWN ||
+			event.type==SDL_FINGERDOWN ||
+			event.type==SDL_TOUCHBUTTONDOWN)
+		{
 			Input_SetPointerDown(1);
 		}
-		if(event.type==SDL_MOUSEBUTTONUP || event.type==SDL_FINGERUP || event.type==SDL_TOUCHBUTTONUP){
+		if(event.type==SDL_MOUSEBUTTONUP ||
+			event.type==SDL_FINGERUP ||
+			event.type==SDL_TOUCHBUTTONUP)
+		{
 			Input_SetPointerDown(0);
 		}
 	}
@@ -725,9 +753,9 @@ void Draw_DrawImg(DrawImg img,int x,int y){
 
 	// Prepare
 	x1=x+image->x;
-	y1=_height-(y+image->y);
+	y1=y+image->y;
 	x2=(x+image->x)+image->w;
-	y2=_height-((y+image->y)+image->h);
+	y2=(y+image->y)+image->h;
 
 	// Apply flipping
 	if(image->flip&1){
@@ -761,9 +789,9 @@ void Draw_DrawImgResized(DrawImg img,int x,int y,float w,float h){
 
 	// Prepare
 	x1=x+image->x;
-	y1=_height-(y+image->y);
+	y1=y+image->y;
 	x2=(x+image->x)+w;
-	y2=_height-((y+image->y)+h);
+	y2=(y+image->y)+h;
 
 	// Apply flipping
 	if(image->flip&1){
@@ -797,9 +825,9 @@ void Draw_DrawImgPart(DrawImg img,int x,int y,int w,int h,int i,int j){
 
 	// Prepare
 	x1=x+image->x;
-	y1=_height-(y+image->y);
+	y1=y+image->y;
 	x2=(x+image->x)+w;
-	y2=_height-((y+image->y)+h);
+	y2=(y+image->y)+h;
 	us=1.0f/image->w;
 	u1=us*i*w;
 	u2=u1+(us*w);
@@ -839,9 +867,9 @@ void Draw_DrawImgPartHoriz(DrawImg img,int x,int y,int w,int i){
 
 	// Prepare
 	x1=x+image->x;
-	y1=_height-(y+image->y);
+	y1=y+image->y;
 	x2=(x+image->x)+w;
-	y2=_height-((y+image->y)+image->h);
+	y2=(y+image->y)+image->h;
 	us=1.0f/image->w;
 	u1=us*i*w;
 	u2=u1+us*w;
