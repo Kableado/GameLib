@@ -228,9 +228,10 @@ void GameLib_ProcLoop(void *data){
 				continue;
 			}
 			for(j=0;j<_n_entities;j++){
-				if(!(_entity[j]->flags&EntityFlag_Collision) ||
-					!Entity_BBoxIntersect(_entity[i],_entity[j]) ||
-					CollisionInfo_CheckRepetition(collInfo,_entity[i],_entity[j]))
+				if( i==j ||
+					!(_entity[j]->flags&EntityFlag_Collision) ||
+					CollisionInfo_CheckRepetition(collInfo,_entity[i],_entity[j]) ||
+					!Entity_BBoxIntersect(_entity[i],_entity[j]))
 				{
 					continue;
 				}
@@ -250,8 +251,12 @@ void GameLib_ProcLoop(void *data){
 			if(!(_entity[i]->flags&EntityFlag_Collision) || _entity[i]->mass<0.0f)
 				continue;
 			for(j=0;j<_n_entities;j++){
-				if(!(_entity[j]->flags&EntityFlag_Collision) || i==j)
+				if(i==j ||
+					!(_entity[j]->flags&EntityFlag_Collision) ||
+					!Entity_BBoxIntersect(_entity[i],_entity[j]))
+				{
 					continue;
+				}
 				if(Entity_CheckCollision(_entity[i],_entity[j],NULL)){
 					vec2_set(_entity[i]->vel,0,0);
 					Entity_CalcBBox(_entity[i]);
