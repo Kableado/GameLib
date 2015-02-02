@@ -136,6 +136,7 @@ GLuint vertexObject;
 
 #endif
 
+void Draw_ShowInfo();
 void Draw_SetMatrix(float matrix[16]);
 GLuint Draw_UploadGLTexture(int w, int h, unsigned char *pixels);
 
@@ -171,17 +172,6 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 		return(0);
 	}
 
-#if USE_OpenGL
-	// Prepare OpenGL inicialization
-	SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 8);
-	SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 8);
-	SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE, 8);
-	SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE, 8);
-	SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 24);
-	SDL_GL_SetAttribute (SDL_GL_STENCIL_SIZE, 8);
-	SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
-#endif
-
 	// Initialize video mode
 	_screen=SDL_SetVideoMode(width,height,32,SDL_HWSURFACE|SDL_OPENGL);
 	if( _screen == NULL){
@@ -190,6 +180,7 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 		return(0);
 	}
 	SDL_WM_SetCaption(title, NULL);
+	Draw_ShowInfo();
 
 #if USE_OpenGL
 	// Set the desired state
@@ -209,18 +200,6 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 	SDL_GL_SwapBuffers();
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	// Show device info
-	char *str;
-	printf("\n*********************************\n");
-	printf("*** Draw Info\n");
-	str=(char *)glGetString(GL_VENDOR);
-	printf(" Vendor: %s\n",str);
-	str=(char *)glGetString(GL_RENDERER);
-	printf(" Renderer: %s\n",str);
-	str=(char *)glGetString(GL_VERSION);
-	printf(" Version: %s\n",str);
-	printf("*********************************\n");
-
 
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -229,18 +208,6 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 #endif
 
 #if USE_OpenGLES
-
-	// Show device info
-	char *str;
-	printf("\n*********************************\n");
-	printf("*** Draw Info\n");
-	str=(char *)glGetString(GL_VENDOR);
-	printf(" Vendor: %s\n",str);
-	str=(char *)glGetString(GL_RENDERER);
-	printf(" Renderer: %s\n",str);
-	str=(char *)glGetString(GL_VERSION);
-	printf(" Version: %s\n",str);
-	printf("*********************************\n");
 
 	const char vertexShaderSource[] =
 		"attribute vec4 aPosition;       \n"
@@ -277,6 +244,8 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 	textureLoc = glGetUniformLocation(programObject, "sTexture");
 	projectionMatrixLoc = glGetUniformLocation(programObject, "sProjectionMatrix");
 
+	glUniform1i(textureLoc, 0);
+
 	glGenBuffers(1, &vertexObject);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexObject );
 	glBufferData(GL_ARRAY_BUFFER, Vertex2D_Length*sizeof(float)*Max_Vertices,
@@ -295,8 +264,6 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 	glEnableVertexAttribArray(vertTexLoc);
 	glEnableVertexAttribArray(vertColorLoc);
 
-	glUniform1i(textureLoc, 0);
-
 	unsigned char whiteTexData[4]={255,255,255,255};
 	_whiteTex=Draw_UploadGLTexture(1, 1, whiteTexData);
 
@@ -309,11 +276,11 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 		0, 1, 0, 0,
 		0, 0, 1, 0,
 		0, 0, 0, 1 };
-	projectionMatrix[0] = (2.0 / _width);
-	projectionMatrix[5] = -(2.0 / _height);
-	projectionMatrix[10] = -0.001;
-	projectionMatrix[3] = -1;
-	projectionMatrix[7] = 1;
+	projectionMatrix[0] = (2.0f / _width);
+	projectionMatrix[5] = -(2.0f / _height);
+	projectionMatrix[10] = -0.001f;
+	projectionMatrix[3] = -1.0f;
+	projectionMatrix[7] = 1.0f;
 	Draw_SetMatrix(projectionMatrix);
 
 	// Enable Alpha blending
@@ -326,6 +293,24 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 	Draw_SetColor(1.0f,1.0f,1.0f,1.0f);
 
 	return(1);
+}
+
+
+/////////////////////////////
+// Draw_ShowInfo
+//
+// Show device information
+void Draw_ShowInfo(){
+	char *str;
+	printf("\n*********************************\n");
+	printf("*** Draw Info\n");
+	str=(char *)glGetString(GL_VENDOR);
+	printf(" Vendor: %s\n",str);
+	str=(char *)glGetString(GL_RENDERER);
+	printf(" Renderer: %s\n",str);
+	str=(char *)glGetString(GL_VERSION);
+	printf(" Version: %s\n",str);
+	printf("*********************************\n");
 }
 
 
