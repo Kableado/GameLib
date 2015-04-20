@@ -14,7 +14,6 @@
 // Globals
 InputKeyStatus _keys[InputKey_Max];
 int _pointerDown=0;
-SDL_Joystick *_joy;
 
 
 /////////////////////////////
@@ -24,33 +23,11 @@ SDL_Joystick *_joy;
 int Input_Init(){
 	int i;
 
-	// Init the SDL Joystick subsistem
-	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
-
 	// Mark released all the keys
 	for(i=0;i<InputKey_Max;i++){
 		_keys[i]=InputKey_Released;
 	}
-/*
-	// Check for joystick
-	if(SDL_NumJoysticks()>0){
-		// Open joystick
-		_joy=SDL_JoystickOpen(0);
 
-		if(_joy){
-			printf("Opened Joystick 0\n");
-			printf("Name: %s\n", SDL_JoystickName(0));
-			printf("Number of Axes: %d\n", SDL_JoystickNumAxes(_joy));
-			printf("Number of Buttons: %d\n", SDL_JoystickNumButtons(_joy));
-			printf("Number of Balls: %d\n", SDL_JoystickNumBalls(_joy));
-		}else
-			printf("Couldn't open Joystick 0\n");
-
-		// Close if opened
-		if(SDL_JoystickOpened(0))
-			SDL_JoystickClose(_joy);
-	}
-*/
 	return(1);
 }
 
