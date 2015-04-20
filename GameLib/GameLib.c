@@ -624,3 +624,21 @@ void GameLib_EntitySetLight(Entity e,float r,float g,float b,float rad){
 	}
 }
 
+
+/////////////////////////////
+// GameLib_ConvertScreenPositionToGamePosition
+//
+//
+void GameLib_ConvertScreenPositionToGamePosition(
+	vec2 screenPos, vec2 gamePos)
+{
+	float f;
+	int game_pos[2];
+
+	game_pos[0]=_game_pos0[0]+f*(_game_pos1[0]-_game_pos0[0]);
+	game_pos[1]=_game_pos0[1]+f*(_game_pos1[1]-_game_pos0[1]);
+
+	gamePos[0]=(screenPos[0]*_game_size[0])+game_pos[0];
+	gamePos[1]=(screenPos[1]*_game_size[1])+game_pos[1];
+}
+

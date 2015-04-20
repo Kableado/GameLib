@@ -115,4 +115,12 @@ void GameLib_PlaySound(AudioSnd snd,int x,int y);
 void GameLib_EntitySetLight(Entity e,float r,float g,float b,float rad);
 
 
+/////////////////////////////
+// GameLib_ConvertScreenPositionToGamePosition
+//
+//
+void GameLib_ConvertScreenPositionToGamePosition(
+	vec2 screenPos, vec2 gamePos);
+
+
 #endif

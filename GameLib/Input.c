@@ -13,7 +13,14 @@
 
 // Globals
 InputKeyStatus _keys[InputKey_Max];
+
 int _pointerDown=0;
+float _pointerX=0;
+float _pointerY=0;
+
+int _clicked=0;
+float _clickedPositionX=0;
+float _clickedPositionY=0;
 
 
 /////////////////////////////
@@ -57,6 +64,16 @@ void Input_Frame(){
 
 
 /////////////////////////////
+// Input_PostFrame
+//
+// Notify a frame update to the input subsystem.
+void Input_PostFrame(){
+	Input_SetKey(InputKey_Exit,0);
+	_clicked=0;
+}
+
+
+/////////////////////////////
 // Input_SetKey
 //
 // Notify a key press to the input subsystem.
@@ -83,10 +100,44 @@ InputKeyStatus Input_GetKey(InputKey key){
 
 
 /////////////////////////////
+// Input_SetPointerPosition
+//
+void Input_SetPointerPosition(float x, float y){
+	_pointerX=x;
+	_pointerY=y;
+}
+
+
+/////////////////////////////
 // Input_SetPointerDown
 //
 void Input_SetPointerDown(int pointerDown){
+	if(pointerDown==0 && _pointerDown==1){
+		_clicked=1;
+		_clickedPositionX=_pointerX;
+		_clickedPositionY=_pointerY;
+	}
 	_pointerDown=pointerDown;
+}
+
+
+/////////////////////////////
+// Input_GetPointerPosition
+//
+int Input_GetPointerPosition(vec2 pointer){
+	pointer[0]=_pointerX;
+	pointer[1]=_pointerY;
+	return _pointerDown;
+}
+
+
+/////////////////////////////
+// Input_GetClickedPosition
+//
+int Input_GetClickedPosition(vec2 clickPosition){
+	clickPosition[0]=_clickedPositionX;
+	clickPosition[1]=_clickedPositionY;
+	return _clicked;
 }
 
 
@@ -115,7 +166,6 @@ int Input_GetDir(vec2 dir){
 	int mx,my;
 	float dlen;
 	extern int _width,_height;
-
 
 	// Get mouse state
 	buttons=SDL_GetMouseState(&mx,&my);

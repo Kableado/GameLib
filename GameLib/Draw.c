@@ -475,16 +475,50 @@ int Draw_LoopIteration(){
 				Input_SetKey(InputKey_Exit,1);
 			}
 		}
-		if(event.type==SDL_MOUSEBUTTONDOWN ||
-			event.type==SDL_FINGERDOWN ||
-			event.type==SDL_TOUCHBUTTONDOWN)
-		{
+		if(event.type==SDL_MOUSEMOTION){
+			Input_SetPointerPosition(
+				event.motion.x/(float)_width,
+				event.motion.y/(float)_height);
+		}
+		if(event.type==SDL_MOUSEBUTTONDOWN){
+			Input_SetPointerPosition(
+				event.button.x/(float)_width,
+				event.button.y/(float)_height);
 			Input_SetPointerDown(1);
 		}
-		if(event.type==SDL_MOUSEBUTTONUP ||
-			event.type==SDL_FINGERUP ||
-			event.type==SDL_TOUCHBUTTONUP)
-		{
+		if(event.type==SDL_FINGERMOTION){
+			Input_SetPointerPosition(
+				event.tfinger.x,
+				event.tfinger.y);
+		}
+		if(event.type==SDL_FINGERDOWN){
+			Input_SetPointerPosition(
+				event.tfinger.x,
+				event.tfinger.y);
+			Input_SetPointerDown(1);
+		}
+		if(event.type==SDL_TOUCHBUTTONDOWN){
+			Input_SetPointerPosition(
+				event.tfinger.x,
+				event.tfinger.y);
+			Input_SetPointerDown(1);
+		}
+		if(event.type==SDL_MOUSEBUTTONUP){
+			Input_SetPointerPosition(
+				event.button.x/(float)_width,
+				event.button.y/(float)_height);
+			Input_SetPointerDown(0);
+		}
+		if(event.type==SDL_FINGERUP){
+			Input_SetPointerPosition(
+				event.tfinger.x,
+				event.tfinger.y);
+			Input_SetPointerDown(0);
+		}
+		if(event.type==SDL_TOUCHBUTTONUP){
+			Input_SetPointerPosition(
+				event.tfinger.x,
+				event.tfinger.y);
 			Input_SetPointerDown(0);
 		}
 	}
@@ -504,10 +538,21 @@ int Draw_LoopIteration(){
 				}
 			}
 		}
+		if(event.type==SDL_MOUSEMOTION){
+			Input_SetPointerPosition(
+				event.motion.x/(float)_width,
+				event.motion.y/(float)_height);
+		}
 		if(event.type==SDL_MOUSEBUTTONDOWN){
+			Input_SetPointerPosition(
+				event.button.x/(float)_width,
+				event.button.y/(float)_height);
 			Input_SetPointerDown(1);
 		}
 		if(event.type==SDL_MOUSEBUTTONUP){
+			Input_SetPointerPosition(
+				event.button.x/(float)_width,
+				event.button.y/(float)_height);
 			Input_SetPointerDown(0);
 		}
 	}
@@ -532,7 +577,7 @@ int Draw_LoopIteration(){
 			Input_Frame();
 			_proc_func(_data);
 			_accTime-=proc_t_frame;
-			Input_SetKey(InputKey_Exit,0);
+			Input_PostFrame();
 		}
 	}
 

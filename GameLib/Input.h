@@ -20,6 +20,13 @@ int Input_Init();
 void Input_Frame();
 
 
+/////////////////////////////
+// Input_PostFrame
+//
+// Notify a frame update end to the input subsystem.
+void Input_PostFrame();
+
+
 ////////////////////////////////////////////////
 // InputKey //
 //////////////
@@ -67,9 +74,27 @@ InputKeyStatus Input_GetKey(InputKey key);
 
 
 /////////////////////////////
+// Input_SetPointerPosition
+//
+void Input_SetPointerPosition(float x, float y);
+
+
+/////////////////////////////
 // Input_SetPointerDown
 //
 void Input_SetPointerDown(int pointerDown);
+
+
+/////////////////////////////
+// Input_GetPointerPosition
+//
+int Input_GetPointerPosition(vec2 pointer);
+
+
+/////////////////////////////
+// Input_GetClickedPosition
+//
+int Input_GetClickedPosition(vec2 clickPosition);
 
 
 /////////////////////////////
