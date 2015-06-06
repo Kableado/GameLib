@@ -20,6 +20,7 @@ case "$uname" in
 		cflags="-Dmain=SDL_main -lmingw32 -lSDLmain -lSDL -mwindows -g"
 		builddir="build-mingw"
 		platform="win32"
+		exeextension=".exe"
 		;;
 	*EMSCRIPTEN*)
 		# Configuracion de Emscripten
@@ -27,6 +28,7 @@ case "$uname" in
 		cflags="-s FULL_ES2=1 -s ASM_JS=1 -Wno-implicit-function-declaration"
 		builddir="build-emscripten"
 		platform="emscripten"
+		exeextension=".html"
 		;;
 	*)
 		# Configuracion de Linux
@@ -34,6 +36,7 @@ case "$uname" in
 		cflags="-Wall -g  -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/"
 		builddir="build-linux-$unamem"
 		platform="linux-$unamem"
+		exeextension=""
 		;;
 esac
 
@@ -62,6 +65,9 @@ while test $# -gt 0; do
       ;;
     --platform)
       echo "$platform"
+      ;;
+    --exe-extension)
+      echo "$exeextension"
       ;;
     *)
       echo "${usage}" 1>&2
