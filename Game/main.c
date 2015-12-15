@@ -2,9 +2,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <string.h>
 #include <math.h>
-#include <time.h>
 
 #include "GameLib.h"
 extern int gamelib_debug;

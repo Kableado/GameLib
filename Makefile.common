@@ -1,4 +1,16 @@
 
+########################
+# Utility Declarations #
+########################
+ifeq ($(VERBOSE_BUILD),true)
+	DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
+	DO_CXX=$(CXX) $(CFLAGS) -o $@ -c $<
+else
+	DO_CC=@$(ECHO) "CC: $@" ;\
+		$(CC) $(CFLAGS) -o $@ -c $<
+	DO_CXX=@$(ECHO) "CXX: $@" ;\
+		$(CXX) $(CFLAGS) -o $@ -c $<
+endif
 
 ########################
 # GameLib Declarations #
@@ -59,23 +71,23 @@ rebuild: clean all
 # GameLib Rules #
 #################
 $(BUILDDIR)/GameLib/Time.o: GameLib/Time.c $(HEADS)
-	$(CC) -c GameLib/Time.c -o $(BUILDDIR)/GameLib/Time.o $(CFLAGS)
+	$(DO_CC)
 $(BUILDDIR)/GameLib/Util.o: GameLib/Util.c $(HEADS)
-	$(CC) -c GameLib/Util.c -o $(BUILDDIR)/GameLib/Util.o $(CFLAGS)
+	$(DO_CC)
 $(BUILDDIR)/GameLib/QuadArray2D.o: GameLib/QuadArray2D.c $(HEADS)
-	$(CC) -c GameLib/QuadArray2D.c -o $(BUILDDIR)/GameLib/QuadArray2D.o $(CFLAGS)
+	$(DO_CC)
 $(BUILDDIR)/GameLib/Draw.o: GameLib/Draw.c $(HEADS)
-	$(CC) -c GameLib/Draw.c -o $(BUILDDIR)/GameLib/Draw.o $(CFLAGS)
+	$(DO_CC)
 $(BUILDDIR)/GameLib/Input.o: GameLib/Input.c $(HEADS)
-	$(CC) -c GameLib/Input.c -o $(BUILDDIR)/GameLib/Input.o $(CFLAGS)
+	$(DO_CC)
 $(BUILDDIR)/GameLib/Audio.o: GameLib/Audio.c $(HEADS)
-	$(CC) -c GameLib/Audio.c -o $(BUILDDIR)/GameLib/Audio.o $(CFLAGS)
+	$(DO_CC)
 $(BUILDDIR)/GameLib/Entity.o: GameLib/Entity.c $(HEADS)
-	$(CC) -c GameLib/Entity.c -o $(BUILDDIR)/GameLib/Entity.o $(CFLAGS)
+	$(DO_CC)
 $(BUILDDIR)/GameLib/Anim.o: GameLib/Anim.c $(HEADS)
-	$(CC) -c GameLib/Anim.c -o $(BUILDDIR)/GameLib/Anim.o $(CFLAGS)
+	$(DO_CC)
 $(BUILDDIR)/GameLib/GameLib.o: GameLib/GameLib.c $(HEADS)
-	$(CC) -c GameLib/GameLib.c -o $(BUILDDIR)/GameLib/GameLib.o $(CFLAGS)
+	$(DO_CC)
 
 
 ##############
@@ -83,13 +95,11 @@ $(BUILDDIR)/GameLib/GameLib.o: GameLib/GameLib.c $(HEADS)
 ##############
 
 $(BUILDDIR)/Game/GameEnts.o: Game/GameEnts.c $(HEADS)
-	$(CC) -c Game/GameEnts.c -o $(BUILDDIR)/Game/GameEnts.o $(CFLAGS)
-
+	$(DO_CC)
 $(BUILDDIR)/Game/GameMap.o: Game/GameMap.c $(HEADS)
-	$(CC) -c Game/GameMap.c -o $(BUILDDIR)/Game/GameMap.o $(CFLAGS)
-
+	$(DO_CC)
 $(BUILDDIR)/Game/main.o: Game/main.c $(HEADS)
-	$(CC) -c Game/main.c -o $(BUILDDIR)/Game/main.o $(CFLAGS)
+	$(DO_CC)
 
 
 ################
@@ -97,10 +107,12 @@ $(BUILDDIR)/Game/main.o: Game/main.c $(HEADS)
 ################
 
 $(RES_GAMELIB_OUT): $(GAMELIBS_OBJS)
-	$(AR) rcs $(RES_GAMELIB_OUT) $(GAMELIBS_OBJS)
+	@$(ECHO) "STATICLIB: $@"
+	@$(AR) rcs $(RES_GAMELIB_OUT) $(GAMELIBS_OBJS)
 
 $(RES_GAME_OUT): $(RES_GAMELIB_OUT) $(GAME_OBJS)
-	$(CC) $(GAME_OBJS) $(RES_GAMELIB_OUT) -o $(RES_GAME_OUT) $(LIBS) $(CFLAGS) $(LDFLAGS)
+	@$(ECHO) "LINK: $@"
+	@$(CC) $(GAME_OBJS) $(RES_GAMELIB_OUT) -o $(RES_GAME_OUT) $(LIBS) $(CFLAGS) $(LDFLAGS)
 
 
 
