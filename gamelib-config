@@ -4,22 +4,29 @@ prefix=$( dirname "$0" )
 usage="\
 Uso: gamelib-config [--cflags] [--libs] [--static-libs] [--builddir] [--platform]"
 
+if test $# -eq 0; then
+      echo "${usage}" 1>&2
+      exit 1
+fi
 
 # Preparar configuracion
 uname=$( uname )
 unamem=$( uname -m )
-if test $1 = "emscripten"; then
-	uname="EMSCRIPTEN"
-	unamem="EMSCRIPTEN"
-	shift
+gcctarget=$( gcc -v 2>&1 | grep "Target:" | cut --delimiter=' ' --fields=2 )
+if test $# > 0; then
+	if test $1 = "emscripten"; then
+		uname="EMSCRIPTEN"
+		unamem="EMSCRIPTEN"
+		shift
+	fi
 fi
 case "$uname" in
-	*MINGW*)
+	*MINGW* | *MSYS*)
 		# Configuracion de Win32/Mingw
-		libs="-lopengl32"
-		cflags="-Dmain=SDL_main -lmingw32 -lSDLmain -lSDL -mwindows -g"
-		builddir="build-mingw"
-		platform="win32"
+		libs="-lopengl32 -lmingw32 -lSDLmain -lSDL"
+		cflags="-Dmain=SDL_main -mwindows -g"
+		builddir="build-$gcctarget"
+		platform="$gcctarget"
 		exeextension=".exe"
 		;;
 	*EMSCRIPTEN*)
@@ -33,21 +40,12 @@ case "$uname" in
 	*)
 		# Configuracion de Linux
 		libs="-lSDL -lpthread -L/usr/X11R6/lib -L/usr/lib -lm -lGL -lX11"
-		cflags="-Wall -g  -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/"
-		builddir="build-linux-$unamem"
-		platform="linux-$unamem"
+		cflags="-Wall -g -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/"
+		builddir="build-$gcctarget"
+		platform="$gcctarget"
 		exeextension=""
 		;;
 esac
-
-
-
-if test $# -eq 0; then
-      echo "${usage}" 1>&2
-      exit 1
-fi
-
-
 
 while test $# -gt 0; do
   case $1 in
@@ -76,4 +74,3 @@ while test $# -gt 0; do
   esac
   shift
 done
-

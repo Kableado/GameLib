@@ -1,4 +1,6 @@
-ifneq (,$(findstring MINGW,$(shell uname -s)))
+
+IsMinGW=$(findstring MSYS,$(shell uname -s)) $(findstring MINGW,$(shell uname -s))
+ifneq (,$(IsMinGW))
 	TARGET_ARCH=mingw
 else
 	TARGET_ARCH=linux

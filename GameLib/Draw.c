@@ -1,33 +1,41 @@
-// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
-
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+// Copyright (C) 2011-2015 Valeriano Alfonso Rodriguez (Kableado)
 
 #ifdef WIN32
-	// Windows
-	#define _WIN32_WINNT 0x0501
-	#include <windows.h>
-	#include <GL/gl.h>
-	#include <GL/glext.h>
-	#define USE_OpenGL 1
-	#define USE_OpenGLES 0
+//	Windows
+#	define _WIN32_WINNT 0x0501
+#	include <math.h>
+#	include <stdlib.h>
+#	include <stdio.h>
+#	include <string.h>
+#	include <windows.h>
+#	include <GL/gl.h>
+#	include <GL/glext.h>
+#	define USE_OpenGL 1
+#	define USE_OpenGLES 0
+#	define GL_CLAMP_TO_EDGE 0x812F
 #else
 #ifdef EMSCRIPTEN
-	// Emscripten
-	#include <GLES2/gl2.h>
-	#define GL_GLEXT_PROTOTYPES 1
-	#include <GLES2/gl2ext.h>
-	#include <emscripten.h>
-	#define USE_OpenGL 0
-	#define USE_OpenGLES 1
-	#define SDL_GetKeyState SDL_GetKeyboardState
+//	Emscripten
+#	include <math.h>
+#	include <stdlib.h>
+#	include <stdio.h>
+#	include <string.h>
+#	include <GLES2/gl2.h>
+#	define GL_GLEXT_PROTOTYPES 1
+#	include <GLES2/gl2ext.h>
+#	include <emscripten.h>
+#	define USE_OpenGL 0
+#	define USE_OpenGLES 1
+#	define SDL_GetKeyState SDL_GetKeyboardState
 #else
-	// UNIX
-	#include <GL/gl.h>
-	#define USE_OpenGL 1
-	#define USE_OpenGLES 0
+//	UNIX
+#	include <math.h>
+#	include <stdlib.h>
+#	include <stdio.h>
+#	include <string.h>
+#	include <GL/gl.h>
+#	define USE_OpenGL 1
+#	define USE_OpenGLES 0
 #endif
 #endif
 #include "lodepng.c"
@@ -707,7 +715,7 @@ DrawImg Draw_LoadImage(char *filename){
 			(unsigned*)&image->h,
 			filename);
 		if(error){
-			printf("Draw_LoadImage: PNG decoder error %u: %s\n", error, lodepng_error_text(error));
+			printf("Draw_LoadImage: PNG decoder error %u: %s on file %s\n", error, lodepng_error_text(error),filename);
 			return(NULL);
 		}
 		image->x=-(int)(image->w/2);

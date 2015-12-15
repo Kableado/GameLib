@@ -3,14 +3,15 @@ AR       = i486-mingw32-ar
 LAUNCHER =
 RM       = rm -rf
 MKDIR    = mkdir
+ECHO     = echo
 
-LIBS= -L/usr/i486-mingw/lib -D_GNU_SOURCE=1 -Dmain=SDL_main -lopengl32
-CFLAGS= -I/usr/i486-mingw/include  -lmingw32 -lSDLmain -lSDL -mwindows
-LDFLAGS=
+LIBS    = -L/usr/i486-mingw/lib -D_GNU_SOURCE=1 -Dmain=SDL_main -lopengl32 -lmingw32 -lSDLmain -lSDL 
+CFLAGS  = -I/usr/i486-mingw/include -mwindows
+LDFLAGS =
 
-RES_GAMELIB=libgame.a
-RES_GAME=game.exe
-BUILDDIR=build-mingw
+RES_GAMELIB = libgame.a
+RES_GAME    = game.exe
+BUILDDIR    = build-mingw
 
 include Makefile.common
 
