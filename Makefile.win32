@@ -7,7 +7,7 @@ ECHO     = echo
 
 LIBS    = -L/mingw/lib -Dmain=SDL_main -lopengl32 -lSDLmain -lSDL 
 CFLAGS  = -I/mingw/include -g -mwindows -D_GNU_SOURCE=1
-LDFLAGS =
+LDFLAGS = -g -mwindows -D_GNU_SOURCE=1
 
 RES_GAMELIB = libgame.a
 RES_GAME    = game.exe

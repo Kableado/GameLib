@@ -7,7 +7,7 @@ ECHO     = echo
 
 LIBS    = -L/usr/i486-mingw/lib -D_GNU_SOURCE=1 -Dmain=SDL_main -lopengl32 -lmingw32 -lSDLmain -lSDL 
 CFLAGS  = -I/usr/i486-mingw/include -mwindows
-LDFLAGS =
+LDFLAGS = -mwindows
 
 RES_GAMELIB = libgame.a
 RES_GAME    = game.exe
