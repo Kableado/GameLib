@@ -13,7 +13,7 @@ fi
 uname=$( uname )
 unamem=$( uname -m )
 gcctarget=$( gcc -v 2>&1 | grep "Target:" | cut --delimiter=' ' --fields=2 )
-if test $# > 0; then
+if test $# -gt 0; then
 	if test $1 = "emscripten"; then
 		uname="EMSCRIPTEN"
 		unamem="EMSCRIPTEN"
