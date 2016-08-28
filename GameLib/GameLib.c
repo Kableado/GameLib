@@ -606,7 +606,17 @@ void GameLib_PlaySound(AudioSnd snd,int x,int y){
 	}
 
 	// PLAY!
-	Audio_PlaySound(snd,vleft,vright);
+	Audio_PlaySound(snd,vleft,vright,0);
+}
+
+
+/////////////////////////////
+// GameLib_PlayLoopingSound
+//
+//
+AudioChn GameLib_PlayLoopingSound(AudioSnd snd){
+	// PLAY!
+	return Audio_PlaySound(snd,1.0f,1.0f,1);
 }
 
 

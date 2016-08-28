@@ -25,6 +25,13 @@ void Audio_Frame();
 typedef void *AudioSnd;
 
 
+////////////////////////////////////////////////
+// AudioChn //
+//////////////
+// Reference to a playing sound.
+typedef void *AudioChn;
+
+
 /////////////////////////////
 // Audio_LoadSound
 //
@@ -36,8 +43,15 @@ AudioSnd Audio_LoadSound(char *filename);
 // Audio_PlaySound
 //
 // Loads a sound, giving a reference.
-void Audio_PlaySound(AudioSnd snd,
-	float leftvol, float rightvol);
+AudioChn Audio_PlaySound(AudioSnd snd,
+	float leftvol, float rightvol,int loop);
 
+
+/////////////////////////////
+// Audio_StopChan
+//
+// Stops an audio chanel
+void Audio_StopChan(AudioChn chan);
+	
 
 #endif
