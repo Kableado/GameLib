@@ -54,11 +54,13 @@ void GameLib_Loop(
 /////////////////////////////
 // GameLib_GetPos
 // GameLib_SetPos
+// GameLib_UpdatePos
 // GameLib_SetPos
 //
 //
 void GameLib_GetPos(int pos[2]);
 void GameLib_SetPos(int pos[2]);
+void GameLib_UpdatePos(int pos[2]);
 void GameLib_GetSize(int size[2]);
 
 
