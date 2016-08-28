@@ -744,6 +744,29 @@ void Entity_GetPos(Entity e,vec2 pos){
 	vec2_copy(pos,e->pos);
 }
 
+
+/////////////////////////////
+// Entity_SetPos
+//
+//
+void Entity_SetPos(Entity e,vec2 pos){
+	vec2_copy(e->oldpos,pos);
+	vec2_copy(e->pos,pos);
+	Entity_CalcBBox(e);
+}
+
+
+/////////////////////////////
+// Entity_AddPos
+//
+//
+void Entity_AddPos(Entity e,vec2 pos){
+	vec2_plus(e->pos,e->pos,pos);
+	vec2_copy(e->oldpos,e->pos);
+	Entity_CalcBBox(e);
+}
+
+
 /////////////////////////////
 // Entity_UpdatePos
 //
@@ -756,6 +779,43 @@ void Entity_UpdatePos(Entity e,vec2 pos){
 
 	vec2_copy(e->pos,pos);
 }
+
+
+/////////////////////////////
+// Entity_AddVel
+//
+void Entity_AddVel(Entity e,vec2 vel){
+	vec2_plus(e->vel,e->vel,vel);
+	Entity_CalcBBox(e);
+}
+
+
+/////////////////////////////
+// Entity_SetVel
+//
+void Entity_SetVel(Entity e,vec2 vel){
+	vec2_copy(e->vel,vel);
+	Entity_CalcBBox(e);
+}
+
+
+/////////////////////////////
+// Entity_SetVelH
+//
+void Entity_SetVelH(Entity e,float v){
+	e->vel[0]=v;
+	Entity_CalcBBox(e);
+}
+
+
+/////////////////////////////
+// Entity_SetVelV
+//
+void Entity_SetVelV(Entity e,float v){
+	e->vel[1]=v;
+	Entity_CalcBBox(e);
+}
+
 
 /////////////////////////////
 // Entity_AddVelLimit
@@ -778,6 +838,42 @@ void Entity_AddVelLimit(Entity e,vec2 vel,float limit){
 		}
 		vec2_scale(vel_temp,dir,vlen);
 		vec2_plus(e->vel,e->vel,vel_temp);
+	}
+	Entity_CalcBBox(e);
+}
+
+
+/////////////////////////////
+// Entity_AddVelLimitH
+//
+void Entity_AddVelLimitH(Entity e,float v,float limit){
+	e->vel[0]+=v;
+	if(e->vel[0]>0.0f){
+		if(e->vel[0]>limit){
+			e->vel[0]=limit;
+		}
+	}else{
+		if(e->vel[0]<-limit){
+			e->vel[0]=-limit;
+		}
+	}
+	Entity_CalcBBox(e);
+}
+
+
+/////////////////////////////
+// Entity_AddVelLimitH
+//
+void Entity_AddVelLimitV(Entity e,float v,float limit){
+	e->vel[1]+=v;
+	if(e->vel[1]>0.0f){
+		if(e->vel[1]>limit){
+			e->vel[1]=limit;
+		}
+	}else{
+		if(e->vel[1]<-limit){
+			e->vel[1]=-limit;
+		}
 	}
 	Entity_CalcBBox(e);
 }
