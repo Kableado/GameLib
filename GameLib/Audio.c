@@ -43,6 +43,8 @@ struct TAudioChan {
 	unsigned char rightvol;
 	unsigned char leftvol;
 
+	int loop;
+	
 	AudioChan next;
 };
 AudioChan _channels=NULL;
@@ -141,7 +143,11 @@ static void Audio_MixerCallback(void *ud,Uint8 *stream,int l){
 		if(chan_remain>len){
 			len_mix=len;
 		}else{
-			len_mix=chan_remain;
+			if(chan->loop){
+				len_mix=len;
+			}else{
+				len_mix=chan_remain;
+			}
 			chan->wave=NULL;
 		}
 
@@ -173,10 +179,21 @@ static void Audio_MixerCallback(void *ud,Uint8 *stream,int l){
 
 			// Next sample
 			ptr_out+=2;
-			ptr_wave++;
+			if(ptr_wave>=(((signed short *)wave->buffer)+(wave->len-1))){
+				ptr_wave=((signed short *)wave->buffer);
+			}else{
+				ptr_wave++;
+			}
 		}
 		chan->pos+=len_mix;
 
+		if(chan->wave==NULL && chan->loop==1){
+			chan->wave=wave;
+			while(chan->pos>wave->len){
+				chan->pos-=wave->len;
+			}
+		}
+		
 		// Next channel
 		prevchan=chan;
 		chan=chan->next;
@@ -303,13 +320,14 @@ AudioSnd Audio_LoadSound(char *filename){
 // Audio_PlaySound
 //
 // Loads a sound, giving a reference.
-void Audio_PlaySound(AudioSnd snd,
-	float leftvol, float rightvol)
+AudioChn Audio_PlaySound(AudioSnd snd,
+	float leftvol, float rightvol,int loop)
 {
 	AudioChan chan;
 	AudioWave wave;
-	if(!snd)
-		return;
+	if(!snd){
+		return(NULL);
+	}
 
 	// Cast AudioSnd to AudioWave
 	wave=snd;
@@ -329,7 +347,25 @@ void Audio_PlaySound(AudioSnd snd,
 	chan->pos=0;
 	chan->rightvol=(rightvol*255);
 	chan->leftvol=(leftvol*255);
+	chan->loop=loop;
+	
+	// Include in sounds list
 	chan->next=_channels;
 	_channels=chan;
+	
+	return chan;
 }
 
+
+/////////////////////////////
+// Audio_StopChan
+//
+// Stops an audio chanel
+void Audio_StopChan(AudioChn c){
+	AudioChan chan;
+	chan=c;
+	if(c==NULL){return;}
+	chan->loop=0;
+	chan->wave=NULL;
+}
+	

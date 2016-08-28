@@ -109,6 +109,13 @@ void GameLib_PlaySound(AudioSnd snd,int x,int y);
 
 
 /////////////////////////////
+// GameLib_PlayLoopingSound
+//
+// Play a sound looping
+AudioChn GameLib_PlayLoopingSound(AudioSnd snd);
+
+
+/////////////////////////////
 // GameLib_EntitySetLight
 //
 //
