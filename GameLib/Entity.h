@@ -223,15 +223,65 @@ void Entity_GetPos(Entity e,vec2 pos);
 
 
 /////////////////////////////
+// Entity_SetPos
+//
+//
+void Entity_SetPos(Entity e,vec2 pos);
+
+
+/////////////////////////////
+// Entity_AddPos
+//
+//
+void Entity_AddPos(Entity e,vec2 pos);
+
+
+/////////////////////////////
 // Entity_UpdatePos
 //
 void Entity_UpdatePos(Entity e,vec2 pos);
 
 
 /////////////////////////////
+// Entity_AddVel
+//
+void Entity_AddVel(Entity e,vec2 vel);
+
+
+/////////////////////////////
+// Entity_SetVel
+//
+void Entity_SetVel(Entity e,vec2 vel);
+
+
+/////////////////////////////
+// Entity_SetVelH
+//
+void Entity_SetVelH(Entity e,float v);
+
+
+/////////////////////////////
+// Entity_SetVelV
+//
+void Entity_SetVelV(Entity e,float v);
+
+
+/////////////////////////////
 // Entity_AddVelLimit
 //
 void Entity_AddVelLimit(Entity e,vec2 vel,float limit);
+
+
+/////////////////////////////
+// Entity_AddVelLimitH
+//
+void Entity_AddVelLimitH(Entity e,float v,float limit);
+
+
+/////////////////////////////
+// Entity_AddVelLimitH
+//
+void Entity_AddVelLimitV(Entity e,float v,float limit);
 
 
 /////////////////////////////
