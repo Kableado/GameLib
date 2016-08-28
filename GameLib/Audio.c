@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <SDL/SDL.h>
+#include "Util.h"
 
 #include "Audio.h"
 
@@ -64,8 +65,8 @@ int Audio_Init(){
 	putenv("SDL_AUDIODRIVER=dsound");
 #endif
 	if(SDL_InitSubSystem(SDL_INIT_AUDIO) < 0){
-		printf("Audio_Init: Failure initializing SDL Audio.\n");
-		printf("\tSDL Error: %s\n",SDL_GetError());
+		Print("Audio_Init: Failure initializing SDL Audio.\n");
+		Print("\tSDL Error: %s\n",SDL_GetError());
 		return(0);
 	}
 
@@ -76,8 +77,8 @@ int Audio_Init(){
 	as.samples = 2048;
 	as.callback = Audio_MixerCallback;
 	if(SDL_OpenAudio(&as, &as2) < 0){
-		printf("Audio_Init: Failure opening audio.\n");
-		printf("\tSDL Error: %s\n",SDL_GetError());
+		Print("Audio_Init: Failure opening audio.\n");
+		Print("\tSDL Error: %s\n",SDL_GetError());
 		return(0);
 	}
 
@@ -86,7 +87,7 @@ int Audio_Init(){
 		as2.freq     != 44100 ||
 		as2.channels != 2 )
 	{
-		printf("Audio_Init: Failure opening audio. (44.1Khz/16b/2c).\n");
+		Print("Audio_Init: Failure opening audio. (44.1Khz/16b/2c).\n");
 		SDL_CloseAudio();
 		return(0);
 	}
@@ -222,14 +223,14 @@ AudioSnd Audio_LoadSound(char *filename){
 
 	f = fopen(filename, "rb");
 	if (!f) {
-		printf("Audio_LoadSound: Failure opening file.\n");
+		Print("Audio_LoadSound: Failure opening file.\n");
 		return(NULL);
 	}
 
 	// Read id "RIFF"
 	fread(id, 4, sizeof(char), f);
 	if (strcmp(id, "RIFF")) {
-		printf("Audio_LoadSound: File is not RIFF.\n");
+		Print("Audio_LoadSound: File is not RIFF.\n");
 		fclose(f);
 		return(NULL);
 	}
@@ -240,7 +241,7 @@ AudioSnd Audio_LoadSound(char *filename){
 	// Read id "WAVE"
 	fread(id, 4, sizeof(char), f);
 	if (strcmp(id, "WAVE")) {
-		printf("Audio_LoadSound: File is not WAVE.\n");
+		Print("Audio_LoadSound: File is not WAVE.\n");
 		fclose(f);
 		return(NULL);
 	}
@@ -249,13 +250,13 @@ AudioSnd Audio_LoadSound(char *filename){
 	fread(id, 1, sizeof(char) * 4, f); // Read "fmt "
 	fread(&formatLen, 1, sizeof(int), f);
 	if (formatLen < 14) {
-		printf("Audio_LoadSound: File too short.\n");
+		Print("Audio_LoadSound: File too short.\n");
 		fclose(f);
 		return (NULL );
 	}
 	fread(&formatTag, 1, sizeof(short), f); // 1=PCM
 	if (formatTag != 1) {
-		printf("Audio_LoadSound: Not PCM format.\n");
+		Print("Audio_LoadSound: Not PCM format.\n");
 		fclose(f);
 		return (NULL );
 	}
@@ -268,7 +269,7 @@ AudioSnd Audio_LoadSound(char *filename){
 
 	// Assert sound format
 	if (sampleRate!=44100 || channels!=1 || bitsPerSample!=2) {
-		printf("Audio_LoadSound: Format not supported: "
+		Print("Audio_LoadSound: Format not supported: "
 				"sampleRate:%d; channels:%d; BPB:%d\n",
 					sampleRate, channels, bitsPerSample);
 		fclose(f);
@@ -287,7 +288,7 @@ AudioSnd Audio_LoadSound(char *filename){
 		}
 	}while(1);
 	if (strcmp(id, "data")) {
-		printf("Audio_LoadSound: DATA block not found\n");
+		Print("Audio_LoadSound: DATA block not found\n");
 		fclose(f);
 		return (NULL );
 	}

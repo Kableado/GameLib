@@ -3,6 +3,8 @@
 #ifndef _UTIL_H_
 #define _UTIL_H_
 
+#include <stdlib.h>
+#include <stdarg.h>
 
 /////////////////////////////
 // SolveQuadratic
@@ -86,6 +88,13 @@ int EndsWith(char *str, char *suffix);
 void Rand_Seed(unsigned seed);
 unsigned Rand_Get();
 #define Rand_GetFloat(x) (((float)(Rand_Get()%1048576))/1048576.0f)
+
+
+/////////////////////////////
+// Print
+//
+// Prints the formated text
+int Print(char *fmt, ...);
 
 
 #endif

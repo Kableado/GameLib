@@ -1,8 +1,9 @@
 // Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
 
-#include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "Util.h"
 
@@ -354,3 +355,23 @@ unsigned Rand_Get() {
 
 	return (val);
 }
+
+
+/////////////////////////////
+// Print
+//
+// Prints the formated text
+int Print(char *fmt, ...) {
+	va_list ap;
+	int n;
+
+	// Print
+	va_start(ap, fmt);
+	n = vprintf(fmt, ap);
+	va_end(ap);
+
+	// Flush
+	fflush(stdout);
+	return(n);
+}
+

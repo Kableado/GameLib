@@ -153,18 +153,6 @@ GLuint Draw_UploadGLTexture(int w, int h, unsigned char *pixels);
 //
 // Initializes the game window.
 int Draw_Init(int width,int height,char *title,int pfps,int fps){
-#ifdef WIN32
-	// Stdout on the parent console
-	AttachConsole(ATTACH_PARENT_PROCESS);
-	if(GetStdHandle(STD_OUTPUT_HANDLE)!=0){
-		fclose(stdin);
-		fclose(stdout);
-		fclose(stderr);
-		freopen("CONIN$","r",stdin);
-		freopen("CONOUT$","w",stdout);
-		freopen("CONOUT$","w",stderr);
-	}
-#endif
 
 	// Set globals
 	proc_t_frame=1000000/pfps;
@@ -175,16 +163,16 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 
 	// Initialize SDL
 	if(SDL_Init(SDL_INIT_VIDEO)<0){
-		printf("Draw_Init: Failure initializing SDL.\n");
-		printf("\tSDL Error: %s\n",SDL_GetError());
+		Print("Draw_Init: Failure initializing SDL.\n");
+		Print("\tSDL Error: %s\n",SDL_GetError());
 		return(0);
 	}
 
 	// Initialize video mode
 	_screen=SDL_SetVideoMode(width,height,32,SDL_HWSURFACE|SDL_OPENGL);
 	if( _screen == NULL){
-		printf("Draw_Init: Failure initializing video mode.\n");
-		printf("\tSDL Error: %s\n",SDL_GetError());
+		Print("Draw_Init: Failure initializing video mode.\n");
+		Print("\tSDL Error: %s\n",SDL_GetError());
 		return(0);
 	}
 	SDL_WM_SetCaption(title, NULL);
@@ -310,15 +298,15 @@ int Draw_Init(int width,int height,char *title,int pfps,int fps){
 // Show device information
 void Draw_ShowInfo(){
 	char *str;
-	printf("\n*********************************\n");
-	printf("*** Draw Info\n");
+	Print("\n*********************************\n");
+	Print("*** Draw Info\n");
 	str=(char *)glGetString(GL_VENDOR);
-	printf(" Vendor: %s\n",str);
+	Print(" Vendor: %s\n",str);
 	str=(char *)glGetString(GL_RENDERER);
-	printf(" Renderer: %s\n",str);
+	Print(" Renderer: %s\n",str);
 	str=(char *)glGetString(GL_VERSION);
-	printf(" Version: %s\n",str);
-	printf("*********************************\n");
+	Print(" Version: %s\n",str);
+	Print("*********************************\n");
 }
 
 
@@ -715,7 +703,7 @@ DrawImg Draw_LoadImage(char *filename){
 			(unsigned*)&image->h,
 			filename);
 		if(error){
-			printf("Draw_LoadImage: PNG decoder error %u: %s on file %s\n", error, lodepng_error_text(error),filename);
+			Print("Draw_LoadImage: PNG decoder error %u: %s on file %s\n", error, lodepng_error_text(error),filename);
 			return(NULL);
 		}
 		image->x=-(int)(image->w/2);
@@ -725,7 +713,7 @@ DrawImg Draw_LoadImage(char *filename){
 		return (DrawImg)image;
 	}
 
-	printf("Draw_LoadImage: Image type not supported: %s\n",filename);
+	Print("Draw_LoadImage: Image type not supported: %s\n",filename);
 	return(NULL);
 }
 
