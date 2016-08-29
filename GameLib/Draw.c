@@ -13,6 +13,7 @@
 #	define USE_OpenGL 1
 #	define USE_OpenGLES 0
 #	define GL_CLAMP_TO_EDGE 0x812F
+#	include <unistd.h>
 #else
 #ifdef EMSCRIPTEN
 //	Emscripten
@@ -27,6 +28,7 @@
 #	define USE_OpenGL 0
 #	define USE_OpenGLES 1
 #	define SDL_GetKeyState SDL_GetKeyboardState
+#	include <unistd.h>
 #else
 //	UNIX
 #	include <math.h>
@@ -36,6 +38,7 @@
 #	include <GL/gl.h>
 #	define USE_OpenGL 1
 #	define USE_OpenGLES 0
+#	include <unistd.h>
 #endif
 #endif
 #include "lodepng.c"
@@ -560,7 +563,13 @@ int Draw_LoopIteration(){
 	keys=(Uint8 *)SDL_GetKeyState(NULL);
 	if(keys[SDLK_F12]){
 		// Screenshot key
-		Draw_SaveScreenshoot("shot.bmp");
+		char strFile[255];
+		int idx = -1;
+		do {
+			idx++;
+			snprintf(strFile, 255, "shot-%04d.bmp", idx);
+		} while (access(strFile, F_OK) != -1);
+		Draw_SaveScreenshoot(strFile);
 	}
 #endif
 
@@ -1092,7 +1101,11 @@ void Draw_SaveScreenshoot(char *filename){
 	}
 
 	// Save the image
-	SDL_SaveBMP(surf,filename);
+	if(EndsWith(filename,".bmp") || EndsWith(filename,".BMP")){
+		SDL_SaveBMP(surf,filename);
+	}else if(EndsWith(filename,".png") || EndsWith(filename,".PNG")){
+		//FIXME: Save PNG
+	}
 
 	// Cleanup
 	SDL_FreeSurface(surf);
