@@ -16,7 +16,7 @@ endif
 # GameLib Declarations #
 ########################
 CFLAGS += -IGameLib
-GAMELIB_HEADS = \
+GAMELIB_HEADS := \
 	GameLib/Time.h \
 	GameLib/Util.h \
 	GameLib/QuadArray2D.h \
@@ -26,7 +26,7 @@ GAMELIB_HEADS = \
 	GameLib/Anim.h \
 	GameLib/Entity.h \
 	GameLib/GameLib.h
-GAMELIBS_OBJS = \
+GAMELIBS_OBJS := \
 	$(BUILDDIR)/GameLib/Time.o \
 	$(BUILDDIR)/GameLib/Util.o \
 	$(BUILDDIR)/GameLib/QuadArray2D.o \
@@ -36,17 +36,17 @@ GAMELIBS_OBJS = \
 	$(BUILDDIR)/GameLib/Anim.o \
 	$(BUILDDIR)/GameLib/Entity.o \
 	$(BUILDDIR)/GameLib/GameLib.o
-RES_GAMELIB_OUT = $(BUILDDIR)/$(RES_GAMELIB)
+RES_GAMELIB_OUT := $(BUILDDIR)/$(RES_GAMELIB)
 
 #####################
 # Game Declarations #
 #####################
-GAME_HEADS = $(GAMELIB_HEADS) Game/GameEnts.h Game/GameMap.h
-GAME_OBJS = \
+GAME_HEADS := $(GAMELIB_HEADS) Game/GameEnts.h Game/GameMap.h
+GAME_OBJS := \
 	$(BUILDDIR)/Game/GameEnts.o \
 	$(BUILDDIR)/Game/GameMap.o \
 	$(BUILDDIR)/Game/main.o
-RES_GAME_OUT = $(BUILDDIR)/$(RES_GAME)
+RES_GAME_OUT := $(BUILDDIR)/$(RES_GAME)
 
 
 #################

@@ -1,16 +1,16 @@
-CC       = gcc
-AR       = ar
-LAUNCHER =
-RM       = rm -rf
-MKDIR    = mkdir
-ECHO     = echo
+CC       := gcc
+AR       := ar
+LAUNCHER :=
+RM       := rm -rf
+MKDIR    := mkdir
+ECHO     := echo
+ 
+LIBS    := -lSDL -lpthread -L/usr/X11R6/lib -L/usr/lib -lm -lGL -lX11
+CFLAGS  := -Wall -g -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/
+LDFLAGS :=
 
-LIBS    = -lSDL -lpthread -L/usr/X11R6/lib -L/usr/lib -lm -lGL -lX11
-CFLAGS  = -Wall -g -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/
-LDFLAGS =
-
-RES_GAMELIB = libgame.a
-RES_GAME    = game
-BUILDDIR    = build-$(shell gcc -v 2>&1 | grep "Target:" | cut --delimiter=' ' --fields=2)
+RES_GAMELIB := libgame.a
+RES_GAME    := game
+BUILDDIR    := build-$(shell gcc -v 2>&1 | grep "Target:" | cut --delimiter=' ' --fields=2)
 
 include Makefile.common

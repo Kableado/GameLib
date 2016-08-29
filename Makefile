@@ -6,7 +6,6 @@ else
 	TARGET_ARCH=linux
 endif # windir
 
-
 ifeq ($(TARGET_ARCH),mingw)
 	include Makefile.win32
 else
