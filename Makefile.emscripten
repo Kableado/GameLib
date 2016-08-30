@@ -7,7 +7,7 @@ ECHO     := echo
 
 LIBS    :=
 CFLAGS  := -s FULL_ES2=1 -s ASM_JS=1 -O1 -Wno-implicit-function-declaration -DEMSCRIPTEN
-LDFLAGS := --preload-file data 
+LDFLAGS := --preload-file data -s TOTAL_MEMORY=134217728
 
 RES_GAMELIB := libgame.a
 RES_GAME    := game.html
@@ -16,7 +16,7 @@ BUILDDIR    := build-emscripten
 ifeq ($(target),release)
 	CFLAGS   := -s FULL_ES2=1 -s ASM_JS=1 -O1 --llvm-lto 1 -Wno-implicit-function-declaration -DEMSCRIPTEN
 	BUILDDIR := build-emscripten-release
-	LDFLAGS  := --preload-file data 
+	LDFLAGS  := --preload-file data -s TOTAL_MEMORY=134217728
 endif
 
 include Makefile.common
