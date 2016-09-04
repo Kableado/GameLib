@@ -107,6 +107,8 @@ void GameLib_AddEntity(Entity e){
 	Entity_MarkUpdateLight(e,_entity,_n_entities);
 
 	Entity_CalcBBox(e);
+	
+	Entity_Init(e);
 }
 
 
@@ -181,7 +183,6 @@ void GameLib_Compactate(){
 	}
 	_n_entities=j;
 	_entities_compactate=0;
-	_entities_lock=0;
 }
 
 
@@ -210,6 +211,7 @@ void GameLib_ProcLoop(void *data){
 		Entity_Process(_entity[i],_pft);
 	}
 	GameLib_Compactate();
+	_entities_lock=0;
 	t_proc+=Time_GetTime()-time;
 
 	// Colisions between entities
@@ -267,6 +269,7 @@ void GameLib_ProcLoop(void *data){
 		}
 	}
 	GameLib_Compactate();
+	_entities_lock=0;
 	t_col+=Time_GetTime()-time;
 
 	// Process Overlaps
@@ -282,6 +285,7 @@ void GameLib_ProcLoop(void *data){
 		}
 	}
 	GameLib_Compactate();
+	_entities_lock=0;
 	t_over+=Time_GetTime()-time;
 
 	// Sort
@@ -331,6 +335,7 @@ void GameLib_ProcLoop(void *data){
 		_gamepostproc();
 	}
 	GameLib_Compactate();
+	_entities_lock=0;
 	t_postproc+=Time_GetTime()-time;
 
 	fproc_count++;
@@ -358,9 +363,9 @@ void GameLib_DrawLoop(void *data, float f){
 		// Limpiar pantalla
 		Draw_Clean(0,0,0);
 	}
-
+	
 	// Draw entities
-	GameLib_Compactate();_entities_lock=1;
+	GameLib_Compactate();
 	for(i=0;i<_n_entities;i++){
 		Entity e=_entity[i];
 
@@ -380,10 +385,12 @@ void GameLib_DrawLoop(void *data, float f){
 		Entity_Draw(e,-game_pos[0],-game_pos[1],f);
 	}
 	Draw_SetColor(1,1,1,1);
+	_entities_lock=1;
 	if(_gamedraw){
 		_gamedraw(f);
 	}
 	GameLib_Compactate();
+	_entities_lock=0;
 
 	t_draw+=Time_GetTime()-time;
 

@@ -35,7 +35,6 @@ void vec2_orthogonalize4(vec2 v);
 void vec2_orthogonalize8(vec2 v);
 
 
-
 /////////////////////////////
 // Intersec_RayUnitCircle
 //

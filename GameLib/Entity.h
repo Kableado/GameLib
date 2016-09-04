@@ -58,6 +58,7 @@ struct TEntity {
 	float defaultColor[4];
 
 	void (*oncopy)(Entity ent);
+	void (*oninit)(Entity ent);
 	void (*ondelete)(Entity ent);
 	void (*proc)(Entity ent,int ft);
 	void (*postproc)(Entity ent,int ft);
@@ -81,6 +82,12 @@ struct TEntity {
 // Entity_New
 //
 Entity Entity_New();
+
+
+/////////////////////////////
+// Entity_Init
+//
+Entity Entity_Init(Entity e);
 
 
 /////////////////////////////

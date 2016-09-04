@@ -8,6 +8,33 @@
 
 #include "Util.h"
 
+
+/////////////////////////////
+// SolveQuadratic
+//
+// Solves a Quadratic equation using a, b and c coeficients.
+int SolveQuadratic(float a,float b,float c,float *Rmin,float *Rmax){
+	float root;
+	float divisor;
+	float b2;
+	b2=b*b;
+	root=b2-4.0*a*c;
+	if(root<0){
+		// Complex
+		return(0);
+	}
+	divisor=(2.0*a);
+	if(fabs(divisor)==0.0f){
+		// +inf -inf
+		return(0);
+	}
+	root=sqrtf(root);
+	Rmin[0]=(float)((-b-root)/divisor);
+	Rmax[0]=(float)((-b+root)/divisor);
+	return(1);
+}
+
+
 ////////////////////////////////////////////////
 // vec2 //
 //////////
@@ -71,32 +98,6 @@ void vec2_orthogonalize8(vec2 v) {
 			v[1] = -0.707f;
 		}
 	}
-}
-
-
-/////////////////////////////
-// SolveQuadratic
-//
-// Solves a Quadratic equation using a, b and c coeficients.
-int SolveQuadratic(float a,float b,float c,float *Rmin,float *Rmax){
-	float root;
-	float divisor;
-	float b2;
-	b2=b*b;
-	root=b2-4.0*a*c;
-	if(root<0){
-		// Complex
-		return(0);
-	}
-	divisor=(2.0*a);
-	if(fabs(divisor)==0.0f){
-		// +inf -inf
-		return(0);
-	}
-	root=sqrtf(root);
-	Rmin[0]=(float)((-b-root)/divisor);
-	Rmax[0]=(float)((-b+root)/divisor);
-	return(1);
 }
 
 
@@ -230,8 +231,6 @@ int Intersect_RayEdge(
 	}
 	return(0);
 }
-
-
 
 
 /////////////////////////////
