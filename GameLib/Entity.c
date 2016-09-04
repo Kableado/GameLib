@@ -86,6 +86,7 @@ Entity Entity_New(){
 		e->defaultColor[2]=e->defaultColor[3]=1.0f;
 
 	e->oncopy=NULL;
+	e->oninit=NULL;
 	e->ondelete=NULL;
 	e->proc=NULL;
 	e->postproc=NULL;
@@ -101,6 +102,16 @@ Entity Entity_New(){
 	e->next=NULL;
 
 	return(e);
+}
+
+
+/////////////////////////////
+// Entity_Init
+//
+Entity Entity_Init(Entity e){
+	if(e->oninit){
+		e->oninit(e);
+	}
 }
 
 
@@ -164,6 +175,7 @@ Entity Entity_Copy(Entity e){
 	n->defaultColor[3]=e->defaultColor[3];
 
 	n->oncopy=e->oncopy;
+	n->oninit=e->oninit;
 	n->ondelete=e->ondelete;
 	n->proc=e->proc;
 	n->postproc=e->postproc;
@@ -750,8 +762,9 @@ void Entity_GetPos(Entity e,vec2 pos){
 //
 //
 void Entity_SetPos(Entity e,vec2 pos){
-	vec2_copy(e->oldpos,pos);
 	vec2_copy(e->pos,pos);
+	vec2_copy(e->oldpos,pos);
+	vec2_copy(e->pos0,pos);
 	Entity_CalcBBox(e);
 }
 
@@ -763,6 +776,7 @@ void Entity_SetPos(Entity e,vec2 pos){
 void Entity_AddPos(Entity e,vec2 pos){
 	vec2_plus(e->pos,e->pos,pos);
 	vec2_copy(e->oldpos,e->pos);
+	vec2_copy(e->pos0,e->pos);
 	Entity_CalcBBox(e);
 }
 
