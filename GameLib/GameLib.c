@@ -40,6 +40,17 @@ long long t_draw;
 int fproc_count;
 int fdraw_count;
 
+typedef struct TParallaxBackground TParallaxBackground, *ParallaxBackground;
+struct TParallaxBackground {
+	DrawImg img;
+	int imgSize[2];
+	int imgOffset[2];
+	float parallaxFactor[2];
+};
+#define MaxParallaxBackgrounds 10
+TParallaxBackground _parallaxBackground[MaxParallaxBackgrounds];
+int _nParallaxBackgrounds=0;
+
 int gamelib_debug=0;
 
 
@@ -351,17 +362,29 @@ void GameLib_DrawLoop(void *data, float f){
 	int i;
 	int game_pos[2];
 
-	game_pos[0]=_game_pos0[0]+f*(_game_pos1[0]-_game_pos0[0]);
-	game_pos[1]=_game_pos0[1]+f*(_game_pos1[1]-_game_pos0[1]);
+	GameLib_GetPosInstant(game_pos,f);
 
 	time=Time_GetTime();
 
-	// Predibujado
+	// PreDraw
 	if(_gamepredraw){
 		_gamepredraw(f);
 	}else{
-		// Limpiar pantalla
-		Draw_Clean(0,0,0);
+		if(_nParallaxBackgrounds==0){
+			// Clean screen
+			Draw_Clean(0,0,0);
+		}
+	}
+	
+	// Draw parallax backgrounds
+	for(i=0;i<_nParallaxBackgrounds;i++){
+		Draw_ImgParallax(
+			_parallaxBackground[i].img,
+			_parallaxBackground[i].imgSize,
+			_parallaxBackground[i].imgOffset,
+			_parallaxBackground[i].parallaxFactor,
+			game_pos,
+			_game_size);
 	}
 	
 	// Draw entities
@@ -446,6 +469,7 @@ void GameLib_Loop(
 // GameLib_SetPos
 // GameLib_UpdatePos
 // GameLib_SetPos
+// GameLib_GetPosInstant
 //
 //
 void GameLib_GetPos(int pos[2]){
@@ -465,6 +489,10 @@ void GameLib_UpdatePos(int pos[2]){
 void GameLib_GetSize(int size[2]){
 	size[0]=_game_size[0];
 	size[1]=_game_size[1];
+}
+void GameLib_GetPosInstant(int pos[2],float f){
+	pos[0]=_game_pos0[0]+f*(_game_pos1[0]-_game_pos0[0]);
+	pos[1]=_game_pos0[1]+f*(_game_pos1[1]-_game_pos0[1]);
 }
 
 
@@ -657,5 +685,35 @@ void GameLib_ConvertScreenPositionToGamePosition(
 
 	gamePos[0]=(screenPos[0]*_game_size[0])+game_pos[0];
 	gamePos[1]=(screenPos[1]*_game_size[1])+game_pos[1];
+}
+
+
+/////////////////////////////
+// GameLib_AddParallaxBackground
+//
+//
+void GameLib_AddParallaxBackground(DrawImg img, int imgSize[2], int imgOffset[2], float parallaxFactor[2]){
+	int idx = _nParallaxBackgrounds;
+	if((idx+1)>=MaxParallaxBackgrounds){
+		Print("GameLib: Can't add parallaxBackground, limit reached.");
+		return;
+	}
+	_parallaxBackground[idx].img=img;
+	_parallaxBackground[idx].imgSize[0]=imgSize[0];
+	_parallaxBackground[idx].imgSize[1]=imgSize[1];
+	_parallaxBackground[idx].imgOffset[0]=imgOffset[0];
+	_parallaxBackground[idx].imgOffset[1]=imgOffset[1];
+	_parallaxBackground[idx].parallaxFactor[0]=parallaxFactor[0];
+	_parallaxBackground[idx].parallaxFactor[1]=parallaxFactor[1];
+	_nParallaxBackgrounds++;
+}
+
+
+/////////////////////////////
+// GameLib_CleanParallaxBackgrounds
+//
+//
+void GameLib_CleanParallaxBackgrounds(){
+	_nParallaxBackgrounds=0;
 }
 

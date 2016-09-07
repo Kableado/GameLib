@@ -930,6 +930,35 @@ void Draw_DrawImgPartHoriz(DrawImg img,int x,int y,int w,int i){
 
 
 /////////////////////////////
+// Draw_ImgParallax
+//
+//
+void Draw_ImgParallax(DrawImg img, int imgSize[2], int imgOffset[2], float parallaxFactor[2], int gamePos[2], int gameSize[2]){
+	int paralaxPos[2];
+	int mult[2];
+	int x, y;
+	
+	paralaxPos[0] = (gamePos[0] * parallaxFactor[0]) + imgOffset[0];
+	paralaxPos[1] = (gamePos[1] * parallaxFactor[1]) + imgOffset[1];
+	
+	mult[0] = floor(paralaxPos[0] / imgSize[0]);
+	if(paralaxPos[0] < 0 ){ mult[0]--; }
+	mult[1] = floor(paralaxPos[1] / imgSize[1]);
+	if(paralaxPos[1] < 0 ){ mult[1]--; }
+	
+	y = (mult[1] * imgSize[1]) - paralaxPos[1];
+	while(y < gameSize[1]){
+		x = (mult[0] * imgSize[0]) - paralaxPos[0];
+		while(x < gameSize[0]){
+			Draw_DrawImgResized(img, x, y, imgSize[0], imgSize[1]);
+			x += imgSize[0];
+		}
+		y += imgSize[1];
+	}
+}
+
+
+/////////////////////////////
 // Draw_SetColor
 //
 //

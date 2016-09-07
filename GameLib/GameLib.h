@@ -56,12 +56,14 @@ void GameLib_Loop(
 // GameLib_SetPos
 // GameLib_UpdatePos
 // GameLib_SetPos
+// GameLib_GetPosInstant
 //
 //
 void GameLib_GetPos(int pos[2]);
 void GameLib_SetPos(int pos[2]);
 void GameLib_UpdatePos(int pos[2]);
 void GameLib_GetSize(int size[2]);
+void GameLib_GetPosInstant(int pos[2],float f);
 
 
 /////////////////////////////
@@ -131,5 +133,18 @@ void GameLib_EntitySetLight(Entity e,float r,float g,float b,float rad);
 void GameLib_ConvertScreenPositionToGamePosition(
 	vec2 screenPos, vec2 gamePos);
 
+
+/////////////////////////////
+// GameLib_AddParallaxBackground
+//
+//
+void GameLib_AddParallaxBackground(DrawImg img, int imgSize[2], int imgOffset[2], float parallaxFactor[2]);
+
+
+/////////////////////////////
+// GameLib_CleanParallaxBackgrounds
+//
+//
+void GameLib_CleanParallaxBackgrounds();
 
 #endif

@@ -90,7 +90,6 @@ void player_proc(Entity e,int ft){
 
 
 	// Scroll View
-	//GameLib_MoveToPosH(e->pos,0.6f);
 	GameLib_MoveToPos(e->pos,0.6f);
 }
 

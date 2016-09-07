@@ -126,6 +126,13 @@ void Draw_DrawImgPartHoriz(DrawImg img,int x,int y,int w,int i);
 
 
 /////////////////////////////
+// Draw_ImgParallax
+//
+//
+void Draw_ImgParallax(DrawImg img, int imgSize[2], int imgOffset[2], float parallaxFactor[2], int gamePos[2], int gameSize[2]);
+
+
+/////////////////////////////
 // Draw_SetColor
 //
 //
