@@ -142,6 +142,20 @@ DrawFnt Draw_LoadFont(char *fichero, int min, int max);
 void Draw_DrawText(DrawFnt f, char *text, int x, int y);
 
 /////////////////////////////
+// Draw_SaveRGBAToBMP
+//
+//
+void Draw_SaveRGBAToBMP(char *filename, unsigned char *data, int width,
+						int height);
+
+/////////////////////////////
+// Draw_SaveRGBAToPNG
+//
+//
+void Draw_SaveRGBAToPNG(char *filename, unsigned char *data, int width,
+						int height);
+
+/////////////////////////////
 // Draw_SaveScreenshoot
 //
 //
