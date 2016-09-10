@@ -532,7 +532,7 @@ int Draw_LoopIteration() {
 		int idx = -1;
 		do {
 			idx++;
-			snprintf(strFile, 255, "shot-%04d.bmp", idx);
+			snprintf(strFile, 255, "shot-%04d.png", idx);
 		} while (access(strFile, F_OK) != -1);
 		Draw_SaveScreenshoot(strFile);
 	}
@@ -1027,38 +1027,21 @@ void Draw_DrawText(DrawFnt f, char *text, int x, int y) {
 }
 
 /////////////////////////////
-// Draw_SaveScreenshoot
+// Draw_SaveRGBAToBMP
 //
 //
-void Draw_SaveScreenshoot(char *filename) {
-#if USE_OpenGL
+void Draw_SaveRGBAToBMP(char *filename, unsigned char *data, int width,
+						int height) {
 	SDL_Surface *surf;
-	unsigned char *image_line;
-	int i, half_height, line_size;
 
 	// Create the surface
-	surf = SDL_CreateRGBSurface(SDL_SWSURFACE, _width, _height, 32, 0, 0, 0, 0);
+	surf = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 32, 0, 0, 0, 0);
 	surf->format->Amask = 0xFF000000;
 	surf->format->Ashift = 24;
 	SDL_SetAlpha(surf, SDL_SRCALPHA, 255);
-
-	// Get the screenshot
 	SDL_LockSurface(surf);
-	glReadPixels(0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE,
-				 surf->pixels);
+	memcpy(surf->pixels, data, width * height * 4);
 	SDL_UnlockSurface(surf);
-
-	// Flip the image data
-	line_size = _width * 4;
-	half_height = _height / 2;
-	image_line = malloc(line_size);
-	for (i = 0; i < half_height; i++) {
-		memcpy(image_line, surf->pixels + i * line_size, line_size);
-		memcpy(surf->pixels + i * line_size,
-			   surf->pixels + (_height - (i + 1)) * line_size, line_size);
-		memcpy(surf->pixels + (_height - (i + 1)) * line_size, image_line,
-			   line_size);
-	}
 
 	// Swap RGB to BGR
 	Uint32 *ptr, *ptr_end;
@@ -1075,13 +1058,59 @@ void Draw_SaveScreenshoot(char *filename) {
 	}
 
 	// Save the image
-	if (EndsWith(filename, ".bmp") || EndsWith(filename, ".BMP")) {
-		SDL_SaveBMP(surf, filename);
-	} else if (EndsWith(filename, ".png") || EndsWith(filename, ".PNG")) {
-		// FIXME: Save PNG
-	}
+	SDL_SaveBMP(surf, filename);
 
 	// Cleanup
 	SDL_FreeSurface(surf);
+}
+
+/////////////////////////////
+// Draw_SaveRGBAToPNG
+//
+//
+void Draw_SaveRGBAToPNG(char *filename, unsigned char *data, int width,
+						int height) {
+	unsigned error = lodepng_encode32_file(filename, data, width, height);
+	if (error) {
+		Print("Draw_SaveRGBAToPNG: Error %u: %s\n", error,
+			  lodepng_error_text(error));
+	}
+}
+
+/////////////////////////////
+// Draw_SaveScreenshoot
+//
+//
+void Draw_SaveScreenshoot(char *filename) {
+#if USE_OpenGL
+	unsigned char *pixelData;
+	unsigned char *image_line;
+	int i, half_height, line_size;
+
+	pixelData = malloc(_width * _height * 4);
+
+	glReadPixels(0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
+
+	// Flip the image data
+	line_size = _width * 4;
+	half_height = _height / 2;
+	image_line = malloc(line_size);
+	for (i = 0; i < half_height; i++) {
+		memcpy(image_line, pixelData + i * line_size, line_size);
+		memcpy(pixelData + i * line_size,
+			   pixelData + (_height - (i + 1)) * line_size, line_size);
+		memcpy(pixelData + (_height - (i + 1)) * line_size, image_line,
+			   line_size);
+	}
+
+	// Save the image
+	if (EndsWith(filename, ".bmp") || EndsWith(filename, ".BMP")) {
+		Draw_SaveRGBAToBMP(filename, pixelData, _width, _height);
+	} else if (EndsWith(filename, ".png") || EndsWith(filename, ".PNG")) {
+		Draw_SaveRGBAToPNG(filename, pixelData, _width, _height);
+	}
+
+	// Cleanup
+	free(pixelData);
 #endif
 }
