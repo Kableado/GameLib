@@ -9,7 +9,6 @@
 // Gets the current time in usecs.
 long long Time_GetTime();
 
-
 /////////////////////////////
 // Time_Pause
 //
