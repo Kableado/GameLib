@@ -8,7 +8,6 @@
 
 #include "Time.h"
 
-
 /////////////////////////////
 // Time_GetTime
 //
@@ -20,46 +19,44 @@
 #if WIN32
 #include <windows.h>
 // WIN32
-long long Time_GetTime(){
+long long Time_GetTime() {
 	LARGE_INTEGER freq;
 	LARGE_INTEGER tim;
 	long long int microt;
 
 	QueryPerformanceFrequency(&freq);
 	QueryPerformanceCounter(&tim);
-	microt=(tim.QuadPart*1000000)/freq.QuadPart;
-	return(microt);
+	microt = (tim.QuadPart * 1000000) / freq.QuadPart;
+	return (microt);
 }
-void Time_Pause(int pausa){
-	long long tend,t,diff;
+void Time_Pause(int pausa) {
+	long long tend, t, diff;
 
-	t=Time_GetTime();
-	tend=t+pausa;
-	do{
-		diff=tend-t;
-		if(diff>1000){
-			Sleep(diff/1000);
-		}else{
+	t = Time_GetTime();
+	tend = t + pausa;
+	do {
+		diff = tend - t;
+		if (diff > 1000) {
+			Sleep(diff / 1000);
+		} else {
 			Sleep(0);
 		}
-		t=Time_GetTime();
-	}while(tend>=t);
+		t = Time_GetTime();
+	} while (tend >= t);
 }
 #else
 // UNIX
-long long Time_GetTime(){
+long long Time_GetTime() {
 	struct timeval t;
 	long long usecs;
-	gettimeofday(&t,NULL);
-	usecs=(t.tv_sec*1000000ll)+(t.tv_usec);
-	return(usecs);
+	gettimeofday(&t, NULL);
+	usecs = (t.tv_sec * 1000000ll) + (t.tv_usec);
+	return (usecs);
 }
-void Time_Pause(int pausa){
+void Time_Pause(int pausa) {
 	struct timeval tv;
-	tv.tv_sec=(long long)pausa/1000000;
-	tv.tv_usec=(long long)pausa%1000000;
+	tv.tv_sec = (long long)pausa / 1000000;
+	tv.tv_usec = (long long)pausa % 1000000;
 	select(0, NULL, NULL, NULL, &tv);
 }
 #endif // if WIN32
-
-

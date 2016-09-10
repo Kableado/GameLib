@@ -2,7 +2,6 @@
 #ifndef _GAMEMAP_H_
 #define _GAMEMAP_H_
 
-int GameMap_LoadLevel(char *filename,int res);
-
+int GameMap_LoadLevel(char *filename, int res);
 
 #endif

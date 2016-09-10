@@ -5,13 +5,11 @@
 
 #include "Util.h"
 
-
 /////////////////////////////
 // Input_Init
 //
 // Initializes the game input.
 int Input_Init();
-
 
 /////////////////////////////
 // Input_Frame
@@ -19,13 +17,11 @@ int Input_Init();
 // Notify a frame update to the input subsystem.
 void Input_Frame();
 
-
 /////////////////////////////
 // Input_PostFrame
 //
 // Notify a frame update end to the input subsystem.
 void Input_PostFrame();
-
 
 ////////////////////////////////////////////////
 // InputKey //
@@ -47,13 +43,11 @@ typedef enum {
 	InputKey_Max
 } InputKey;
 
-
 /////////////////////////////
 // Input_SetKey
 //
 // Notify a key press to the input subsystem.
-void Input_SetKey(InputKey key,int status);
-
+void Input_SetKey(InputKey key, int status);
 
 ////////////////////////////////////////////////
 // InputKeyStatus //
@@ -65,37 +59,31 @@ typedef enum {
 	InputKey_Holded
 } InputKeyStatus;
 
-
 /////////////////////////////
 // Input_GetKey
 //
 // Reports a the status of a key.
 InputKeyStatus Input_GetKey(InputKey key);
 
-
 /////////////////////////////
 // Input_SetPointerPosition
 //
 void Input_SetPointerPosition(float x, float y);
-
 
 /////////////////////////////
 // Input_SetPointerDown
 //
 void Input_SetPointerDown(int pointerDown);
 
-
 /////////////////////////////
 // Input_GetPointerPosition
 //
 int Input_GetPointerPosition(vec2 pointer);
 
-
 /////////////////////////////
 // Input_GetClickedPosition
 //
 int Input_GetClickedPosition(vec2 clickPosition);
-
 
 /////////////////////////////
 // Input_AnyKey
@@ -103,12 +91,10 @@ int Input_GetClickedPosition(vec2 clickPosition);
 //
 int Input_AnyKey();
 
-
 /////////////////////////////
 // Input_GetDir
 //
 // Reports the direction of the dpad.
 int Input_GetDir(vec2 dir);
-
 
 #endif

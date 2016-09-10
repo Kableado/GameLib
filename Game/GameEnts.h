@@ -3,8 +3,6 @@
 #ifndef _GAMEENTS_H_
 #define _GAMEENTS_H_
 
-
-
 enum {
 	Ent_Player,
 	Ent_Platform,
@@ -22,4 +20,3 @@ int EntityApplyGravity(Entity e);
 void GameEnts_Init();
 
 #endif
-

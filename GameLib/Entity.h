@@ -7,7 +7,6 @@
 #include "Draw.h"
 #include "Anim.h"
 
-
 ////////////////////////////////////////////////
 // Entity
 //
@@ -60,9 +59,9 @@ struct TEntity {
 	void (*oncopy)(Entity ent);
 	void (*oninit)(Entity ent);
 	void (*ondelete)(Entity ent);
-	void (*proc)(Entity ent,int ft);
-	void (*postproc)(Entity ent,int ft);
-	int (*collision)(Entity ent, Entity ent2, float t,vec2 n);
+	void (*proc)(Entity ent, int ft);
+	void (*postproc)(Entity ent, int ft);
+	int (*collision)(Entity ent, Entity ent2, float t, vec2 n);
 	void (*overlap)(Entity ent, Entity ent2);
 
 	int A;
@@ -71,36 +70,31 @@ struct TEntity {
 	int D;
 	Entity child;
 
-	float maxX,minX;
-	float maxY,minY;
+	float maxX, minX;
+	float maxY, minY;
 
 	Entity next;
 };
-
 
 /////////////////////////////
 // Entity_New
 //
 Entity Entity_New();
 
-
 /////////////////////////////
 // Entity_Init
 //
 Entity Entity_Init(Entity e);
-
 
 /////////////////////////////
 // Entity_Destroy
 //
 void Entity_Destroy(Entity e);
 
-
 /////////////////////////////
 // Entity_Copy
 //
 Entity Entity_Copy(Entity e);
-
 
 /////////////////////////////
 // Entity_CalcBBox
@@ -108,44 +102,38 @@ Entity Entity_Copy(Entity e);
 //
 void Entity_CalcBBox(Entity e);
 
-
 /////////////////////////////
 // Entity_BBoxIntersect
 //
 //
-int Entity_BBoxIntersect(Entity ent1,Entity ent2);
-
+int Entity_BBoxIntersect(Entity ent1, Entity ent2);
 
 /////////////////////////////
 // Entity_Draw
 //
-void Entity_Draw(Entity e,int x,int y,float f);
-
+void Entity_Draw(Entity e, int x, int y, float f);
 
 /////////////////////////////
 // Entity_IsVisible
 //
-int Entity_IsVisible(Entity e,int x,int y,int w,int h);
-
+int Entity_IsVisible(Entity e, int x, int y, int w, int h);
 
 /////////////////////////////
 // Entity_Process
 //
-void Entity_Process(Entity e,int ft);
-
+void Entity_Process(Entity e, int ft);
 
 /////////////////////////////
 // Entity_PostProcess
 //
-void Entity_PostProcess(Entity e,int ft);
-
+void Entity_PostProcess(Entity e, int ft);
 
 ////////////////////////////////////////////////
 // CollisionInfo
 //
 #define CollisionResponse_Circle 1
 #define CollisionResponse_Line 2
-typedef struct TCollisionInfo TCollisionInfo,*CollisionInfo;
+typedef struct TCollisionInfo TCollisionInfo, *CollisionInfo;
 struct TCollisionInfo {
 	int responseType;
 	Entity ent1;
@@ -157,13 +145,12 @@ struct TCollisionInfo {
 	CollisionInfo next;
 };
 
-
 /////////////////////////////
 // CollisionInfo_New
 //
 //
-CollisionInfo CollisionInfo_New(int responseType,Entity ent1,Entity ent2,float t,vec2 n,int applyFriction);
-
+CollisionInfo CollisionInfo_New(int responseType, Entity ent1, Entity ent2,
+								float t, vec2 n, int applyFriction);
 
 /////////////////////////////
 // CollisionInfo_Destroy
@@ -171,44 +158,38 @@ CollisionInfo CollisionInfo_New(int responseType,Entity ent1,Entity ent2,float t
 //
 void CollisionInfo_Destroy(CollisionInfo *collInfoRef);
 
-
 /////////////////////////////
 // CollisionInfo_Add
 //
 //
-void CollisionInfo_Add(CollisionInfo *collInfo,
-	int responseType,Entity ent1,Entity ent2,float t,vec2 n,int applyFriction);
-
+void CollisionInfo_Add(CollisionInfo *collInfo, int responseType, Entity ent1,
+					   Entity ent2, float t, vec2 n, int applyFriction);
 
 /////////////////////////////
 // CollisionInfo_CheckRepetition
 //
 //
-int CollisionInfo_CheckRepetition(CollisionInfo collInfo,Entity ent1,Entity ent2);
-
+int CollisionInfo_CheckRepetition(CollisionInfo collInfo, Entity ent1,
+								  Entity ent2);
 
 /////////////////////////////
 // Entity_CheckCollision
 //
 //
-int Entity_CheckCollision(Entity ent1,Entity ent2,CollisionInfo *collInfoRef);
-
+int Entity_CheckCollision(Entity ent1, Entity ent2, CollisionInfo *collInfoRef);
 
 /////////////////////////////
 // Entity_CollisionResponseClircle
 //
 // Normal response to a collision of spheres.
-void Entity_CollisionResponseCircle(
-	Entity b1,Entity b2,float t,vec2 n);
-
+void Entity_CollisionResponseCircle(Entity b1, Entity b2, float t, vec2 n);
 
 /////////////////////////////
 // Entity_CollisionResponseLine
 //
 // Normal response to a collision with a line.
-void Entity_CollisionResponseLine(
-	Entity ent,Entity ent2,float t,vec2 n,int applyFriction);
-
+void Entity_CollisionResponseLine(Entity ent, Entity ent2, float t, vec2 n,
+								  int applyFriction);
 
 /////////////////////////////
 // Entity_CollisionInfoResponse
@@ -216,141 +197,117 @@ void Entity_CollisionResponseLine(
 //
 int Entity_CollisionInfoResponse(CollisionInfo collInfo);
 
-
 /////////////////////////////
 // Entity_Overlaps
 //
-void Entity_Overlaps(Entity b1,Entity b2);
-
+void Entity_Overlaps(Entity b1, Entity b2);
 
 /////////////////////////////
 // Entity_GetPos
 //
-void Entity_GetPos(Entity e,vec2 pos);
-
+void Entity_GetPos(Entity e, vec2 pos);
 
 /////////////////////////////
 // Entity_SetPos
 //
 //
-void Entity_SetPos(Entity e,vec2 pos);
-
+void Entity_SetPos(Entity e, vec2 pos);
 
 /////////////////////////////
 // Entity_AddPos
 //
 //
-void Entity_AddPos(Entity e,vec2 pos);
-
+void Entity_AddPos(Entity e, vec2 pos);
 
 /////////////////////////////
 // Entity_UpdatePos
 //
-void Entity_UpdatePos(Entity e,vec2 pos);
-
+void Entity_UpdatePos(Entity e, vec2 pos);
 
 /////////////////////////////
 // Entity_AddVel
 //
-void Entity_AddVel(Entity e,vec2 vel);
-
+void Entity_AddVel(Entity e, vec2 vel);
 
 /////////////////////////////
 // Entity_SetVel
 //
-void Entity_SetVel(Entity e,vec2 vel);
-
+void Entity_SetVel(Entity e, vec2 vel);
 
 /////////////////////////////
 // Entity_SetVelH
 //
-void Entity_SetVelH(Entity e,float v);
-
+void Entity_SetVelH(Entity e, float v);
 
 /////////////////////////////
 // Entity_SetVelV
 //
-void Entity_SetVelV(Entity e,float v);
-
+void Entity_SetVelV(Entity e, float v);
 
 /////////////////////////////
 // Entity_AddVelLimit
 //
-void Entity_AddVelLimit(Entity e,vec2 vel,float limit);
-
-
-/////////////////////////////
-// Entity_AddVelLimitH
-//
-void Entity_AddVelLimitH(Entity e,float v,float limit);
-
+void Entity_AddVelLimit(Entity e, vec2 vel, float limit);
 
 /////////////////////////////
 // Entity_AddVelLimitH
 //
-void Entity_AddVelLimitV(Entity e,float v,float limit);
+void Entity_AddVelLimitH(Entity e, float v, float limit);
 
+/////////////////////////////
+// Entity_AddVelLimitH
+//
+void Entity_AddVelLimitV(Entity e, float v, float limit);
 
 /////////////////////////////
 // Entity_SetColor
 //
-void Entity_SetColor(Entity e,float r,float g,float b,float a);
-
+void Entity_SetColor(Entity e, float r, float g, float b, float a);
 
 /////////////////////////////
 // Entity_AddColor
 //
-void Entity_AddColor(Entity e,float r,float g,float b,float a);
-
+void Entity_AddColor(Entity e, float r, float g, float b, float a);
 
 /////////////////////////////
 // Entity_MultColor
 //
 //
-void Entity_MultColor(Entity e,float r,float g,float b,float a);
-
+void Entity_MultColor(Entity e, float r, float g, float b, float a);
 
 /////////////////////////////
 // Entity_AddColor
 //
-void Entity_SetLight(Entity e,float r,float g,float b,float rad);
-
+void Entity_SetLight(Entity e, float r, float g, float b, float rad);
 
 /////////////////////////////
 // Entity_SetDefaultColor
 //
-void Entity_SetDefaultColor(Entity e,float r,float g,float b,float a);
-
+void Entity_SetDefaultColor(Entity e, float r, float g, float b, float a);
 
 /////////////////////////////
 // Entity_Iluminate
 //
-void Entity_Iluminate(Entity e,Entity *elist,int n);
-
+void Entity_Iluminate(Entity e, Entity *elist, int n);
 
 /////////////////////////////
 // Entity_MarkUpdateLight
 //
-void Entity_MarkUpdateLight(Entity e,Entity *elist,int n);
-
+void Entity_MarkUpdateLight(Entity e, Entity *elist, int n);
 
 /////////////////////////////
 // Entity_IsLight
 //
 int Entity_IsLight(Entity e);
 
-
 /////////////////////////////
 // Entity_IsUpdateLight
 //
 int Entity_IsUpdateLight(Entity e);
-
 
 /////////////////////////////
 // Entity_IsMoving
 //
 int Entity_IsMoving(Entity e);
 
-
 #endif
-
