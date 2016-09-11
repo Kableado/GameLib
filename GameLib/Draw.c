@@ -733,18 +733,18 @@ int Draw_GetFlip(DrawImg img) {
 // Draw_DrawImg
 //
 // Draws an image.
-void Draw_DrawImg(DrawImg img, int x, int y) {
+void Draw_DrawImg(DrawImg img, int x, int y, float scale[2]) {
 	DrawImage image = img;
 	float x1, x2, y1, y2;
 	float u1 = 0.0f, u2 = 1.0f;
 	float v1 = 0.0f, v2 = 1.0f;
 
-	// Prepare
-	x1 = x + image->x;
-	y1 = y + image->y;
-	x2 = (x + image->x) + image->w;
-	y2 = (y + image->y) + image->h;
-
+	// Prepare screen coordinates
+	x1 = x + (image->x * scale[0]);
+	y1 = y + (image->y * scale[1]);
+	x2 = x1 + (image->w * scale[0]);
+	y2 = y1 + (image->h * scale[1]);
+	
 	// Apply flipping
 	if (image->flip & 1) {
 		float t = u1;
@@ -778,8 +778,8 @@ void Draw_DrawImgResized(DrawImg img, int x, int y, float w, float h) {
 	// Prepare
 	x1 = x + image->x;
 	y1 = y + image->y;
-	x2 = (x + image->x) + w;
-	y2 = (y + image->y) + h;
+	x2 = x1 + w;
+	y2 = y1 + h;
 
 	// Apply flipping
 	if (image->flip & 1) {
@@ -805,17 +805,19 @@ void Draw_DrawImgResized(DrawImg img, int x, int y, float w, float h) {
 // Draw_DrawImgPart
 //
 // Draws an image part.
-void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j) {
+void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j, float scale[2]) {
 	DrawImage image = img;
 	int x1, x2, y1, y2;
 	float us, u1, u2;
 	float vs, v1, v2;
 
-	// Prepare
-	x1 = x + image->x;
-	y1 = y + image->y;
-	x2 = (x + image->x) + w;
-	y2 = (y + image->y) + h;
+	// Prepare screen coordinates
+	x1 = x + (image->x * scale[0]);
+	y1 = y + (image->y * scale[1]);
+	x2 = x1 + (w * scale[0]);
+	y2 = y1 + (h * scale[1]);
+	
+	// Prepare image coordinates
 	us = 1.0f / image->w;
 	u1 = us * i * w;
 	u2 = u1 + (us * w);
@@ -847,17 +849,19 @@ void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j) {
 // Draw_DrawImgPartHoriz
 //
 // Draws an image part horizontally.
-void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i) {
+void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i, float scale[2]) {
 	DrawImage image = img;
 	int x1, x2, y1, y2;
 	float us, u1, u2;
 	float v1 = 0.0f, v2 = 1.0f;
 
-	// Prepare
-	x1 = x + image->x;
-	y1 = y + image->y;
-	x2 = (x + image->x) + w;
-	y2 = (y + image->y) + image->h;
+	// Prepare screen coordinates
+	x1 = x + (image->x * scale[0]);
+	y1 = y + (image->y * scale[1]);
+	x2 = x1 + (w * scale[0]);
+	y2 = y1 + (image->h * scale[1]);
+	
+	// Prepare image coordinates
 	us = 1.0f / image->w;
 	u1 = us * i * w;
 	u2 = u1 + us * w;
@@ -935,6 +939,7 @@ typedef struct {
 	DrawImage img;
 	int w, h;
 	int min, max;
+	float scale[2];
 } DrawFont;
 
 /////////////////////////////
@@ -1008,6 +1013,16 @@ DrawFnt Draw_LoadFont(char *fichero, int min, int max) {
 }
 
 /////////////////////////////
+// Draw_FontScale
+//
+void Draw_FontScale(DrawFnt f, float scale[2]) {
+	DrawFont *font = f;
+
+	font->scale[0] = scale[0];
+	font->scale[1] = scale[1];
+}
+
+/////////////////////////////
 // Draw_DrawText
 //
 // Draws text using a font.
@@ -1019,7 +1034,7 @@ void Draw_DrawText(DrawFnt f, char *text, int x, int y) {
 	ptr = text;
 	while (*ptr) {
 		if ((*ptr) < font->max) {
-			Draw_DrawImgPartHoriz(font->img, x, y, font->w, (*ptr) - font->min);
+			Draw_DrawImgPartHoriz(font->img, x, y, font->w, (*ptr) - font->min, font->scale);
 		}
 		x += font->w;
 		ptr++;

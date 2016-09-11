@@ -14,6 +14,7 @@
 #define EntityIntFlag_UpdatedPos 2
 #define EntityIntFlag_UpdatedColor 4
 #define EntityIntFlag_UpdateColor 8
+#define EntityIntFlag_UpdatedScale 16
 
 /////////////////////////////
 // Entity_New
@@ -23,14 +24,6 @@ Entity _free_entity = NULL;
 Entity Entity_New() {
 	Entity e;
 
-#if 0
-	if(!_free_entity){
-		e=malloc(sizeof(TEntity));
-	}else{
-		e=_free_entity;
-		_free_entity=e->next;
-	}
-#else
 	if (!_free_entity) {
 		// Allocate a big block of entities
 		int n = 1024, i;
@@ -44,10 +37,8 @@ Entity Entity_New() {
 		}
 		_free_entity = newEnts;
 	}
-
 	e = _free_entity;
 	_free_entity = e->next;
-#endif
 
 	e->base = NULL;
 	e->type = 0;
@@ -80,6 +71,11 @@ Entity Entity_New() {
 	e->light[0] = e->light[1] = e->light[2] = e->light[3] = 1.0f;
 	e->defaultColor[0] = e->defaultColor[1] = e->defaultColor[2] =
 		e->defaultColor[3] = 1.0f;
+
+	e->scale0[0] = 1.0f;
+	e->scale0[1] = 1.0f;
+	e->scale[0] = 1.0f;
+	e->scale[1] = 1.0f;
 
 	e->oncopy = NULL;
 	e->oninit = NULL;
@@ -167,6 +163,11 @@ Entity Entity_Copy(Entity e) {
 	n->defaultColor[2] = e->defaultColor[2];
 	n->defaultColor[3] = e->defaultColor[3];
 
+	n->scale0[0] = e->scale[0];
+	n->scale0[1] = e->scale[1];
+	n->scale[0] = e->scale[0];
+	n->scale[1] = e->scale[1];
+
 	n->oncopy = e->oncopy;
 	n->oninit = e->oninit;
 	n->ondelete = e->ondelete;
@@ -234,6 +235,7 @@ int Entity_BBoxIntersect(Entity ent1, Entity ent2) {
 //
 void Entity_Draw(Entity e, int x, int y, float f) {
 	vec2 fPos;
+	float scale[2];
 	if (e->internalFlags & EntityIntFlag_UpdatedColor) {
 		Draw_SetColor(e->color0[0] - f * (e->color0[0] - e->color[0]),
 					  e->color0[1] - f * (e->color0[1] - e->color[1]),
@@ -242,11 +244,18 @@ void Entity_Draw(Entity e, int x, int y, float f) {
 	} else {
 		Draw_SetColor(e->color[0], e->color[1], e->color[2], e->color[3]);
 	}
+	if (e->internalFlags & EntityIntFlag_UpdatedScale) {
+		scale[0] = e->scale0[0] - f * (e->scale0[0] - e->scale[0]);
+		scale[1] = e->scale0[1] - f * (e->scale0[1] - e->scale[1]);
+	} else {
+		scale[0] = e->scale[0];
+		scale[1] = e->scale[1];
+	}
 	if (e->internalFlags & EntityIntFlag_UpdatedPos) {
 		vec2_interpol(fPos, e->pos0, e->pos, f);
-		AnimPlay_Draw(&e->anim, fPos[0] + x, fPos[1] + y);
+		AnimPlay_Draw(&e->anim, fPos[0] + x, fPos[1] + y, scale);
 	} else {
-		AnimPlay_Draw(&e->anim, e->pos[0] + x, e->pos[1] + y);
+		AnimPlay_Draw(&e->anim, e->pos[0] + x, e->pos[1] + y, scale);
 	}
 }
 
@@ -277,12 +286,18 @@ int Entity_IsVisible(Entity e, int x, int y, int w, int h) {
 // Entity_Process
 //
 //
-void Entity_Process(Entity b, int ft) {
-	b->internalFlags &= ~EntityIntFlag_UpdatedPos;
+void Entity_Process(Entity e, int ft) {
+	e->internalFlags &= ~EntityIntFlag_UpdatedPos;
+
+	if (e->internalFlags & EntityIntFlag_UpdatedScale) {
+		e->scale0[0] = e->scale[0];
+		e->scale0[1] = e->scale[1];
+		e->internalFlags &= ~EntityIntFlag_UpdatedScale;
+	}
 
 	// Launch method
-	if (b->proc) {
-		b->proc(b, ft);
+	if (e->proc) {
+		e->proc(e, ft);
 	}
 }
 
@@ -918,6 +933,15 @@ void Entity_SetDefaultColor(Entity e, float r, float g, float b, float a) {
 	e->defaultColor[1] = g;
 	e->defaultColor[2] = b;
 	e->defaultColor[3] = a;
+}
+
+/////////////////////////////
+// Entity_SetScale
+//
+void Entity_SetScale(Entity e, float scale[2]) {
+	e->scale[0] = scale[0];
+	e->scale[1] = scale[1];
+	e->internalFlags |= EntityIntFlag_UpdatedScale;
 }
 
 /////////////////////////////

@@ -108,12 +108,12 @@ int Anim_GetFlip(Anim a) {
 // Anim_Draw
 //
 //
-void Anim_Draw(Anim a, int time_ms, int x, int y) {
+void Anim_Draw(Anim a, int time_ms, int x, int y, float scale[2]) {
 	Animation *anim = a;
 	int frame;
 
 	frame = (time_ms / anim->ftime) % anim->frames;
-	Draw_DrawImgPartHoriz(anim->img, x, y, anim->w, frame);
+	Draw_DrawImgPartHoriz(anim->img, x, y, anim->w, frame, scale);
 }
 
 /////////////////////////////
@@ -177,17 +177,17 @@ void AnimPlay_SetImgPart(AnimPlay *ap, DrawImg img, int w, int h, int i,
 // AnimPlay_Draw
 //
 //
-void AnimPlay_Draw(AnimPlay *ani, int x, int y) {
+void AnimPlay_Draw(AnimPlay *ani, int x, int y, float scale[2]) {
 	if (ani->anim) {
-		Anim_Draw(ani->anim, ani->time_ms, x, y);
+		Anim_Draw(ani->anim, ani->time_ms, x, y, scale);
 		return;
 	}
 	if (ani->img) {
-		Draw_DrawImg(ani->img, x, y);
+		Draw_DrawImg(ani->img, x, y, scale);
 		return;
 	}
 	if (ani->imgPart) {
-		Draw_DrawImgPart(ani->imgPart, x, y, ani->w, ani->h, ani->i, ani->j);
+		Draw_DrawImgPart(ani->imgPart, x, y, ani->w, ani->h, ani->i, ani->j, scale);
 		return;
 	}
 }

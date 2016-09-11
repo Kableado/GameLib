@@ -83,7 +83,7 @@ int Draw_GetFlip(DrawImg img);
 // Draw_DrawImg
 //
 // Draws an image.
-void Draw_DrawImg(DrawImg img, int x, int y);
+void Draw_DrawImg(DrawImg img, int x, int y, float scale[2]);
 
 /////////////////////////////
 // Draw_DrawImgResized
@@ -95,13 +95,13 @@ void Draw_DrawImgResized(DrawImg img, int x, int y, float w, float h);
 // Draw_DrawImgPart
 //
 // Draws an image part.
-void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j);
+void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j, float scale[2]);
 
 /////////////////////////////
 // Draw_DrawImgPartHoriz
 //
 // Draws an image part horizontally.
-void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i);
+void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i, float scale[2]);
 
 /////////////////////////////
 // Draw_ImgParallax
@@ -134,6 +134,11 @@ DrawFnt Draw_DefaultFont(unsigned char r, unsigned char g, unsigned char b,
 //
 // Load a font from a file.
 DrawFnt Draw_LoadFont(char *fichero, int min, int max);
+
+/////////////////////////////
+// Draw_FontScale
+//
+void Draw_FontScale(DrawFnt f, float scale[2]);
 
 /////////////////////////////
 // Draw_DrawText

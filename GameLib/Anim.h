@@ -49,7 +49,7 @@ int Anim_GetFlip(Anim anim);
 // Anim_Draw
 //
 //
-void Anim_Draw(Anim anim, int time_ms, int x, int y);
+void Anim_Draw(Anim anim, int time_ms, int x, int y, float scale[2]);
 
 ////////////////////////////////////////////////
 // AnimPlay //
@@ -87,7 +87,7 @@ void AnimPlay_SetImgPart(AnimPlay *ap, DrawImg img, int w, int h, int i, int j);
 // AnimPlay_Draw
 //
 //
-void AnimPlay_Draw(AnimPlay *ani, int x, int y);
+void AnimPlay_Draw(AnimPlay *ani, int x, int y, float scale[2]);
 
 /////////////////////////////
 // AnimPlay_GetOffset
