@@ -56,6 +56,9 @@ struct TEntity {
 	float light[4];
 	float defaultColor[4];
 
+	float scale0[2];
+	float scale[2];
+
 	void (*oncopy)(Entity ent);
 	void (*oninit)(Entity ent);
 	void (*ondelete)(Entity ent);
@@ -204,86 +207,49 @@ void Entity_Overlaps(Entity b1, Entity b2);
 
 /////////////////////////////
 // Entity_GetPos
-//
-void Entity_GetPos(Entity e, vec2 pos);
-
-/////////////////////////////
 // Entity_SetPos
-//
-//
-void Entity_SetPos(Entity e, vec2 pos);
-
-/////////////////////////////
 // Entity_AddPos
-//
-//
-void Entity_AddPos(Entity e, vec2 pos);
-
-/////////////////////////////
 // Entity_UpdatePos
 //
+void Entity_GetPos(Entity e, vec2 pos);
+void Entity_SetPos(Entity e, vec2 pos);
+void Entity_AddPos(Entity e, vec2 pos);
 void Entity_UpdatePos(Entity e, vec2 pos);
 
 /////////////////////////////
 // Entity_AddVel
+// Entity_SetVel
+// Entity_SetVelH
+// Entity_SetVelV
+// Entity_AddVelLimit
+// Entity_AddVelLimitH
+// Entity_AddVelLimitH
 //
 void Entity_AddVel(Entity e, vec2 vel);
-
-/////////////////////////////
-// Entity_SetVel
-//
 void Entity_SetVel(Entity e, vec2 vel);
-
-/////////////////////////////
-// Entity_SetVelH
-//
 void Entity_SetVelH(Entity e, float v);
-
-/////////////////////////////
-// Entity_SetVelV
-//
 void Entity_SetVelV(Entity e, float v);
-
-/////////////////////////////
-// Entity_AddVelLimit
-//
 void Entity_AddVelLimit(Entity e, vec2 vel, float limit);
-
-/////////////////////////////
-// Entity_AddVelLimitH
-//
 void Entity_AddVelLimitH(Entity e, float v, float limit);
-
-/////////////////////////////
-// Entity_AddVelLimitH
-//
 void Entity_AddVelLimitV(Entity e, float v, float limit);
 
 /////////////////////////////
 // Entity_SetColor
-//
-void Entity_SetColor(Entity e, float r, float g, float b, float a);
-
-/////////////////////////////
 // Entity_AddColor
-//
-void Entity_AddColor(Entity e, float r, float g, float b, float a);
-
-/////////////////////////////
 // Entity_MultColor
-//
-//
-void Entity_MultColor(Entity e, float r, float g, float b, float a);
-
-/////////////////////////////
 // Entity_AddColor
-//
-void Entity_SetLight(Entity e, float r, float g, float b, float rad);
-
-/////////////////////////////
 // Entity_SetDefaultColor
 //
+void Entity_SetColor(Entity e, float r, float g, float b, float a);
+void Entity_AddColor(Entity e, float r, float g, float b, float a);
+void Entity_MultColor(Entity e, float r, float g, float b, float a);
+void Entity_SetLight(Entity e, float r, float g, float b, float rad);
 void Entity_SetDefaultColor(Entity e, float r, float g, float b, float a);
+
+/////////////////////////////
+// Entity_SetScale
+//
+void Entity_SetScale(Entity e, float scale[2]);
 
 /////////////////////////////
 // Entity_Iluminate

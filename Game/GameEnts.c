@@ -50,6 +50,8 @@ void player_proc(Entity e, int ft) {
 		}
 		Entity_CalcBBox(e);
 
+		Entity_SetScale(e, (float[2]){0.5f, 0.5f});
+
 		// FIXME: play sound
 	}
 	if (Input_GetKey(InputKey_Left)) {
@@ -71,6 +73,8 @@ void player_proc(Entity e, int ft) {
 	}
 	if (Input_GetKey(InputKey_Action1) == InputKey_Pressed ||
 		Input_GetKey(InputKey_Action2) == InputKey_Pressed) {
+		Entity_SetScale(e, (float[2]){1.0f, 1.0f});
+
 	}
 
 	// Scroll View
