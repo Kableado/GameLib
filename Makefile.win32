@@ -5,7 +5,7 @@ RM       := rm -rf
 MKDIR    := mkdir
 ECHO     := echo
 
-LIBS    := -L/mingw/lib -Dmain=SDL_main -lopengl32 -lSDLmain -lSDL 
+LIBS    := -L/mingw/lib -lopengl32 -lSDL 
 #CFLAGS  := -I/mingw/include -g -mwindows -D_GNU_SOURCE=1
 CFLAGS  := -g -mwindows -D_GNU_SOURCE=1
 LDFLAGS := -g -mwindows -D_GNU_SOURCE=1

@@ -23,8 +23,8 @@ fi
 case "$uname" in
 	*MINGW* | *MSYS*)
 		# Configuracion de Win32/Mingw
-		libs="-lopengl32 -lmingw32 -lSDLmain -lSDL"
-		cflags="-Dmain=SDL_main -mwindows -g"
+		libs="-L/mingw/lib -lopengl32 -lSDL"
+		cflags="-g -mwindows -D_GNU_SOURCE=1"
 		builddir="build-$gcctarget"
 		platform="$gcctarget"
 		exeextension=".exe"
