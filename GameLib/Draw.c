@@ -12,7 +12,6 @@
 #include <GL/glext.h>
 #define USE_OpenGL 1
 #define USE_OpenGLES 0
-#define GL_CLAMP_TO_EDGE 0x812F
 #include <unistd.h>
 #else
 #ifdef EMSCRIPTEN
@@ -43,6 +42,10 @@
 #endif
 #include "lodepng.c"
 #include <SDL/SDL.h>
+
+#ifndef GL_CLAMP_TO_EDGE
+#define GL_CLAMP_TO_EDGE 0x812F
+#endif
 
 #include "Time.h"
 #include "Util.h"
