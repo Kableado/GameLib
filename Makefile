@@ -1,10 +1,10 @@
 
-IsMinGW=$(findstring MSYS,$(shell uname -s)) $(findstring MINGW,$(shell uname -s))
+IsMinGW := $(findstring MSYS,$(shell uname -s))$(findstring MINGW,$(shell uname -s))
 ifneq (,$(IsMinGW))
-	TARGET_ARCH:=mingw
+	TARGET_ARCH := mingw
 else
-	TARGET_ARCH:=linux
-endif # windir
+	TARGET_ARCH := linux
+endif
 
 ifeq ($(TARGET_ARCH),mingw)
 	include Makefile.win32
