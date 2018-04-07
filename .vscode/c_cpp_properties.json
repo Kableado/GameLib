@@ -1,0 +1,68 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "/usr/include",
+                "${workspaceRoot}",
+                "${workspaceRoot}/GameLib/"
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": "",
+                "path": [
+                    "/usr/include",
+                    "${workspaceRoot}",
+                    "${workspaceRoot}/GameLib/"
+                ]
+            },
+            "intelliSenseMode": "clang-x64",
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ]
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "/usr/include",
+                "${workspaceRoot}",
+                "${workspaceRoot}/GameLib/"
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": "",
+                "path": [
+                    "/usr/include",
+                    "${workspaceRoot}",
+                    "${workspaceRoot}/GameLib/"
+                ]
+            },
+            "intelliSenseMode": "clang-x64",
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        },
+        {
+            "name": "Win32",
+            "includePath": [
+                "C:\\msys64\\mingw64\\include",
+                "C:\\msys64\\mingw64\\x86_64-w64-mingw32\\include",
+                "${workspaceRoot}",
+                "${workspaceRoot}/GameLib/"
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": "",
+                "path": [
+                    "C:\\msys64\\mingw64\\include",
+                    "C:\\msys64\\mingw64\\x86_64-w64-mingw32\\include",
+                    "${workspaceRoot}",
+                    "${workspaceRoot}/GameLib/"
+                ]
+            },
+            "intelliSenseMode": "msvc-x64"
+        }
+    ],
+    "version": 3
+}
