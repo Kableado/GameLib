@@ -53,7 +53,6 @@ void QuadArray2D_AddQuad(QuadArray2D quadArray, float x0, float y0, float u0,
 						 float v0, float x1, float y1, float u1, float v1,
 						 float color[]) {
 	float v[Vertex2D_Length];
-	int firstIndex = quadArray->nVertex;
 
 	// Set the color
 	v[4] = color[0];

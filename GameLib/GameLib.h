@@ -112,7 +112,7 @@ void GameLib_EntitySetLight(Entity e, float r, float g, float b, float rad);
 // GameLib_ConvertScreenPositionToGamePosition
 //
 //
-void GameLib_ConvertScreenPositionToGamePosition(vec2 screenPos, vec2 gamePos);
+void GameLib_ConvertScreenPositionToGamePosition(vec2 screenPos, vec2 gamePos, float f);
 
 /////////////////////////////
 // GameLib_AddParallaxBackground

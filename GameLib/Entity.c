@@ -103,6 +103,7 @@ Entity Entity_Init(Entity e) {
 	if (e->oninit) {
 		e->oninit(e);
 	}
+	return (e);
 }
 
 /////////////////////////////

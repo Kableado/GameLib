@@ -641,8 +641,7 @@ void GameLib_EntitySetLight(Entity e, float r, float g, float b, float rad) {
 // GameLib_ConvertScreenPositionToGamePosition
 //
 //
-void GameLib_ConvertScreenPositionToGamePosition(vec2 screenPos, vec2 gamePos) {
-	float f;
+void GameLib_ConvertScreenPositionToGamePosition(vec2 screenPos, vec2 gamePos, float f) {
 	int game_pos[2];
 
 	game_pos[0] = _game_pos0[0] + f * (_game_pos1[0] - _game_pos0[0]);

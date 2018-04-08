@@ -92,19 +92,17 @@ int GameMap_LoadLevel(char *filename, int res) {
 	// Parse the map
 	for (j = 0; j < height; j++) {
 		for (i = 0; i < width; i++) {
-			Entity ent;
-
 			if (MAP(i, j) == 'P') {
 				// Player
 				GameMapAux_CreateEnt(ent_Player, i, j, res);
 			}
 			if (MAP(i, j) == '#') {
 				// Block
-				ent = GameMapAux_CreateEnt(ent_Block, i, j, res);
+				GameMapAux_CreateEnt(ent_Block, i, j, res);
 			}
 			if (MAP(i, j) == '|') {
 				// Platform
-				ent = GameMapAux_CreateEnt(ent_Platform, i, j, res);
+				GameMapAux_CreateEnt(ent_Platform, i, j, res);
 			}
 		}
 	}
