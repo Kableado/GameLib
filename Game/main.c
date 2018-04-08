@@ -31,8 +31,6 @@ void PreDrawGame(float f) {}
 void DrawGame(float f) { MainGame_Text(8, 8, "Hello world!"); }
 
 int main(int argc, char *argv[]) {
-	int i, j;
-	Entity *e;
 
 	srand(time(NULL));
 

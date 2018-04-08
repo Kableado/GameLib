@@ -38,11 +38,9 @@ void player_proc(Entity e, int ft) {
 	float acel = 8.0f;
 	float maxVel = 30.0f;
 	float jumpVel = 50.0f;
-	float shootVel = 50.0f;
 
 	if (Input_GetKey(InputKey_Jump) == InputKey_Pressed ||
 		Input_GetKey(InputKey_Up) == InputKey_Pressed) {
-		vec2 jump;
 
 		// Apply jump
 		if (e->vel[1] > (-jumpVel)) {

@@ -1011,6 +1011,8 @@ DrawFnt Draw_LoadFont(char *fichero, int min, int max) {
 	font->h = font->img->h;
 	font->min = min;
 	font->max = max;
+	font->scale[0] = 1.0f;
+	font->scale[1] = 1.0f;
 
 	return ((DrawFnt)font);
 }
