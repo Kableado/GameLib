@@ -993,6 +993,8 @@ DrawFnt Draw_DefaultFont(unsigned char r, unsigned char g, unsigned char b,
 	font->h = 8;
 	font->min = 0;
 	font->max = 256;
+	font->scale[0] = 1.0f;
+	font->scale[1] = 1.0f;
 
 	return ((DrawFnt)font);
 }
@@ -1041,7 +1043,7 @@ void Draw_DrawText(DrawFnt f, char *text, int x, int y) {
 		if ((*ptr) < font->max) {
 			Draw_DrawImgPartHoriz(font->img, x, y, font->w, (*ptr) - font->min, font->scale);
 		}
-		x += font->w;
+		x += font->w * font->scale[0];
 		ptr++;
 	}
 }
