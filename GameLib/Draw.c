@@ -3,24 +3,24 @@
 #ifdef WIN32
 //	Windows
 #define _WIN32_WINNT 0x0501
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <windows.h>
 #include <GL/gl.h>
 #include <GL/glext.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <windows.h>
 #define USE_OpenGL 1
 #define USE_OpenGLES 0
 #include <unistd.h>
 #else
 #ifdef EMSCRIPTEN
 //	Emscripten
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <GLES2/gl2.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #define GL_GLEXT_PROTOTYPES 1
 #include <GLES2/gl2ext.h>
 #include <emscripten.h>
@@ -30,11 +30,11 @@
 #include <unistd.h>
 #else
 //	UNIX
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <GL/gl.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #define USE_OpenGL 1
 #define USE_OpenGLES 0
 #include <unistd.h>
@@ -47,12 +47,12 @@
 #define GL_CLAMP_TO_EDGE 0x812F
 #endif
 
+#include "Audio.h"
+#include "Draw.h"
+#include "Input.h"
+#include "QuadArray2D.h"
 #include "Time.h"
 #include "Util.h"
-#include "QuadArray2D.h"
-#include "Audio.h"
-#include "Input.h"
-#include "Draw.h"
 
 ////////////////////////////////////////////////
 // DrawImage //
@@ -747,7 +747,7 @@ void Draw_DrawImg(DrawImg img, int x, int y, float scale[2]) {
 	y1 = y + (image->y * scale[1]);
 	x2 = x1 + (image->w * scale[0]);
 	y2 = y1 + (image->h * scale[1]);
-	
+
 	// Apply flipping
 	if (image->flip & 1) {
 		float t = u1;
@@ -808,7 +808,8 @@ void Draw_DrawImgResized(DrawImg img, int x, int y, float w, float h) {
 // Draw_DrawImgPart
 //
 // Draws an image part.
-void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j, float scale[2]) {
+void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j,
+					  float scale[2]) {
 	DrawImage image = img;
 	int x1, x2, y1, y2;
 	float us, u1, u2;
@@ -819,7 +820,7 @@ void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j, flo
 	y1 = y + (image->y * scale[1]);
 	x2 = x1 + (w * scale[0]);
 	y2 = y1 + (h * scale[1]);
-	
+
 	// Prepare image coordinates
 	us = 1.0f / image->w;
 	u1 = us * i * w;
@@ -852,7 +853,8 @@ void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j, flo
 // Draw_DrawImgPartHoriz
 //
 // Draws an image part horizontally.
-void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i, float scale[2]) {
+void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i,
+						   float scale[2]) {
 	DrawImage image = img;
 	int x1, x2, y1, y2;
 	float us, u1, u2;
@@ -863,7 +865,7 @@ void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i, float scale[
 	y1 = y + (image->y * scale[1]);
 	x2 = x1 + (w * scale[0]);
 	y2 = y1 + (image->h * scale[1]);
-	
+
 	// Prepare image coordinates
 	us = 1.0f / image->w;
 	u1 = us * i * w;
@@ -1041,7 +1043,8 @@ void Draw_DrawText(DrawFnt f, char *text, int x, int y) {
 	ptr = text;
 	while (*ptr) {
 		if ((*ptr) < font->max) {
-			Draw_DrawImgPartHoriz(font->img, x, y, font->w, (*ptr) - font->min, font->scale);
+			Draw_DrawImgPartHoriz(font->img, x, y, font->w, (*ptr) - font->min,
+								  font->scale);
 		}
 		x += font->w * font->scale[0];
 		ptr++;
