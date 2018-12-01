@@ -155,6 +155,22 @@ GLuint Draw_UploadGLTexture(int w, int h, unsigned char *pixels);
 // Initializes the game window.
 int Draw_Init(int width, int height, char *title, int pfps, int fps) {
 
+#ifdef WIN32
+#ifndef ATTACH_PARENT_PROCESS
+#	define ATTACH_PARENT_PROCESS ((DWORD)-1)
+#endif
+	// Salida en la consola del padre
+	AttachConsole(ATTACH_PARENT_PROCESS );
+	if (GetStdHandle(STD_OUTPUT_HANDLE) != 0) {
+		fclose(stdin);
+		fclose(stdout);
+		fclose(stderr);
+		freopen("CONIN$", "r", stdin);
+		freopen("CONOUT$", "w", stdout);
+		freopen("CONOUT$", "w", stderr);
+	}
+#endif // WIN32
+
 	// Set globals
 	proc_t_frame = 1000000 / pfps;
 	draw_t_frame = 1000000 / fps;
