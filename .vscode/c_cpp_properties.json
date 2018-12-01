@@ -64,10 +64,10 @@
             "intelliSenseMode": "msvc-x64",
             "cStandard": "c11",
             "cppStandard": "c++17",
-			"defines": [
-				"WIN32"
-			]
+            "defines": [
+                "WIN32"
+            ]
         }
     ],
-    "version": 3
+    "version": 4
 }
