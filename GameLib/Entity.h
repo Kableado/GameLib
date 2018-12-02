@@ -248,8 +248,10 @@ void Entity_SetDefaultColor(Entity e, float r, float g, float b, float a);
 
 /////////////////////////////
 // Entity_SetScale
+// Entity_GetScale
 //
 void Entity_SetScale(Entity e, float scale[2]);
+void Entity_GetScale(Entity e, float scale[2]);
 
 /////////////////////////////
 // Entity_Iluminate
