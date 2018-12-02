@@ -38,45 +38,93 @@ void player_proc(Entity e, int ft) {
 	float acel = 8.0f;
 	float maxVel = 30.0f;
 	float jumpVel = 50.0f;
+	float airMovementFactor = 0.1f;
 
-	if (Input_GetKey(InputKey_Jump) == InputKey_Pressed ||
-		Input_GetKey(InputKey_Up) == InputKey_Pressed) {
 
-		// Apply jump
-		if (e->vel[1] > (-jumpVel)) {
-			e->vel[1] = -jumpVel;
+	// Process elasticity
+	float entityScale[2];
+	Entity_GetScale(e, entityScale);
+	entityScale[0] += (1.0f - entityScale[0]) / 2.0f;
+	entityScale[1] += (1.0f - entityScale[1]) / 2.0f;
+	Entity_SetScale(e, entityScale);
+
+
+	if (e->A > 0) {
+		if (Input_GetKey(InputKey_Jump) == InputKey_Pressed ||
+			Input_GetKey(InputKey_Up) == InputKey_Pressed) {
+
+			// Apply jump
+			if (e->vel[1] > (-jumpVel)) {
+				e->vel[1] = -jumpVel;
+			}
+			Entity_CalcBBox(e);
+
+			Entity_SetScale(e, (float[2]){0.6f, 1.4f});
+
+			// FIXME: play sound
 		}
-		Entity_CalcBBox(e);
+		if (Input_GetKey(InputKey_Left)) {
+			vec2 left;
 
-		Entity_SetScale(e, (float[2]){0.5f, 0.5f});
+			// Apply left movement
+			vec2_set(left, -acel, 0.0f);
+			Entity_AddVelLimit(e, left, maxVel);
+		}
+		if (Input_GetKey(InputKey_Right)) {
+			vec2 right;
 
-		// FIXME: play sound
-	}
-	if (Input_GetKey(InputKey_Left)) {
-		vec2 left;
+			// Apply right movement
+			vec2_set(right, acel, 0.0f);
+			Entity_AddVelLimit(e, right, maxVel);
+		}
+	} else {
+		if (Input_GetKey(InputKey_Left)) {
+			vec2 left;
 
-		// Apply left movement
-		vec2_set(left, -acel, 0.0f);
-		Entity_AddVelLimit(e, left, maxVel);
+			// Apply left movement
+			vec2_set(left, -(acel * airMovementFactor), 0.0f);
+			Entity_AddVelLimit(e, left, maxVel * airMovementFactor);
+		}
+		if (Input_GetKey(InputKey_Right)) {
+			vec2 right;
 
-		e->A = 0;
-	}
-	if (Input_GetKey(InputKey_Right)) {
-		vec2 right;
-
-		// Apply right movement
-		vec2_set(right, acel, 0.0f) Entity_AddVelLimit(e, right, maxVel);
-
-		e->A = 1;
+			// Apply right movement
+			vec2_set(right, acel * airMovementFactor, 0.0f);
+			Entity_AddVelLimit(e, right, maxVel * airMovementFactor);
+		}
 	}
 	if (Input_GetKey(InputKey_Action1) == InputKey_Pressed ||
 		Input_GetKey(InputKey_Action2) == InputKey_Pressed) {
 		Entity_SetScale(e, (float[2]){1.0f, 1.0f});
-
 	}
+
+	e->A = 0;
+}
+
+void player_postproc(Entity e){
 
 	// Scroll View
 	GameLib_MoveToPos(e->pos, 0.6f);
+	//GameLib_MoveToPos(e->pos, 1.0f);
+}
+
+int player_collision(Entity ent, Entity ent2, float t, vec2 n){
+	if(n[1] < 0  && fabs(n[1]) > fabs(n[0])){
+		ent->A = 1;
+	}
+	
+	if (fabs(n[0]) > fabs(n[1])) {
+		float intensity = (fabs(ent->vel[0]) - 10.0f) / 40.0f;
+		if (intensity > 0) {
+			Entity_SetScale(ent, (float[2]){1.0f - (0.3f * intensity), 1.0f + (0.3f * intensity)});
+		}
+	} else {
+		float intensity = (fabs(ent->vel[1]) - 10.0f) / 40.0f;
+		if (intensity > 0) {
+			Entity_SetScale(ent, (float[2]){1.0f + (0.3f * intensity), 1.0f - (0.3f * intensity)});
+		}
+	}
+	return -1;
 }
 
 void GameEnts_Init() {
@@ -101,6 +149,8 @@ void GameEnts_Init() {
 	ent_Player->zorder = 0;
 	AnimPlay_SetImg(&ent_Player->anim, img_player);
 	ent_Player->proc = player_proc;
+	ent_Player->postproc = player_postproc;
+	ent_Player->collision = player_collision;
 	ent_Player->mass = 1.0f;
 	ent_Player->radius = 12;
 	ent_Player->width = 24;
