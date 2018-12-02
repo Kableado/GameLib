@@ -946,6 +946,14 @@ void Entity_SetScale(Entity e, float scale[2]) {
 }
 
 /////////////////////////////
+// Entity_GetScale
+//
+void Entity_GetScale(Entity e, float scale[2]) {
+	scale[0] = e->scale[0];
+	scale[1] = e->scale[1];
+}
+
+/////////////////////////////
 // Entity_Iluminate
 //
 //
