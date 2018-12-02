@@ -46,17 +46,17 @@ void Input_Frame() {
 	keys = (Uint8 *)SDL_GetKeyState(NULL);
 
 	// Process Keys
-	Input_SetKey(InputKey_Action1, keys[SDLK_z]);
-	Input_SetKey(InputKey_Action2, keys[SDLK_x]);
-	Input_SetKey(InputKey_Up, keys[SDLK_UP]);
-	Input_SetKey(InputKey_Down, keys[SDLK_DOWN]);
-	Input_SetKey(InputKey_Left, keys[SDLK_LEFT]);
-	Input_SetKey(InputKey_Right, keys[SDLK_RIGHT]);
+	Input_SetKey(InputKey_Action1, keys[SDLK_z] | keys[SDLK_o]);
+	Input_SetKey(InputKey_Action2, keys[SDLK_x] | keys[SDLK_p]);
+	Input_SetKey(InputKey_Up, keys[SDLK_UP] | keys[SDLK_w]);
+	Input_SetKey(InputKey_Down, keys[SDLK_DOWN] | keys[SDLK_s]);
+	Input_SetKey(InputKey_Left, keys[SDLK_LEFT] | keys[SDLK_a]);
+	Input_SetKey(InputKey_Right, keys[SDLK_RIGHT] | keys[SDLK_d]);
 	Input_SetKey(InputKey_Jump, keys[SDLK_SPACE]);
 	Input_SetKey(InputKey_Continue,
 				 keys[SDLK_RETURN] | keys[SDLK_KP_ENTER] | _pointerDown);
 
-	Input_SetKey(InputKey_DumpProfiling, keys[SDLK_p]);
+	Input_SetKey(InputKey_DumpProfiling, keys[SDLK_m]);
 }
 
 /////////////////////////////
