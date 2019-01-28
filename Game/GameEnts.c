@@ -101,7 +101,7 @@ void player_proc(Entity e, int ft) {
 	e->A = 0;
 }
 
-void player_postproc(Entity e){
+void player_postproc(Entity e, int ft){
 
 	// Scroll View
 	GameLib_MoveToPos(e->pos, 0.6f);
