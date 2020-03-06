@@ -27,15 +27,15 @@ GAMELIB_HEADS := \
 	GameLib$(SLASH)Entity.h \
 	GameLib$(SLASH)GameLib.h
 GAMELIBS_OBJS := \
-	$(BUILDDIR)$(SLASH)GameLib$(SLASH)Time.o \
-	$(BUILDDIR)$(SLASH)GameLib$(SLASH)Util.o \
-	$(BUILDDIR)$(SLASH)GameLib$(SLASH)QuadArray2D.o \
-	$(BUILDDIR)$(SLASH)GameLib$(SLASH)Draw.o \
-	$(BUILDDIR)$(SLASH)GameLib$(SLASH)Input.o \
-	$(BUILDDIR)$(SLASH)GameLib$(SLASH)Audio.o \
-	$(BUILDDIR)$(SLASH)GameLib$(SLASH)Anim.o \
-	$(BUILDDIR)$(SLASH)GameLib$(SLASH)Entity.o \
-	$(BUILDDIR)$(SLASH)GameLib$(SLASH)GameLib.o
+	$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Time.o \
+	$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Util.o \
+	$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)QuadArray2D.o \
+	$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Draw.o \
+	$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Input.o \
+	$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Audio.o \
+	$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Anim.o \
+	$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Entity.o \
+	$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)GameLib.o
 RES_GAMELIB_OUT := $(BUILDDIR)$(SLASH)$(RES_GAMELIB)
 
 #####################
@@ -43,9 +43,9 @@ RES_GAMELIB_OUT := $(BUILDDIR)$(SLASH)$(RES_GAMELIB)
 #####################
 GAME_HEADS := $(GAMELIB_HEADS) Game$(SLASH)GameEnts.h Game$(SLASH)GameMap.h
 GAME_OBJS := \
-	$(BUILDDIR)$(SLASH)Game$(SLASH)GameEnts.o \
-	$(BUILDDIR)$(SLASH)Game$(SLASH)GameMap.o \
-	$(BUILDDIR)$(SLASH)Game$(SLASH)main.o
+	$(BUILDDIR)$(SLASH)Game.o$(SLASH)GameEnts.o \
+	$(BUILDDIR)$(SLASH)Game.o$(SLASH)GameMap.o \
+	$(BUILDDIR)$(SLASH)Game.o$(SLASH)main.o
 RES_GAME_OUT := $(BUILDDIR)$(SLASH)$(RES_GAME)
 
 
@@ -56,8 +56,8 @@ all: $(BUILDDIR) $(RES_GAME_OUT)
 
 $(BUILDDIR):
 	$(MKDIR) $(BUILDDIR)
-	$(MKDIR) $(BUILDDIR)$(SLASH)GameLib
-	$(MKDIR) $(BUILDDIR)$(SLASH)Game
+	$(MKDIR) $(BUILDDIR)$(SLASH)GameLib.o
+	$(MKDIR) $(BUILDDIR)$(SLASH)Game.o
 
 clean:
 	$(RM) $(GAMELIBS_OBJS) $(RES_GAMELIB_OUT) $(GAME_OBJS) $(RES_GAME_OUT)
@@ -70,23 +70,23 @@ rebuild: clean all
 #################
 # GameLib Rules #
 #################
-$(BUILDDIR)$(SLASH)GameLib$(SLASH)Time.o: GameLib$(SLASH)Time.c $(HEADS)
+$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Time.o: GameLib$(SLASH)Time.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)$(SLASH)GameLib$(SLASH)Util.o: GameLib$(SLASH)Util.c $(HEADS)
+$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Util.o: GameLib$(SLASH)Util.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)$(SLASH)GameLib$(SLASH)QuadArray2D.o: GameLib$(SLASH)QuadArray2D.c $(HEADS)
+$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)QuadArray2D.o: GameLib$(SLASH)QuadArray2D.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)$(SLASH)GameLib$(SLASH)Draw.o: GameLib$(SLASH)Draw.c $(HEADS)
+$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Draw.o: GameLib$(SLASH)Draw.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)$(SLASH)GameLib$(SLASH)Input.o: GameLib$(SLASH)Input.c $(HEADS)
+$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Input.o: GameLib$(SLASH)Input.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)$(SLASH)GameLib$(SLASH)Audio.o: GameLib$(SLASH)Audio.c $(HEADS)
+$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Audio.o: GameLib$(SLASH)Audio.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)$(SLASH)GameLib$(SLASH)Entity.o: GameLib$(SLASH)Entity.c $(HEADS)
+$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Entity.o: GameLib$(SLASH)Entity.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)$(SLASH)GameLib$(SLASH)Anim.o: GameLib$(SLASH)Anim.c $(HEADS)
+$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Anim.o: GameLib$(SLASH)Anim.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)$(SLASH)GameLib$(SLASH)GameLib.o: GameLib$(SLASH)GameLib.c $(HEADS)
+$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)GameLib.o: GameLib$(SLASH)GameLib.c $(HEADS)
 	$(DO_CC)
 
 
@@ -94,11 +94,11 @@ $(BUILDDIR)$(SLASH)GameLib$(SLASH)GameLib.o: GameLib$(SLASH)GameLib.c $(HEADS)
 # Game Rules #
 ##############
 
-$(BUILDDIR)$(SLASH)Game$(SLASH)GameEnts.o: Game$(SLASH)GameEnts.c $(HEADS)
+$(BUILDDIR)$(SLASH)Game.o$(SLASH)GameEnts.o: Game$(SLASH)GameEnts.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)$(SLASH)Game$(SLASH)GameMap.o: Game$(SLASH)GameMap.c $(HEADS)
+$(BUILDDIR)$(SLASH)Game.o$(SLASH)GameMap.o: Game$(SLASH)GameMap.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)$(SLASH)Game$(SLASH)main.o: Game$(SLASH)main.c $(HEADS)
+$(BUILDDIR)$(SLASH)Game.o$(SLASH)main.o: Game$(SLASH)main.c $(HEADS)
 	$(DO_CC)
 
 

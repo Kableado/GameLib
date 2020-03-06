@@ -3,13 +3,10 @@
 #ifndef _GAMEENTS_H_
 #define _GAMEENTS_H_
 
-enum {
-	Ent_Player,
-	Ent_Platform,
-	Ent_Block,
 
-	Ent_Last
-} EntityType;
+#define Ent_Player 1
+#define Ent_Platform 2
+#define Ent_Block 3
 
 extern Entity ent_Player;
 extern Entity ent_Platform;
