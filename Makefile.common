@@ -27,15 +27,15 @@ GAMELIB_HEADS := \
 	GameLib/Entity.h \
 	GameLib/GameLib.h
 GAMELIBS_OBJS := \
-	$(BUILDDIR)/GameLib/Time.o \
-	$(BUILDDIR)/GameLib/Util.o \
-	$(BUILDDIR)/GameLib/QuadArray2D.o \
-	$(BUILDDIR)/GameLib/Draw.o \
-	$(BUILDDIR)/GameLib/Input.o \
-	$(BUILDDIR)/GameLib/Audio.o \
-	$(BUILDDIR)/GameLib/Anim.o \
-	$(BUILDDIR)/GameLib/Entity.o \
-	$(BUILDDIR)/GameLib/GameLib.o
+	$(BUILDDIR)/GameLib.o/Time.o \
+	$(BUILDDIR)/GameLib.o/Util.o \
+	$(BUILDDIR)/GameLib.o/QuadArray2D.o \
+	$(BUILDDIR)/GameLib.o/Draw.o \
+	$(BUILDDIR)/GameLib.o/Input.o \
+	$(BUILDDIR)/GameLib.o/Audio.o \
+	$(BUILDDIR)/GameLib.o/Anim.o \
+	$(BUILDDIR)/GameLib.o/Entity.o \
+	$(BUILDDIR)/GameLib.o/GameLib.o
 RES_GAMELIB_OUT := $(BUILDDIR)/$(RES_GAMELIB)
 
 #####################
@@ -43,9 +43,9 @@ RES_GAMELIB_OUT := $(BUILDDIR)/$(RES_GAMELIB)
 #####################
 GAME_HEADS := $(GAMELIB_HEADS) Game/GameEnts.h Game/GameMap.h
 GAME_OBJS := \
-	$(BUILDDIR)/Game/GameEnts.o \
-	$(BUILDDIR)/Game/GameMap.o \
-	$(BUILDDIR)/Game/main.o
+	$(BUILDDIR)/Game.o/GameEnts.o \
+	$(BUILDDIR)/Game.o/GameMap.o \
+	$(BUILDDIR)/Game.o/main.o
 RES_GAME_OUT := $(BUILDDIR)/$(RES_GAME)
 
 
@@ -56,8 +56,8 @@ all: $(BUILDDIR) $(RES_GAME_OUT)
 
 $(BUILDDIR):
 	$(MKDIR) $(BUILDDIR)
-	$(MKDIR) $(BUILDDIR)/GameLib
-	$(MKDIR) $(BUILDDIR)/Game
+	$(MKDIR) $(BUILDDIR)/GameLib.o
+	$(MKDIR) $(BUILDDIR)/Game.o
 
 clean:
 	$(RM) $(GAMELIBS_OBJS) $(RES_GAMELIB_OUT) $(GAME_OBJS) $(RES_GAME_OUT)
@@ -70,23 +70,23 @@ rebuild: clean all
 #################
 # GameLib Rules #
 #################
-$(BUILDDIR)/GameLib/Time.o: GameLib/Time.c $(HEADS)
+$(BUILDDIR)/GameLib.o/Time.o: GameLib/Time.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/GameLib/Util.o: GameLib/Util.c $(HEADS)
+$(BUILDDIR)/GameLib.o/Util.o: GameLib/Util.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/GameLib/QuadArray2D.o: GameLib/QuadArray2D.c $(HEADS)
+$(BUILDDIR)/GameLib.o/QuadArray2D.o: GameLib/QuadArray2D.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/GameLib/Draw.o: GameLib/Draw.c $(HEADS)
+$(BUILDDIR)/GameLib.o/Draw.o: GameLib/Draw.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/GameLib/Input.o: GameLib/Input.c $(HEADS)
+$(BUILDDIR)/GameLib.o/Input.o: GameLib/Input.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/GameLib/Audio.o: GameLib/Audio.c $(HEADS)
+$(BUILDDIR)/GameLib.o/Audio.o: GameLib/Audio.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/GameLib/Entity.o: GameLib/Entity.c $(HEADS)
+$(BUILDDIR)/GameLib.o/Entity.o: GameLib/Entity.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/GameLib/Anim.o: GameLib/Anim.c $(HEADS)
+$(BUILDDIR)/GameLib.o/Anim.o: GameLib/Anim.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/GameLib/GameLib.o: GameLib/GameLib.c $(HEADS)
+$(BUILDDIR)/GameLib.o/GameLib.o: GameLib/GameLib.c $(HEADS)
 	$(DO_CC)
 
 
@@ -94,11 +94,11 @@ $(BUILDDIR)/GameLib/GameLib.o: GameLib/GameLib.c $(HEADS)
 # Game Rules #
 ##############
 
-$(BUILDDIR)/Game/GameEnts.o: Game/GameEnts.c $(HEADS)
+$(BUILDDIR)/Game.o/GameEnts.o: Game/GameEnts.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/Game/GameMap.o: Game/GameMap.c $(HEADS)
+$(BUILDDIR)/Game.o/GameMap.o: Game/GameMap.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/Game/main.o: Game/main.c $(HEADS)
+$(BUILDDIR)/Game.o/main.o: Game/main.c $(HEADS)
 	$(DO_CC)
 
 
