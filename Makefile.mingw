@@ -1,17 +1,19 @@
-CC       := i486-mingw32-gcc
-AR       := i486-mingw32-ar
+CC       := gcc
+AR       := ar
 LAUNCHER :=
 RM       := rm -rf
 MKDIR    := mkdir
 ECHO     := echo
+SLASH    := /
 
-LIBS    := -L/usr/i486-mingw/lib -D_GNU_SOURCE=1 -Dmain=SDL_main -lopengl32 -lmingw32 -lSDLmain -lSDL 
-CFLAGS  := -I/usr/i486-mingw/include -mwindows
-LDFLAGS := 
+LIBS    := -L/mingw/lib -lopengl32 -lSDL -lm
+#CFLAGS  := -I/mingw/include -g -mwindows -D_GNU_SOURCE=1
+CFLAGS  := -g -mwindows -D_GNU_SOURCE=1 -DWIN32
+LDFLAGS := -g -mwindows -D_GNU_SOURCE=1
 
 RES_GAMELIB := libgame.a
 RES_GAME    := game.exe
-BUILDDIR    := build-mingw
+BUILDDIR    := build-$(shell gcc -v 2>&1 | grep "Target:" | cut --delimiter=' ' --fields=2)
 
 include Makefile.common
 

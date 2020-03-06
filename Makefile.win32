@@ -4,10 +4,11 @@ LAUNCHER :=
 RM       := rm -rf
 MKDIR    := mkdir
 ECHO     := echo
+SLASH    := /
 
-LIBS    := -L/mingw/lib -lopengl32 -lSDL 
+LIBS    := -L/mingw/lib -lopengl32 -lSDL -lm
 #CFLAGS  := -I/mingw/include -g -mwindows -D_GNU_SOURCE=1
-CFLAGS  := -g -mwindows -D_GNU_SOURCE=1
+CFLAGS  := -g -mwindows -D_GNU_SOURCE=1 -DWIN32
 LDFLAGS := -g -mwindows -D_GNU_SOURCE=1
 
 RES_GAMELIB := libgame.a
