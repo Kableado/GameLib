@@ -1,0 +1,16 @@
+CC       := gcc
+AR       := ar
+LAUNCHER :=
+RM       := rm -rf
+MKDIR    := mkdir
+ECHO     := echo
+ 
+LIBS    := -framework Cocoa -lm -framework OpenGL -framework SDL macosx/SDLMain.m
+CFLAGS  := -Wall -g -DMACOSX -ObjC -Dmain=SDL_main -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/
+LDFLAGS :=
+
+RES_GAMELIB := libgame.a
+RES_GAME    := game
+BUILDDIR    := build-$(shell gcc -v 2>&1 | grep "Target:" | cut -d ' ' -f 2)
+
+include Makefile.common

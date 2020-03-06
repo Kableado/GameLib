@@ -27,6 +27,7 @@ GAMELIB_HEADS := \
 	GameLib$(SLASH)Entity.h \
 	GameLib$(SLASH)GameLib.h
 GAMELIBS_OBJS := \
+<<<<<<< HEAD
 	$(BUILDDIR)$(SLASH)GameLib$(SLASH)Time.o \
 	$(BUILDDIR)$(SLASH)GameLib$(SLASH)Util.o \
 	$(BUILDDIR)$(SLASH)GameLib$(SLASH)QuadArray2D.o \
@@ -37,16 +38,35 @@ GAMELIBS_OBJS := \
 	$(BUILDDIR)$(SLASH)GameLib$(SLASH)Entity.o \
 	$(BUILDDIR)$(SLASH)GameLib$(SLASH)GameLib.o
 RES_GAMELIB_OUT := $(BUILDDIR)$(SLASH)$(RES_GAMELIB)
+=======
+	$(BUILDDIR)/GameLib.o/Time.o \
+	$(BUILDDIR)/GameLib.o/Util.o \
+	$(BUILDDIR)/GameLib.o/QuadArray2D.o \
+	$(BUILDDIR)/GameLib.o/Draw.o \
+	$(BUILDDIR)/GameLib.o/Input.o \
+	$(BUILDDIR)/GameLib.o/Audio.o \
+	$(BUILDDIR)/GameLib.o/Anim.o \
+	$(BUILDDIR)/GameLib.o/Entity.o \
+	$(BUILDDIR)/GameLib.o/GameLib.o
+RES_GAMELIB_OUT := $(BUILDDIR)/$(RES_GAMELIB)
+>>>>>>> c38b321 (Add support for MacOSX)
 
 #####################
 # Game Declarations #
 #####################
 GAME_HEADS := $(GAMELIB_HEADS) Game$(SLASH)GameEnts.h Game$(SLASH)GameMap.h
 GAME_OBJS := \
+<<<<<<< HEAD
 	$(BUILDDIR)$(SLASH)Game$(SLASH)GameEnts.o \
 	$(BUILDDIR)$(SLASH)Game$(SLASH)GameMap.o \
 	$(BUILDDIR)$(SLASH)Game$(SLASH)main.o
 RES_GAME_OUT := $(BUILDDIR)$(SLASH)$(RES_GAME)
+=======
+	$(BUILDDIR)/Game.o/GameEnts.o \
+	$(BUILDDIR)/Game.o/GameMap.o \
+	$(BUILDDIR)/Game.o/main.o
+RES_GAME_OUT := $(BUILDDIR)/$(RES_GAME)
+>>>>>>> c38b321 (Add support for MacOSX)
 
 
 #################
@@ -56,8 +76,13 @@ all: $(BUILDDIR) $(RES_GAME_OUT)
 
 $(BUILDDIR):
 	$(MKDIR) $(BUILDDIR)
+<<<<<<< HEAD
 	$(MKDIR) $(BUILDDIR)$(SLASH)GameLib
 	$(MKDIR) $(BUILDDIR)$(SLASH)Game
+=======
+	$(MKDIR) $(BUILDDIR)/GameLib.o
+	$(MKDIR) $(BUILDDIR)/Game.o
+>>>>>>> c38b321 (Add support for MacOSX)
 
 clean:
 	$(RM) $(GAMELIBS_OBJS) $(RES_GAMELIB_OUT) $(GAME_OBJS) $(RES_GAME_OUT)
@@ -70,6 +95,7 @@ rebuild: clean all
 #################
 # GameLib Rules #
 #################
+<<<<<<< HEAD
 $(BUILDDIR)$(SLASH)GameLib$(SLASH)Time.o: GameLib$(SLASH)Time.c $(HEADS)
 	$(DO_CC)
 $(BUILDDIR)$(SLASH)GameLib$(SLASH)Util.o: GameLib$(SLASH)Util.c $(HEADS)
@@ -87,6 +113,25 @@ $(BUILDDIR)$(SLASH)GameLib$(SLASH)Entity.o: GameLib$(SLASH)Entity.c $(HEADS)
 $(BUILDDIR)$(SLASH)GameLib$(SLASH)Anim.o: GameLib$(SLASH)Anim.c $(HEADS)
 	$(DO_CC)
 $(BUILDDIR)$(SLASH)GameLib$(SLASH)GameLib.o: GameLib$(SLASH)GameLib.c $(HEADS)
+=======
+$(BUILDDIR)/GameLib.o/Time.o: GameLib/Time.c $(HEADS)
+	$(DO_CC)
+$(BUILDDIR)/GameLib.o/Util.o: GameLib/Util.c $(HEADS)
+	$(DO_CC)
+$(BUILDDIR)/GameLib.o/QuadArray2D.o: GameLib/QuadArray2D.c $(HEADS)
+	$(DO_CC)
+$(BUILDDIR)/GameLib.o/Draw.o: GameLib/Draw.c $(HEADS)
+	$(DO_CC)
+$(BUILDDIR)/GameLib.o/Input.o: GameLib/Input.c $(HEADS)
+	$(DO_CC)
+$(BUILDDIR)/GameLib.o/Audio.o: GameLib/Audio.c $(HEADS)
+	$(DO_CC)
+$(BUILDDIR)/GameLib.o/Entity.o: GameLib/Entity.c $(HEADS)
+	$(DO_CC)
+$(BUILDDIR)/GameLib.o/Anim.o: GameLib/Anim.c $(HEADS)
+	$(DO_CC)
+$(BUILDDIR)/GameLib.o/GameLib.o: GameLib/GameLib.c $(HEADS)
+>>>>>>> c38b321 (Add support for MacOSX)
 	$(DO_CC)
 
 
@@ -94,11 +139,19 @@ $(BUILDDIR)$(SLASH)GameLib$(SLASH)GameLib.o: GameLib$(SLASH)GameLib.c $(HEADS)
 # Game Rules #
 ##############
 
+<<<<<<< HEAD
 $(BUILDDIR)$(SLASH)Game$(SLASH)GameEnts.o: Game$(SLASH)GameEnts.c $(HEADS)
 	$(DO_CC)
 $(BUILDDIR)$(SLASH)Game$(SLASH)GameMap.o: Game$(SLASH)GameMap.c $(HEADS)
 	$(DO_CC)
 $(BUILDDIR)$(SLASH)Game$(SLASH)main.o: Game$(SLASH)main.c $(HEADS)
+=======
+$(BUILDDIR)/Game.o/GameEnts.o: Game/GameEnts.c $(HEADS)
+	$(DO_CC)
+$(BUILDDIR)/Game.o/GameMap.o: Game/GameMap.c $(HEADS)
+	$(DO_CC)
+$(BUILDDIR)/Game.o/main.o: Game/main.c $(HEADS)
+>>>>>>> c38b321 (Add support for MacOSX)
 	$(DO_CC)
 
 
