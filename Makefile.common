@@ -17,36 +17,36 @@ endif
 ########################
 CFLAGS += -IGameLib
 GAMELIB_HEADS := \
-	GameLib/Time.h \
-	GameLib/Util.h \
-	GameLib/QuadArray2D.h \
-	GameLib/Draw.h \
-	GameLib/Input.h \
-	GameLib/Audio.h \
-	GameLib/Anim.h \
-	GameLib/Entity.h \
-	GameLib/GameLib.h
+	GameLib$(SLASH)Time.h \
+	GameLib$(SLASH)Util.h \
+	GameLib$(SLASH)QuadArray2D.h \
+	GameLib$(SLASH)Draw.h \
+	GameLib$(SLASH)Input.h \
+	GameLib$(SLASH)Audio.h \
+	GameLib$(SLASH)Anim.h \
+	GameLib$(SLASH)Entity.h \
+	GameLib$(SLASH)GameLib.h
 GAMELIBS_OBJS := \
-	$(BUILDDIR)/GameLib/Time.o \
-	$(BUILDDIR)/GameLib/Util.o \
-	$(BUILDDIR)/GameLib/QuadArray2D.o \
-	$(BUILDDIR)/GameLib/Draw.o \
-	$(BUILDDIR)/GameLib/Input.o \
-	$(BUILDDIR)/GameLib/Audio.o \
-	$(BUILDDIR)/GameLib/Anim.o \
-	$(BUILDDIR)/GameLib/Entity.o \
-	$(BUILDDIR)/GameLib/GameLib.o
-RES_GAMELIB_OUT := $(BUILDDIR)/$(RES_GAMELIB)
+	$(BUILDDIR)$(SLASH)GameLib$(SLASH)Time.o \
+	$(BUILDDIR)$(SLASH)GameLib$(SLASH)Util.o \
+	$(BUILDDIR)$(SLASH)GameLib$(SLASH)QuadArray2D.o \
+	$(BUILDDIR)$(SLASH)GameLib$(SLASH)Draw.o \
+	$(BUILDDIR)$(SLASH)GameLib$(SLASH)Input.o \
+	$(BUILDDIR)$(SLASH)GameLib$(SLASH)Audio.o \
+	$(BUILDDIR)$(SLASH)GameLib$(SLASH)Anim.o \
+	$(BUILDDIR)$(SLASH)GameLib$(SLASH)Entity.o \
+	$(BUILDDIR)$(SLASH)GameLib$(SLASH)GameLib.o
+RES_GAMELIB_OUT := $(BUILDDIR)$(SLASH)$(RES_GAMELIB)
 
 #####################
 # Game Declarations #
 #####################
-GAME_HEADS := $(GAMELIB_HEADS) Game/GameEnts.h Game/GameMap.h
+GAME_HEADS := $(GAMELIB_HEADS) Game$(SLASH)GameEnts.h Game$(SLASH)GameMap.h
 GAME_OBJS := \
-	$(BUILDDIR)/Game/GameEnts.o \
-	$(BUILDDIR)/Game/GameMap.o \
-	$(BUILDDIR)/Game/main.o
-RES_GAME_OUT := $(BUILDDIR)/$(RES_GAME)
+	$(BUILDDIR)$(SLASH)Game$(SLASH)GameEnts.o \
+	$(BUILDDIR)$(SLASH)Game$(SLASH)GameMap.o \
+	$(BUILDDIR)$(SLASH)Game$(SLASH)main.o
+RES_GAME_OUT := $(BUILDDIR)$(SLASH)$(RES_GAME)
 
 
 #################
@@ -56,37 +56,37 @@ all: $(BUILDDIR) $(RES_GAME_OUT)
 
 $(BUILDDIR):
 	$(MKDIR) $(BUILDDIR)
-	$(MKDIR) $(BUILDDIR)/GameLib
-	$(MKDIR) $(BUILDDIR)/Game
+	$(MKDIR) $(BUILDDIR)$(SLASH)GameLib
+	$(MKDIR) $(BUILDDIR)$(SLASH)Game
 
 clean:
 	$(RM) $(GAMELIBS_OBJS) $(RES_GAMELIB_OUT) $(GAME_OBJS) $(RES_GAME_OUT)
 
 run: $(BUILDDIR) $(RES_GAME_OUT)
-	$(LAUNCHER) ./$(RES_GAME_OUT) debug
+	$(LAUNCHER) .$(SLASH)$(RES_GAME_OUT) debug
 
 rebuild: clean all
 
 #################
 # GameLib Rules #
 #################
-$(BUILDDIR)/GameLib/Time.o: GameLib/Time.c $(HEADS)
+$(BUILDDIR)$(SLASH)GameLib$(SLASH)Time.o: GameLib$(SLASH)Time.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/GameLib/Util.o: GameLib/Util.c $(HEADS)
+$(BUILDDIR)$(SLASH)GameLib$(SLASH)Util.o: GameLib$(SLASH)Util.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/GameLib/QuadArray2D.o: GameLib/QuadArray2D.c $(HEADS)
+$(BUILDDIR)$(SLASH)GameLib$(SLASH)QuadArray2D.o: GameLib$(SLASH)QuadArray2D.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/GameLib/Draw.o: GameLib/Draw.c $(HEADS)
+$(BUILDDIR)$(SLASH)GameLib$(SLASH)Draw.o: GameLib$(SLASH)Draw.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/GameLib/Input.o: GameLib/Input.c $(HEADS)
+$(BUILDDIR)$(SLASH)GameLib$(SLASH)Input.o: GameLib$(SLASH)Input.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/GameLib/Audio.o: GameLib/Audio.c $(HEADS)
+$(BUILDDIR)$(SLASH)GameLib$(SLASH)Audio.o: GameLib$(SLASH)Audio.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/GameLib/Entity.o: GameLib/Entity.c $(HEADS)
+$(BUILDDIR)$(SLASH)GameLib$(SLASH)Entity.o: GameLib$(SLASH)Entity.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/GameLib/Anim.o: GameLib/Anim.c $(HEADS)
+$(BUILDDIR)$(SLASH)GameLib$(SLASH)Anim.o: GameLib$(SLASH)Anim.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/GameLib/GameLib.o: GameLib/GameLib.c $(HEADS)
+$(BUILDDIR)$(SLASH)GameLib$(SLASH)GameLib.o: GameLib$(SLASH)GameLib.c $(HEADS)
 	$(DO_CC)
 
 
@@ -94,11 +94,11 @@ $(BUILDDIR)/GameLib/GameLib.o: GameLib/GameLib.c $(HEADS)
 # Game Rules #
 ##############
 
-$(BUILDDIR)/Game/GameEnts.o: Game/GameEnts.c $(HEADS)
+$(BUILDDIR)$(SLASH)Game$(SLASH)GameEnts.o: Game$(SLASH)GameEnts.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/Game/GameMap.o: Game/GameMap.c $(HEADS)
+$(BUILDDIR)$(SLASH)Game$(SLASH)GameMap.o: Game$(SLASH)GameMap.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)/Game/main.o: Game/main.c $(HEADS)
+$(BUILDDIR)$(SLASH)Game$(SLASH)main.o: Game$(SLASH)main.c $(HEADS)
 	$(DO_CC)
 
 

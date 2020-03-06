@@ -4,6 +4,7 @@ LAUNCHER :=
 RM       := rm -rf
 MKDIR    := mkdir
 ECHO     := echo
+SLASH    := /
  
 LIBS    := -lSDL -lpthread -L/usr/X11R6/lib -L/usr/lib -lm -lGL -lX11
 CFLAGS  := -Wall -g -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/
