@@ -1,10 +1,11 @@
 // Copyright (C) 2012 Valeriano Alfonso Rodriguez (Kableado)
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
+#include <unistd.h>
 #include <string.h>
-#include <math.h>
+
 
 #include "GameLib.h"
 extern int gamelib_debug;
@@ -31,8 +32,6 @@ void PreDrawGame(float f) {}
 void DrawGame(float f) { MainGame_Text(8, 8, "Hello world!"); }
 
 int main(int argc, char *argv[]) {
-
-	srand(time(NULL));
 
 	if (argc > 1) {
 		if (!strcmp(argv[1], "debug")) {
