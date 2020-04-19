@@ -1,5 +1,5 @@
 
-IsMinGW := $(findstring MSYS,$(shell uname -s))
+IsMinGW := $(findstring MINGW,$(shell uname -s))
 IsDarwin := $(findstring Darwin,$(shell uname -s))
 ifneq (,$(IsMinGW))
 	TARGET_ARCH := mingw
