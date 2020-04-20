@@ -38,23 +38,37 @@
 			margin: 0 auto;
 		}
 		.progress-container progress{
-			width:100%;
+			width: 100%;
+		}
+		.game-screen-container{
+			display:block;
+			width: 100%;
+			padding-top: 10px;
+		}
+		.game-screen-container canvas{
+			border: 1px solid #808080;
+			border-radius: 5px;
+			padding: 5px;
+			box-shadow: 0px 0px 5px #808080;
+			margin: 0 auto;
 		}
 	</style>
 	<body>
-		<div id="progress-container" class="progress-container">
-			<h1>Loading...</h1>
-			<span>Code:</span></br>
-			<progress id="progress-code" max="1" value="0"></progress></br>
-			</br>
-			<span>Data:</span></br>
-			<progress id="progress-data" max="1" value="0"></progress></br>
+		<div class="game-screen-container">
+			<div id="progress-container" class="progress-container">
+				<h1>Loading...</h1>
+				<span>Code:</span></br>
+				<progress id="progress-code" max="1" value="0"></progress></br>
+				</br>
+				<span>Data:</span></br>
+				<progress id="progress-data" max="1" value="0"></progress></br>
+			</div>
+			<div style="width:0;height:0;position:absolute;display:block;overflow:hidden;">
+				<input type="button" id="btnFocus" value="focus" />
+			</div>
+			<canvas class="game-screen" id="canvas" style="display:none;"
+				oncontextmenu="event.preventDefault()" onclick="document.getElementById('btnFocus').focus();"></canvas>
 		</div>
-		<div style="width:0;height:0;position:absolute;display:block;overflow:hidden;">
-			<input type="button" id="btnFocus" value="focus" />
-		</div>
-		<canvas class="game-screen" id="canvas" style="display:none;"
-			oncontextmenu="event.preventDefault()" onclick="document.getElementById('btnFocus').focus();"></canvas>
 
 		<script type='text/javascript'>
 		var Module = {
@@ -67,20 +81,26 @@
 					});
 				}],
 			postRun: [],
-			canvas: document.getElementById('canvas'),
 			progressContainer: document.getElementById('progress-container'),
 			progressCode: document.getElementById('progress-code'),
 			progressData: document.getElementById('progress-data'),
-			print: function(text) {
+			printErr: function(text) {
+				if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
 				if(console && console.log){
 					console.log(text);
 				}
 			},
-			printErr: function(text) {
-				this.print(text);
-			},
+			canvas: (function() {
+				var canvas = document.getElementById('canvas');
+
+				// As a default initial behavior, pop up an alert when webgl context is lost. To make your
+				// application robust, you may want to override this behavior before shipping!
+				// See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
+				canvas.addEventListener("webglcontextlost", function(e) { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
+
+				return canvas;
+			})(),
 			setStatus: function(text) {
-				this.print(text);
 				var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
 				if(m){
 					this.progressData.value = parseInt(m[2]);
@@ -107,7 +127,12 @@
 				xhr.onload = function(event) {
 					var packageData = xhr.response;
 					// Launch loaded code
-					eval.call(null,packageData);
+					try{
+						eval.call(null,packageData);
+					}catch(e){
+						alert("Error "+parent+" "+e);
+						parent.postMessage("Error","");
+					}
 				};
 				xhr.onerror = function(event) {
 					alert(event);
@@ -117,6 +142,5 @@
 		};
 		Module.LaunchCode();
 		</script>
-		<!-- <script async type="text/javascript" src="game.js"></script> -->
 	</body>
 </html>

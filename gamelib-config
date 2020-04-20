@@ -24,7 +24,7 @@ case "$uname" in
 	*MINGW* | *MSYS*)
 		# Configuracion de Win32/Mingw
 		libs="-L/mingw/lib -lopengl32 -lSDL"
-		cflags="-g -mwindows -D_GNU_SOURCE=1"
+		cflags="-g -mwindows -D_GNU_SOURCE=1 -DWIN32"
 		builddir="build-$gcctarget"
 		platform="$gcctarget"
 		exeextension=".exe"
@@ -36,6 +36,14 @@ case "$uname" in
 		builddir="build-emscripten"
 		platform="emscripten"
 		exeextension=".html"
+		;;
+	*Darwin*)
+		# Configuracion de MacOSX
+		libs="-framework Cocoa -lm -framework OpenGL -framework SDL"
+		cflags="-Wall -g -DMACOSX -ObjC -Dmain=SDL_main -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/"
+		builddir="build-$gcctarget"
+		platform="$gcctarget"
+		exeextension=""
 		;;
 	*)
 		# Configuracion de Linux
@@ -50,7 +58,7 @@ esac
 while test $# -gt 0; do
   case $1 in
     --cflags)
-      echo "$cflags -I$prefix/GameLib"
+      echo "$cflags -I$prefix/src"
       ;;
     --libs)
       echo "$libs"
