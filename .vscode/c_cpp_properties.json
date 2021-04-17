@@ -5,7 +5,7 @@
             "includePath": [
                 "/usr/include",
                 "${workspaceRoot}",
-                "${workspaceRoot}/GameLib/"
+                "${workspaceRoot}/src/"
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
@@ -13,7 +13,7 @@
                 "path": [
                     "/usr/include",
                     "${workspaceRoot}",
-                    "${workspaceRoot}/GameLib/"
+                    "${workspaceRoot}/src/"
                 ]
             },
             "intelliSenseMode": "clang-x64",
@@ -27,7 +27,7 @@
             "includePath": [
                 "/usr/include",
                 "${workspaceRoot}",
-                "${workspaceRoot}/GameLib/"
+                "${workspaceRoot}/src/"
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
@@ -35,7 +35,7 @@
                 "path": [
                     "/usr/include",
                     "${workspaceRoot}",
-                    "${workspaceRoot}/GameLib/"
+                    "${workspaceRoot}/src/"
                 ]
             },
             "intelliSenseMode": "clang-x64",
@@ -49,7 +49,7 @@
                 "C:\\msys64\\mingw64\\include",
                 "C:\\msys64\\mingw64\\x86_64-w64-mingw32\\include",
                 "${workspaceRoot}",
-                "${workspaceRoot}/GameLib/"
+                "${workspaceRoot}/src/"
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
@@ -58,7 +58,7 @@
                     "C:\\msys64\\mingw64\\include",
                     "C:\\msys64\\mingw64\\x86_64-w64-mingw32\\include",
                     "${workspaceRoot}",
-                    "${workspaceRoot}/GameLib/"
+                    "${workspaceRoot}/src/"
                 ]
             },
             "intelliSenseMode": "msvc-x64",
