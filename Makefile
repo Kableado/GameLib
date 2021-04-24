@@ -20,7 +20,6 @@ ifeq ($(TARGET_ARCH),mingw)
 	RM       := rm -rf
 	MKDIR    := mkdir
 	ECHO     := echo
-	SLASH    := /
 
 	LIBS    := -L/mingw/lib -lopengl32 -lSDL -lm
 	CFLAGS  := -g -mwindows -D_GNU_SOURCE=1 -DWIN32
@@ -36,7 +35,6 @@ ifeq ($(TARGET_ARCH),linux)
 	RM       := rm -rf
 	MKDIR    := mkdir
 	ECHO     := echo
-	SLASH    := /
 
 	LIBS    := -lSDL -lpthread -L/usr/X11R6/lib -L/usr/lib -lm -lGL -lX11
 	CFLAGS  := -Wall -g -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/
@@ -54,7 +52,6 @@ ifeq ($(TARGET_ARCH),macosx)
 	MKDIR    := mkdir
 	ECHO     := echo
 	VERBOSE_BUILD := false
-	SLASH    := /
 
 	LIBS    := -framework Cocoa -lm -framework OpenGL -framework SDL macosx/SDLMain.m
 	CFLAGS  := -Wall -g -DMACOSX -ObjC -Dmain=SDL_main -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/
