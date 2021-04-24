@@ -6,9 +6,9 @@ ifeq ($(VERBOSE_BUILD),true)
 	DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
 	DO_CXX=$(CXX) $(CFLAGS) -o $@ -c $<
 else
-	DO_CC=@$(ECHO) "CC: $@" ;\
+	DO_CC=@$(ECHO) "CC: $@" &&\
 		$(CC) $(CFLAGS) -o $@ -c $<
-	DO_CXX=@$(ECHO) "CXX: $@" ;\
+	DO_CXX=@$(ECHO) "CXX: $@" &&\
 		$(CXX) $(CFLAGS) -o $@ -c $<
 endif
 
@@ -17,26 +17,26 @@ endif
 ########################
 CFLAGS += -Isrc
 GAMELIB_HEADS := \
-	src$(SLASH)Time.h \
-	src$(SLASH)Util.h \
-	src$(SLASH)QuadArray2D.h \
-	src$(SLASH)Draw.h \
-	src$(SLASH)Input.h \
-	src$(SLASH)Audio.h \
-	src$(SLASH)Anim.h \
-	src$(SLASH)Entity.h \
-	src$(SLASH)GameLib.h
+	src/Time.h \
+	src/Util.h \
+	src/QuadArray2D.h \
+	src/Draw.h \
+	src/Input.h \
+	src/Audio.h \
+	src/Anim.h \
+	src/Entity.h \
+	src/GameLib.h
 GAMELIBS_OBJS := \
-	$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Time.o \
-	$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Util.o \
-	$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)QuadArray2D.o \
-	$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Draw.o \
-	$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Input.o \
-	$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Audio.o \
-	$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Anim.o \
-	$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Entity.o \
-	$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)GameLib.o
-RES_GAMELIB_OUT := $(BUILDDIR)$(SLASH)$(RES_GAMELIB)
+	$(BUILDDIR)/Time.o \
+	$(BUILDDIR)/Util.o \
+	$(BUILDDIR)/QuadArray2D.o \
+	$(BUILDDIR)/Draw.o \
+	$(BUILDDIR)/Input.o \
+	$(BUILDDIR)/Audio.o \
+	$(BUILDDIR)/Anim.o \
+	$(BUILDDIR)/Entity.o \
+	$(BUILDDIR)/GameLib.o
+RES_GAMELIB_OUT := $(BUILDDIR)/$(RES_GAMELIB)
 
 #################
 # General Rules #
@@ -45,10 +45,9 @@ all: $(BUILDDIR) $(RES_GAMELIB_OUT)
 
 $(BUILDDIR):
 	$(MKDIR) $(BUILDDIR)
-	$(MKDIR) $(BUILDDIR)$(SLASH)GameLib.o
 
 clean:
-	$(RM) $(GAMELIBS_OBJS) $(RES_GAMELIB_OUT)
+	$(RM) $(BUILDDIR)
 
 lib: $(BUILDDIR) $(RES_GAMELIB_OUT)
 
@@ -57,23 +56,23 @@ rebuild: clean all
 #################
 # GameLib Rules #
 #################
-$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Time.o: src$(SLASH)Time.c $(HEADS)
+$(BUILDDIR)/Time.o: src/Time.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Util.o: src$(SLASH)Util.c $(HEADS)
+$(BUILDDIR)/Util.o: src/Util.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)QuadArray2D.o: src$(SLASH)QuadArray2D.c $(HEADS)
+$(BUILDDIR)/QuadArray2D.o: src/QuadArray2D.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Draw.o: src$(SLASH)Draw.c $(HEADS)
+$(BUILDDIR)/Draw.o: src/Draw.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Input.o: src$(SLASH)Input.c $(HEADS)
+$(BUILDDIR)/Input.o: src/Input.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Audio.o: src$(SLASH)Audio.c $(HEADS)
+$(BUILDDIR)/Audio.o: src/Audio.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Entity.o: src$(SLASH)Entity.c $(HEADS)
+$(BUILDDIR)/Entity.o: src/Entity.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)Anim.o: src$(SLASH)Anim.c $(HEADS)
+$(BUILDDIR)/Anim.o: src/Anim.c $(HEADS)
 	$(DO_CC)
-$(BUILDDIR)$(SLASH)GameLib.o$(SLASH)GameLib.o: src$(SLASH)GameLib.c $(HEADS)
+$(BUILDDIR)/GameLib.o: src/GameLib.c $(HEADS)
 	$(DO_CC)
 
 

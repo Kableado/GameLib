@@ -32,7 +32,6 @@ ifeq ($(TARGET_ARCH),mingw)
 	RM       := rm -rf
 	MKDIR    := mkdir
 	ECHO     := echo
-	SLASH    := /
 endif
 ifeq ($(TARGET_ARCH),linux)
 	CC       := gcc
@@ -41,8 +40,6 @@ ifeq ($(TARGET_ARCH),linux)
 	RM       := rm -rf
 	MKDIR    := mkdir
 	ECHO     := echo
-	SLASH    := /
-
 endif
 ifeq ($(TARGET_ARCH),macosx)
 	CC       := gcc
@@ -51,8 +48,6 @@ ifeq ($(TARGET_ARCH),macosx)
 	RM       := rm -rf
 	MKDIR    := mkdir
 	ECHO     := echo
-	VERBOSE_BUILD := false
-	SLASH    := /
 	LIBS     := $(LIBS) macosx/SDLMain.m
 endif
 
