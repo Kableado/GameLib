@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Draw.h"
 #include "Anim.h"
+#include "Draw.h"
 
 ////////////////////////////////////////////////
 // Animation //
@@ -187,7 +187,8 @@ void AnimPlay_Draw(AnimPlay *ani, int x, int y, float scale[2]) {
 		return;
 	}
 	if (ani->imgPart) {
-		Draw_DrawImgPart(ani->imgPart, x, y, ani->w, ani->h, ani->i, ani->j, scale);
+		Draw_DrawImgPart(ani->imgPart, x, y, ani->w, ani->h, ani->i, ani->j,
+						 scale);
 		return;
 	}
 }
@@ -236,7 +237,7 @@ void AnimPlay_SetPause(AnimPlay *ani, int p) { ani->pause = p; }
 //
 //
 void AnimPlay_IncTime(AnimPlay *ani, int t) {
-	if (ani->anim){
+	if (ani->anim) {
 		if (!ani->pause) {
 			ani->time_ms += t;
 		}

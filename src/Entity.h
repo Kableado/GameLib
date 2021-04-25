@@ -3,9 +3,9 @@
 #ifndef _ENTITY_H_
 #define _ENTITY_H_
 
-#include "Util.h"
-#include "Draw.h"
 #include "Anim.h"
+#include "Draw.h"
+#include "Util.h"
 
 ////////////////////////////////////////////////
 // Entity

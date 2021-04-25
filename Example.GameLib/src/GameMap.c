@@ -1,9 +1,9 @@
 // Copyright (C) 2012 Valeriano Alfonso Rodriguez (Kableado)
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 #include "GameLib.h"
 

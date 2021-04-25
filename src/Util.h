@@ -3,8 +3,8 @@
 #ifndef _UTIL_H_
 #define _UTIL_H_
 
-#include <stdlib.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
 /////////////////////////////
 // SolveQuadratic

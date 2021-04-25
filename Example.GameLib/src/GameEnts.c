@@ -1,8 +1,8 @@
 // Copyright (C) 2012 Valeriano Alfonso Rodriguez (Kableado)
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
 #include "GameLib.h"
 extern int gamelib_debug;
@@ -40,14 +40,12 @@ void player_proc(Entity e, int ft) {
 	float jumpVel = 50.0f;
 	float airMovementFactor = 0.1f;
 
-
 	// Process elasticity
 	float entityScale[2];
 	Entity_GetScale(e, entityScale);
 	entityScale[0] += (1.0f - entityScale[0]) / 2.0f;
 	entityScale[1] += (1.0f - entityScale[1]) / 2.0f;
 	Entity_SetScale(e, entityScale);
-
 
 	if (e->A > 0) {
 		if (Input_GetKey(InputKey_Jump) == InputKey_Pressed ||
@@ -101,27 +99,29 @@ void player_proc(Entity e, int ft) {
 	e->A = 0;
 }
 
-void player_postproc(Entity e, int ft){
+void player_postproc(Entity e, int ft) {
 
 	// Scroll View
 	GameLib_MoveToPos(e->pos, 0.6f);
-	//GameLib_MoveToPos(e->pos, 1.0f);
+	// GameLib_MoveToPos(e->pos, 1.0f);
 }
 
-int player_collision(Entity ent, Entity ent2, float t, vec2 n){
-	if(n[1] < 0  && fabs(n[1]) > fabs(n[0])){
+int player_collision(Entity ent, Entity ent2, float t, vec2 n) {
+	if (n[1] < 0 && fabs(n[1]) > fabs(n[0])) {
 		ent->A = 1;
 	}
-	
+
 	if (fabs(n[0]) > fabs(n[1])) {
 		float intensity = (fabs(ent->vel[0]) - 10.0f) / 40.0f;
 		if (intensity > 0) {
-			Entity_SetScale(ent, (float[2]){1.0f - (0.3f * intensity), 1.0f + (0.3f * intensity)});
+			Entity_SetScale(ent, (float[2]){1.0f - (0.3f * intensity),
+											1.0f + (0.3f * intensity)});
 		}
 	} else {
 		float intensity = (fabs(ent->vel[1]) - 10.0f) / 40.0f;
 		if (intensity > 0) {
-			Entity_SetScale(ent, (float[2]){1.0f + (0.3f * intensity), 1.0f - (0.3f * intensity)});
+			Entity_SetScale(ent, (float[2]){1.0f + (0.3f * intensity),
+											1.0f - (0.3f * intensity)});
 		}
 	}
 	return -1;

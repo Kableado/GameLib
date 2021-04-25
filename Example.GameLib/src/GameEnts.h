@@ -3,7 +3,6 @@
 #ifndef _GAMEENTS_H_
 #define _GAMEENTS_H_
 
-
 #define Ent_Player 1
 #define Ent_Platform 2
 #define Ent_Block 3

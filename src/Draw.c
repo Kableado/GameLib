@@ -157,10 +157,10 @@ int Draw_Init(int width, int height, char *title, int pfps, int fps) {
 
 #ifdef WIN32
 #ifndef ATTACH_PARENT_PROCESS
-#	define ATTACH_PARENT_PROCESS ((DWORD)-1)
+#define ATTACH_PARENT_PROCESS ((DWORD)-1)
 #endif
 	// Salida en la consola del padre
-	AttachConsole(ATTACH_PARENT_PROCESS );
+	AttachConsole(ATTACH_PARENT_PROCESS);
 	if (GetStdHandle(STD_OUTPUT_HANDLE) != 0) {
 		fclose(stdin);
 		fclose(stdout);
