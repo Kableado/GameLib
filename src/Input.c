@@ -1,13 +1,13 @@
 // Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
 
-#include <math.h>
 #include <SDL/SDL.h>
+#include <math.h>
 #ifdef EMSCRIPTEN
 #define SDL_GetKeyState SDL_GetKeyboardState
 #endif
 
-#include "Util.h"
 #include "Input.h"
+#include "Util.h"
 
 // Globals
 InputKeyStatus _keys[InputKey_Max];

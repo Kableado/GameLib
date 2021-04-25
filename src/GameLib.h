@@ -3,13 +3,13 @@
 #ifndef _GAMELIB_H_
 #define _GAMELIB_H_
 
+#include "Anim.h"
+#include "Audio.h"
+#include "Draw.h"
+#include "Entity.h"
+#include "Input.h"
 #include "Time.h"
 #include "Util.h"
-#include "Draw.h"
-#include "Input.h"
-#include "Audio.h"
-#include "Anim.h"
-#include "Entity.h"
 
 /////////////////////////////
 // GameLib_Init
@@ -112,7 +112,8 @@ void GameLib_EntitySetLight(Entity e, float r, float g, float b, float rad);
 // GameLib_ConvertScreenPositionToGamePosition
 //
 //
-void GameLib_ConvertScreenPositionToGamePosition(vec2 screenPos, vec2 gamePos, float f);
+void GameLib_ConvertScreenPositionToGamePosition(vec2 screenPos, vec2 gamePos,
+												 float f);
 
 /////////////////////////////
 // GameLib_AddParallaxBackground

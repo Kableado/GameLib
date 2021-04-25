@@ -4,13 +4,13 @@
 #define _WIN32_WINNT 0x0501
 #include <windows.h>
 #endif
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <SDL/SDL.h>
-#include "Util.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "Audio.h"
+#include "Util.h"
 
 static void Audio_MixerCallback(void *ud, Uint8 *stream, int l);
 

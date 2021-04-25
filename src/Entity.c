@@ -1,12 +1,12 @@
 // Copyright (C) 2011-2014 Valeriano Alfonso Rodriguez (Kableado)
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
-#include "Util.h"
-#include "Draw.h"
 #include "Anim.h"
+#include "Draw.h"
+#include "Util.h"
 
 #include "Entity.h"
 
@@ -331,8 +331,9 @@ void Entity_PostProcess(Entity e, int ft) {
 			vec2_set(e->vel, 0, 0);
 		} else {
 			// Apply dynamic friction
-			vec2_scale(e->vel, e->vel, 1.0f - (e->backFric_dynamic +
-											   (e->backFric_static / len)));
+			vec2_scale(e->vel, e->vel,
+					   1.0f -
+						   (e->backFric_dynamic + (e->backFric_static / len)));
 		}
 
 		// Mark the update of the position.

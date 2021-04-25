@@ -3,9 +3,8 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-
+#include <unistd.h>
 
 #include "GameLib.h"
 extern int gamelib_debug;
