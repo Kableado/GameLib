@@ -111,6 +111,13 @@ void Input_SetPointerDown(int pointerDown) {
 }
 
 /////////////////////////////
+// Input_GetPointerDown
+//
+int Input_GetPointerDown(){
+	return _pointerDown;
+}
+
+/////////////////////////////
 // Input_GetPointerPosition
 //
 int Input_GetPointerPosition(vec2 pointer) {

@@ -168,4 +168,10 @@ void Draw_SaveRGBAToPNG(char *filename, unsigned char *data, int width,
 //
 void Draw_SaveScreenshoot(char *filename);
 
+/////////////////////////////
+// Draw_ShowCursor
+//
+//
+void Draw_ShowCursor(int showCursor);
+
 #endif
