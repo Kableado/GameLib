@@ -17,7 +17,7 @@ endif
 ########################
 CFLAGS += -Isrc
 GAMELIB_HEADS := \
-	src/Time.h \
+	src/TimeUtils.h \
 	src/Util.h \
 	src/QuadArray2D.h \
 	src/Draw.h \
@@ -27,7 +27,7 @@ GAMELIB_HEADS := \
 	src/Entity.h \
 	src/GameLib.h
 GAMELIBS_OBJS := \
-	$(BUILDDIR)/Time.o \
+	$(BUILDDIR)/TimeUtils.o \
 	$(BUILDDIR)/Util.o \
 	$(BUILDDIR)/QuadArray2D.o \
 	$(BUILDDIR)/Draw.o \
@@ -56,7 +56,7 @@ rebuild: clean all
 #################
 # GameLib Rules #
 #################
-$(BUILDDIR)/Time.o: src/Time.c $(HEADS)
+$(BUILDDIR)/TimeUtils.o: src/TimeUtils.c $(HEADS)
 	$(DO_CC)
 $(BUILDDIR)/Util.o: src/Util.c $(HEADS)
 	$(DO_CC)
