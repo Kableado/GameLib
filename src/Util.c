@@ -341,6 +341,13 @@ unsigned Rand_Get() {
 	return (val);
 }
 
+unsigned Rand_GetBetween(int min, int max) {
+	if (min == max) {
+		return max;
+	}
+	return (Rand_Get() % (max - min)) + min;
+}
+
 /////////////////////////////
 // Print
 //
