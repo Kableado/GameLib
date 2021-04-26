@@ -288,12 +288,23 @@ int Entity_IsVisible(Entity e, int x, int y, int w, int h) {
 //
 //
 void Entity_Process(Entity e, int ft) {
-	e->internalFlags &= ~EntityIntFlag_UpdatedPos;
+	if (e->internalFlags & EntityIntFlag_UpdatedPos) {
+		vec2_copy(e->pos0, e->pos);
+		e->internalFlags &= ~EntityIntFlag_UpdatedPos;
+	}
 
 	if (e->internalFlags & EntityIntFlag_UpdatedScale) {
 		e->scale0[0] = e->scale[0];
 		e->scale0[1] = e->scale[1];
 		e->internalFlags &= ~EntityIntFlag_UpdatedScale;
+	}
+
+	if (e->internalFlags & EntityIntFlag_UpdatedColor) {
+		e->color0[0] = e->color[0];
+		e->color0[1] = e->color[1];
+		e->color0[2] = e->color[2];
+		e->color0[3] = e->color[3];
+		e->internalFlags &= ~EntityIntFlag_UpdatedColor;
 	}
 
 	// Launch method
@@ -308,14 +319,6 @@ void Entity_Process(Entity e, int ft) {
 //
 void Entity_PostProcess(Entity e, int ft) {
 	float qlen, len;
-
-	vec2_copy(e->pos0, e->pos);
-
-	e->color0[0] = e->color[0];
-	e->color0[1] = e->color[1];
-	e->color0[2] = e->color[2];
-	e->color0[3] = e->color[3];
-	e->internalFlags &= ~EntityIntFlag_UpdatedColor;
 
 	// Determine if there is movement
 	qlen = vec2_dot(e->vel, e->vel);
