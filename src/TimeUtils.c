@@ -6,7 +6,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "Time.h"
+#include "TimeUtils.h"
 
 /////////////////////////////
 // Time_GetTime

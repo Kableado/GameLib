@@ -8,7 +8,7 @@
 #include "Draw.h"
 #include "Entity.h"
 #include "Input.h"
-#include "Time.h"
+#include "TimeUtils.h"
 #include "Util.h"
 
 /////////////////////////////

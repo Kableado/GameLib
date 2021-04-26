@@ -51,7 +51,7 @@
 #include "Draw.h"
 #include "Input.h"
 #include "QuadArray2D.h"
-#include "Time.h"
+#include "TimeUtils.h"
 #include "Util.h"
 
 ////////////////////////////////////////////////
