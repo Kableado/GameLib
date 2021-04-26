@@ -1155,3 +1155,15 @@ void Draw_SaveScreenshoot(char *filename) {
 	free(pixelData);
 #endif
 }
+
+/////////////////////////////
+// Draw_ShowCursor
+//
+//
+void Draw_ShowCursor(int showCursor) {
+	if (showCursor) {
+		SDL_ShowCursor(31);
+	} else {
+		SDL_ShowCursor(0);
+	}
+}

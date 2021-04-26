@@ -76,6 +76,11 @@ void Input_SetPointerPosition(float x, float y);
 void Input_SetPointerDown(int pointerDown);
 
 /////////////////////////////
+// Input_GetPointerDown
+//
+int Input_GetPointerDown();
+
+/////////////////////////////
 // Input_GetPointerPosition
 //
 int Input_GetPointerPosition(vec2 pointer);
