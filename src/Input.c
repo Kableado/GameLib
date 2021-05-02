@@ -113,9 +113,7 @@ void Input_SetPointerDown(int pointerDown) {
 /////////////////////////////
 // Input_GetPointerDown
 //
-int Input_GetPointerDown(){
-	return _pointerDown;
-}
+int Input_GetPointerDown() { return _pointerDown; }
 
 /////////////////////////////
 // Input_GetPointerPosition
@@ -152,7 +150,7 @@ int Input_AnyKey() {
 /////////////////////////////
 // Input_GetDir
 //
-// Reports the direction of the dpad.
+// Reports the direction of the dpad and mouse.
 int Input_GetDir(vec2 dir) {
 	float vlen;
 	Uint8 buttons;
@@ -191,5 +189,36 @@ int Input_GetDir(vec2 dir) {
 		} else {
 			return (0);
 		}
+	}
+}
+
+/////////////////////////////
+// Input_GetKeyDir
+//
+// Reports the direction of the dpad.
+int Input_GetKeyDir(vec2 dir) {
+	float vlen;
+
+	// Use the keyboard
+	vec2_set(dir, 0.0f, 0.0f);
+	if (Input_GetKey(InputKey_Up)) {
+		dir[1] -= 1.0f;
+	}
+	if (Input_GetKey(InputKey_Down)) {
+		dir[1] += 1.0f;
+	}
+	if (Input_GetKey(InputKey_Left)) {
+		dir[0] -= 1.0f;
+	}
+	if (Input_GetKey(InputKey_Right)) {
+		dir[0] += 1.0f;
+	}
+	vlen = vec2_dot(dir, dir);
+	if (vlen > 0.0f) {
+		vlen = sqrtf(vlen);
+		vec2_scale(dir, dir, 1.0f / vlen);
+		return (1);
+	} else {
+		return (0);
 	}
 }
