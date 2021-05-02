@@ -99,7 +99,13 @@ int Input_AnyKey();
 /////////////////////////////
 // Input_GetDir
 //
-// Reports the direction of the dpad.
+// Reports the direction of the dpad and mouse.
 int Input_GetDir(vec2 dir);
+
+/////////////////////////////
+// Input_GetKeyDir
+//
+// Reports the direction of the dpad.
+int Input_GetKeyDir(vec2 dir);
 
 #endif
