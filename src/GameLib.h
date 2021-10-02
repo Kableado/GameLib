@@ -48,6 +48,7 @@ void GameLib_Loop(void (*gameproc)(), void (*gamepostproc)(),
 // GameLib_UpdatePos
 // GameLib_SetPos
 // GameLib_GetPosInstant
+// GameLib_SetPosOffset
 //
 //
 void GameLib_GetPos(int pos[2]);
@@ -55,6 +56,7 @@ void GameLib_SetPos(int pos[2]);
 void GameLib_UpdatePos(int pos[2]);
 void GameLib_GetSize(int size[2]);
 void GameLib_GetPosInstant(int pos[2], float f);
+void GameLib_SetPosOffset(int posOffset[2]);
 
 /////////////////////////////
 // GameLib_MoveToPos

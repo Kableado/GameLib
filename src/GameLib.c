@@ -31,6 +31,7 @@ int _pft;
 int _game_size[2];
 int _game_pos0[2];
 int _game_pos1[2];
+int _game_posOffset[2];
 
 long long t_proc;
 long long t_col;
@@ -201,8 +202,8 @@ void GameLib_ProcLoop(void *data) {
 	long long time;
 
 	// Step the gamePosition
-	_game_pos0[0] = _game_pos1[0];
-	_game_pos0[1] = _game_pos1[1];
+	_game_pos0[0] = _game_pos1[0] + _game_posOffset[0];
+	_game_pos0[1] = _game_pos1[1] + _game_posOffset[1];
 
 	// Process
 	time = Time_GetTime();
@@ -449,6 +450,7 @@ void GameLib_Loop(void (*gameproc)(), void (*gamepostproc)(),
 // GameLib_UpdatePos
 // GameLib_SetPos
 // GameLib_GetPosInstant
+// GameLib_SetPosOffset
 //
 //
 void GameLib_GetPos(int pos[2]) {
@@ -470,8 +472,14 @@ void GameLib_GetSize(int size[2]) {
 	size[1] = _game_size[1];
 }
 void GameLib_GetPosInstant(int pos[2], float f) {
-	pos[0] = _game_pos0[0] + f * (_game_pos1[0] - _game_pos0[0]);
-	pos[1] = _game_pos0[1] + f * (_game_pos1[1] - _game_pos0[1]);
+	pos[0] = _game_pos0[0] +
+			 f * ((_game_pos1[0] + _game_posOffset[0]) - _game_pos0[0]);
+	pos[1] = _game_pos0[1] +
+			 f * ((_game_pos1[1] + _game_posOffset[1]) - _game_pos0[1]);
+}
+void GameLib_SetPosOffset(int posOffset[2]) {
+	_game_posOffset[0] = posOffset[0];
+	_game_posOffset[1] = posOffset[1];
 }
 
 /////////////////////////////
@@ -645,8 +653,10 @@ void GameLib_ConvertScreenPositionToGamePosition(vec2 screenPos, vec2 gamePos,
 												 float f) {
 	int game_pos[2];
 
-	game_pos[0] = _game_pos0[0] + f * (_game_pos1[0] - _game_pos0[0]);
-	game_pos[1] = _game_pos0[1] + f * (_game_pos1[1] - _game_pos0[1]);
+	game_pos[0] = _game_pos0[0] +
+				  f * ((_game_pos1[0] + _game_posOffset[0]) - _game_pos0[0]);
+	game_pos[1] = _game_pos0[1] +
+				  f * ((_game_pos1[1] + _game_posOffset[1]) - _game_pos0[1]);
 
 	gamePos[0] = (screenPos[0] * _game_size[0]) + game_pos[0];
 	gamePos[1] = (screenPos[1] * _game_size[1]) + game_pos[1];
