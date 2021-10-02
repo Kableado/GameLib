@@ -34,7 +34,7 @@ int EntityApplyGravity(Entity e) {
 	return (1);
 }
 
-void player_proc(Entity e, int ft) {
+void Player_Proc(Entity e, int ft) {
 	float acel = 8.0f;
 	float maxVel = 30.0f;
 	float jumpVel = 50.0f;
@@ -99,14 +99,14 @@ void player_proc(Entity e, int ft) {
 	e->A = 0;
 }
 
-void player_postproc(Entity e, int ft) {
+void Player_PostProc(Entity e, int ft) {
 
 	// Scroll View
 	GameLib_MoveToPos(e->pos, 0.6f);
 	// GameLib_MoveToPos(e->pos, 1.0f);
 }
 
-int player_collision(Entity ent, Entity ent2, float t, vec2 n) {
+int Player_Collision(Entity ent, Entity ent2, float t, vec2 n) {
 	if (n[1] < 0 && fabs(n[1]) > fabs(n[0])) {
 		ent->A = 1;
 	}
@@ -148,9 +148,9 @@ void GameEnts_Init() {
 	ent_Player->flags = EntityFlag_Collision | EntityFlag_Overlap;
 	ent_Player->zorder = 0;
 	AnimPlay_SetImg(&ent_Player->anim, img_player);
-	ent_Player->proc = player_proc;
-	ent_Player->postproc = player_postproc;
-	ent_Player->collision = player_collision;
+	ent_Player->proc = Player_Proc;
+	ent_Player->postproc = Player_PostProc;
+	ent_Player->collision = Player_Collision;
 	ent_Player->mass = 1.0f;
 	ent_Player->radius = 12;
 	ent_Player->width = 24;
