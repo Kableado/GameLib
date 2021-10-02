@@ -4,10 +4,11 @@
 #define _WIN32_WINNT 0x0501
 #include <windows.h>
 #endif
-#include <SDL/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <SDL/SDL.h>
 
 #include "Audio.h"
 #include "Util.h"
