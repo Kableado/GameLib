@@ -71,6 +71,7 @@ struct TEntity {
 	int B;
 	int C;
 	int D;
+	int E;
 	Entity child;
 
 	float maxX, minX;

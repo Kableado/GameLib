@@ -89,6 +89,7 @@ Entity Entity_New() {
 	e->B = 0;
 	e->C = 0;
 	e->D = 0;
+	e->E = 0;
 	e->child = NULL;
 
 	e->next = NULL;
@@ -181,6 +182,7 @@ Entity Entity_Copy(Entity e) {
 	n->B = e->B;
 	n->C = e->C;
 	n->D = e->D;
+	n->E = e->E;
 	n->child = e->child;
 
 	Entity_CalcBBox(n);
