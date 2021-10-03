@@ -311,7 +311,11 @@ void GameLib_ProcLoop(void *data) {
 				// Same level
 				float y1 = ent1->pos[1] + ent1->sortYOffset;
 				float y2 = ent2->pos[1] + ent2->sortYOffset;
-				if (y1 > y2) {
+				if (y1 == y2) {
+					if(ent1->pos[0] < ent2->pos[0]){
+						swap = 1;
+					}
+				} else if (y1 > y2) {
 					swap = 1;
 				}
 			}
