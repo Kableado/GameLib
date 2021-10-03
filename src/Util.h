@@ -6,6 +6,10 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+#define Pi (3.1415925f)
+
+float CosineInterpolation(float f);
+
 /////////////////////////////
 // SolveQuadratic
 //

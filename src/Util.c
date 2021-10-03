@@ -8,6 +8,8 @@
 
 #include "Util.h"
 
+float CosineInterpolation(float f) { return (1.0f - cos(f * Pi)) * 0.5f; }
+
 /////////////////////////////
 // SolveQuadratic
 //
