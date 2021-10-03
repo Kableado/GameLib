@@ -1,4 +1,4 @@
-// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011-2021 Valeriano Alfonso Rodriguez (Kableado)
 
 #ifndef _UTIL_H_
 #define _UTIL_H_
@@ -8,7 +8,31 @@
 
 #define Pi (3.1415925f)
 
+/////////////////////////////
+// Misc
+//
+
 float CosineInterpolation(float f);
+
+int MinimumInt(int i0, int i1);
+
+int MaximumInt(int i0, int i1);
+
+/////////////////////////////
+// Rect
+//
+
+typedef struct SRect TRect, *Rect;
+struct SRect {
+	int x0;
+	int y0;
+	int x1;
+	int y1;
+};
+
+int Rect_UnionRect(Rect r0, Rect r1, Rect rd);
+int Rect_PointInside(Rect r, int x, int y);
+int Rect_PointInsideAny(TRect r[], int rCount, int x, int y);
 
 /////////////////////////////
 // SolveQuadratic
@@ -90,6 +114,7 @@ int EndsWith(char *str, char *suffix);
 /////////////////////////////
 // Rand
 //
+
 void Rand_Seed(unsigned seed);
 
 unsigned Rand_Get();

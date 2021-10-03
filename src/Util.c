@@ -1,4 +1,4 @@
-// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011-2021 Valeriano Alfonso Rodriguez (Kableado)
 
 #include <math.h>
 #include <stdio.h>
@@ -8,7 +8,52 @@
 
 #include "Util.h"
 
+/////////////////////////////
+// Misc
+//
+
 float CosineInterpolation(float f) { return (1.0f - cos(f * Pi)) * 0.5f; }
+
+int MinimumInt(int i0, int i1) {
+	if (i1 < i0) {
+		return i1;
+	}
+	return i0;
+}
+
+int MaximumInt(int i0, int i1) {
+	if (i1 > i0) {
+		return i1;
+	}
+	return i0;
+}
+
+/////////////////////////////
+// Rect
+//
+
+int Rect_UnionRect(Rect r0, Rect r1, Rect rd) {
+	rd->x0 = MinimumInt(r0->x0, r1->x0);
+	rd->y0 = MinimumInt(r0->y0, r1->y0);
+	rd->x1 = MaximumInt(r0->x1, r1->x1);
+	rd->y1 = MaximumInt(r0->y1, r1->y1);
+}
+
+int Rect_PointInside(Rect r, int x, int y) {
+	return (x >= r->x0 && x < r->x1 && y >= r->y0 && y < r->y1);
+}
+
+int Rect_PointInsideAny(TRect r[], int rCount, int x, int y) {
+	int insideAny = 0;
+	int i;
+	for (i = 0; i < rCount; i++) {
+		if (Rect_PointInside(&(r[i]), x, y)) {
+			insideAny = 1;
+			break;
+		}
+	}
+	return insideAny;
+}
 
 /////////////////////////////
 // SolveQuadratic
