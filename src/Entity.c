@@ -978,7 +978,8 @@ void Entity_Iluminate(Entity e, Entity *elist, int n) {
 	e->color[0] = e->light[0];
 	e->color[1] = e->light[1];
 	e->color[2] = e->light[2];
-	e->color[3] = 1.0f;
+	
+	e->color[3] = e->color[3];
 
 	for (i = 0; i < n; i++) {
 		if (e == elist[i] || !(elist[i]->flags & EntityFlag_Light))
