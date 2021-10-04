@@ -10,7 +10,7 @@ GAMELIB_DIR   := ..
 GAMELIB_MAKEPARAMS := -f Makefile.emscripten.mk
 
 LIBS       := 
-STATICLIBS := $(GAMELIB_DIR)/build-emscripten/libgame.a
+STATICLIBS := $(GAMELIB_DIR)/build-emscripten-release/libgame.a
 CFLAGS     := -s FULL_ES2=1 -s ASM_JS=1 -O1 -Wno-implicit-function-declaration -DEMSCRIPTEN -I$(GAMELIB_DIR)/src 
 PLATFORM   := emscripten
 EXEEXT     := .html
