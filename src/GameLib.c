@@ -312,7 +312,7 @@ void GameLib_ProcLoop(void *data) {
 				float y1 = ent1->pos[1] + ent1->sortYOffset;
 				float y2 = ent2->pos[1] + ent2->sortYOffset;
 				if (y1 == y2) {
-					if(ent1->pos[0] < ent2->pos[0]){
+					if (ent1->pos[0] < ent2->pos[0]) {
 						swap = 1;
 					}
 				} else if (y1 > y2) {
@@ -413,11 +413,12 @@ void GameLib_DrawLoop(void *data, float f) {
 	if (Input_GetKey(InputKey_DumpProfiling) == InputKey_Pressed &&
 		fproc_count > 0 && fdraw_count > 0) {
 		Print("Profiling:::::::::\n");
-		Print("t_proc.....:%6lld\n", t_proc / fproc_count);
-		Print("t_col......:%6lld\n", t_col / fproc_count);
-		Print("t_over.....:%6lld\n", t_over / fproc_count);
-		Print("t_postproc.:%6lld\n", t_postproc / fproc_count);
-		Print("t_draw.....:%6lld\n", t_draw / fdraw_count);
+		Print("t_proc.....:%6lldus\n", t_proc / fproc_count);
+		Print("t_col......:%6lldus\n", t_col / fproc_count);
+		Print("t_over.....:%6lldus\n", t_over / fproc_count);
+		Print("t_postproc.:%6lldus\n", t_postproc / fproc_count);
+		Print("t_draw.....:%6lldus\n", t_draw / fdraw_count);
+		Print("n_ents.....:%6lld\n", _n_entities);
 		t_proc = 0;
 		t_col = 0;
 		t_over = 0;
