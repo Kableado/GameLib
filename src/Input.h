@@ -39,6 +39,7 @@ typedef enum {
 	InputKey_Exit,
 
 	InputKey_DumpProfiling,
+	InputKey_Screenshot,
 
 	InputKey_Max
 } InputKey;

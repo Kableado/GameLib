@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 #include "Audio.h"
 #include "Util.h"
@@ -50,6 +50,8 @@ struct TAudioChan {
 AudioChan _channels = NULL;
 AudioChan _free_channels = NULL;
 
+static SDL_AudioDeviceID _audioDeviceID = 0;
+
 /////////////////////////////
 // Audio_Init
 //
@@ -58,11 +60,7 @@ int Audio_Init() {
 	SDL_AudioSpec as;
 	SDL_AudioSpec as2;
 
-// Initialize audio subsistem
-#ifdef WIN32
-	// Force DSound Driver on win32
-	putenv("SDL_AUDIODRIVER=dsound");
-#endif
+	// Initialize audio subsistem
 	if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0) {
 		Print("Audio_Init: Failure initializing SDL Audio.\n");
 		Print("\tSDL Error: %s\n", SDL_GetError());
@@ -75,7 +73,8 @@ int Audio_Init() {
 	as.channels = 2;
 	as.samples = 2048;
 	as.callback = Audio_MixerCallback;
-	if (SDL_OpenAudio(&as, &as2) < 0) {
+	_audioDeviceID = SDL_OpenAudioDevice(NULL, 0, &as, &as2, 0);
+	if (_audioDeviceID == 0) {
 		Print("Audio_Init: Failure opening audio.\n");
 		Print("\tSDL Error: %s\n", SDL_GetError());
 		return (0);
@@ -89,7 +88,7 @@ int Audio_Init() {
 	}
 
 	// Unpause and ready to go
-	SDL_PauseAudio(0);
+	SDL_PauseAudioDevice(_audioDeviceID, 0);
 
 	return (1);
 }

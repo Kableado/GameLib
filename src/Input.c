@@ -1,6 +1,6 @@
 // Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include <math.h>
 #ifdef EMSCRIPTEN
 #define SDL_GetKeyState SDL_GetKeyboardState
@@ -43,20 +43,21 @@ void Input_Frame() {
 	Uint8 *keys;
 
 	// Get keyboard state
-	keys = (Uint8 *)SDL_GetKeyState(NULL);
+	keys = (Uint8 *)SDL_GetKeyboardState(NULL);
 
 	// Process Keys
-	Input_SetKey(InputKey_Action1, keys[SDLK_z] | keys[SDLK_o]);
-	Input_SetKey(InputKey_Action2, keys[SDLK_x] | keys[SDLK_p]);
-	Input_SetKey(InputKey_Up, keys[SDLK_UP] | keys[SDLK_w]);
-	Input_SetKey(InputKey_Down, keys[SDLK_DOWN] | keys[SDLK_s]);
-	Input_SetKey(InputKey_Left, keys[SDLK_LEFT] | keys[SDLK_a]);
-	Input_SetKey(InputKey_Right, keys[SDLK_RIGHT] | keys[SDLK_d]);
-	Input_SetKey(InputKey_Jump, keys[SDLK_SPACE]);
+	Input_SetKey(InputKey_Action1, keys[SDL_SCANCODE_Z] | keys[SDL_SCANCODE_O]);
+	Input_SetKey(InputKey_Action2, keys[SDL_SCANCODE_X] | keys[SDL_SCANCODE_P]);
+	Input_SetKey(InputKey_Up, keys[SDL_SCANCODE_UP] | keys[SDL_SCANCODE_W]);
+	Input_SetKey(InputKey_Down, keys[SDL_SCANCODE_DOWN] | keys[SDL_SCANCODE_S]);
+	Input_SetKey(InputKey_Left, keys[SDL_SCANCODE_LEFT] | keys[SDL_SCANCODE_A]);
+	Input_SetKey(InputKey_Right, keys[SDL_SCANCODE_RIGHT] | keys[SDL_SCANCODE_D]);
+	Input_SetKey(InputKey_Jump, keys[SDL_SCANCODE_SPACE]);
 	Input_SetKey(InputKey_Continue,
-				 keys[SDLK_RETURN] | keys[SDLK_KP_ENTER] | _pointerDown);
+				 keys[SDL_SCANCODE_RETURN] | keys[SDL_SCANCODE_RETURN2] | keys[SDL_SCANCODE_KP_ENTER] | _pointerDown);
 
-	Input_SetKey(InputKey_DumpProfiling, keys[SDLK_m]);
+	Input_SetKey(InputKey_DumpProfiling, keys[SDL_SCANCODE_M]);
+	Input_SetKey(InputKey_Screenshot, keys[SDL_SCANCODE_F12]);
 }
 
 /////////////////////////////

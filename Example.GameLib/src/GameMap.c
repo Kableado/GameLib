@@ -39,7 +39,6 @@ Entity GameMapAux_CreateEnt(Entity ent, int i, int j, int res) {
 	e = Entity_Copy(ent);
 	vec2_set(pos, (res / 2) + i * res, (res / 2) + j * res);
 	vec2_plus(e->pos, e->pos, pos);
-	Entity_CalcBBox(e);
 	GameLib_AddEntity(e);
 	return (e);
 }

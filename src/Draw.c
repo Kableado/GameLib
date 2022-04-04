@@ -41,7 +41,7 @@
 #endif
 #endif
 #include "lodepng.c"
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 #ifndef GL_CLAMP_TO_EDGE
 #define GL_CLAMP_TO_EDGE 0x812F
@@ -68,7 +68,8 @@ struct TDrawImage {
 };
 
 // Globals
-SDL_Surface *_screen = NULL;
+static SDL_Window *_window = NULL;
+static SDL_GLContext _glcontext = NULL;
 int _width;
 int _height;
 long long proc_t_frame = 33333;
@@ -186,13 +187,15 @@ int Draw_Init(int width, int height, char *title, int pfps, int fps) {
 	}
 
 	// Initialize video mode
-	_screen = SDL_SetVideoMode(width, height, 32, SDL_HWSURFACE | SDL_OPENGL);
-	if (_screen == NULL) {
+	_window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED,
+							   SDL_WINDOWPOS_UNDEFINED, width, height,
+							   SDL_WINDOW_OPENGL);
+	if (_window == NULL) {
 		Print("Draw_Init: Failure initializing video mode.\n");
 		Print("\tSDL Error: %s\n", SDL_GetError());
 		return (0);
 	}
-	SDL_WM_SetCaption(title, NULL);
+	_glcontext = SDL_GL_CreateContext(_window);
 	Draw_ShowInfo();
 
 #if USE_OpenGL
@@ -206,11 +209,11 @@ int Draw_Init(int width, int height, char *title, int pfps, int fps) {
 
 	// Triplebuffer swap
 	glClear(GL_COLOR_BUFFER_BIT);
-	SDL_GL_SwapBuffers();
+	SDL_GL_SwapWindow(_window);
 	glClear(GL_COLOR_BUFFER_BIT);
-	SDL_GL_SwapBuffers();
+	SDL_GL_SwapWindow(_window);
 	glClear(GL_COLOR_BUFFER_BIT);
-	SDL_GL_SwapBuffers();
+	SDL_GL_SwapWindow(_window);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glEnableClientState(GL_COLOR_ARRAY);
@@ -470,7 +473,7 @@ int Draw_LoopIteration() {
 			Input_SetKey(InputKey_Exit, 1);
 		}
 		if (event.type == SDL_KEYDOWN) {
-			if (event.key.keysym.sym == SDLK_ESCAPE) {
+			if (event.key.keysym.sym == SDL_SCANCODE_ESCAPE) {
 				Input_SetKey(InputKey_Exit, 1);
 			}
 		}
@@ -517,7 +520,7 @@ int Draw_LoopIteration() {
 			}
 		}
 		if (event.type == SDL_KEYDOWN) {
-			if (event.key.keysym.sym == SDLK_ESCAPE) {
+			if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
 				Input_SetKey(InputKey_Exit, 1);
 				if (!_draw_exitoverrided) {
 					_draw_looping = 0;
@@ -541,22 +544,6 @@ int Draw_LoopIteration() {
 	}
 #endif
 
-#ifndef EMSCRIPTEN
-	// Process keys for Draw
-	Uint8 *keys;
-	keys = (Uint8 *)SDL_GetKeyState(NULL);
-	if (keys[SDLK_F12]) {
-		// Screenshot key
-		char strFile[255];
-		int idx = -1;
-		do {
-			idx++;
-			snprintf(strFile, 255, "shot-%04d.png", idx);
-		} while (access(strFile, F_OK) != -1);
-		Draw_SaveScreenshoot(strFile);
-	}
-#endif
-
 	// Process
 	if (_proc_func) {
 		if (_accTime > 100000) {
@@ -574,7 +561,7 @@ int Draw_LoopIteration() {
 	Audio_Frame();
 
 	// Draw
-	SDL_GL_SwapBuffers();
+	SDL_GL_SwapWindow(_window);
 	if (_draw_func) {
 		_draw_func(_data, (float)_accTime / (float)proc_t_frame);
 		Draw_Flush();
@@ -1079,7 +1066,7 @@ void Draw_SaveRGBAToBMP(char *filename, unsigned char *data, int width,
 	surf = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 32, 0, 0, 0, 0);
 	surf->format->Amask = 0xFF000000;
 	surf->format->Ashift = 24;
-	SDL_SetAlpha(surf, SDL_SRCALPHA, 255);
+	//SDL_SetAlpha(surf, GL_SRC_ALPHA, 255);
 	SDL_LockSurface(surf);
 	memcpy(surf->pixels, data, width * height * 4);
 	SDL_UnlockSurface(surf);

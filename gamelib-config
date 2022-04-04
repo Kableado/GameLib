@@ -23,8 +23,8 @@ fi
 case "$uname" in
 	*MINGW* | *MSYS*)
 		# Configuracion de Win32/Mingw
-		libs="-L/mingw/lib -lopengl32 -lSDL"
-		cflags="-g -mwindows -D_GNU_SOURCE=1 -DWIN32"
+		libs="-lopengl32 $(sdl2-config --libs)"
+		cflags="-g -mwindows -D_GNU_SOURCE=1 -DWIN32 $(sdl2-config --cflags)"
 		builddir="build-$gcctarget"
 		platform="$gcctarget"
 		exeextension=".exe"
@@ -47,8 +47,8 @@ case "$uname" in
 		;;
 	*)
 		# Configuracion de Linux
-		libs="-lSDL -lpthread -L/usr/X11R6/lib -L/usr/lib -lm -lGL -lX11"
-		cflags="-Wall -g -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/"
+		libs="-lpthread -L/usr/X11R6/lib -L/usr/lib -lm -lGL -lX11 $(sdl2-config --libs)"
+		cflags="-Wall -g -I/usr/include/ -I/usr/X11R6/include/ $(sdl2-config --cflags)"
 		builddir="build-$gcctarget"
 		platform="$gcctarget"
 		exeextension=""

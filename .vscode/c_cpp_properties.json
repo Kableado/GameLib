@@ -16,6 +16,7 @@
             "name": "Linux",
             "includePath": [
                 "/usr/include",
+                "/usr/include/SDL2",
                 "${workspaceFolder}/src/"
             ],
             "intelliSenseMode": "clang-x64",
@@ -27,6 +28,7 @@
             "name": "Win32",
             "includePath": [
                 "C:/msys64/mingw64/include",
+                "C:/msys64/mingw64/include/SDL2",
                 "${workspaceFolder}/src/"
             ],
             "defines": [

@@ -21,8 +21,8 @@ ifeq ($(TARGET_ARCH),mingw)
 	MKDIR    := mkdir
 	ECHO     := echo
 
-	LIBS    := -L/mingw/lib -lopengl32 -lSDL -lm
-	CFLAGS  := -g -mwindows -D_GNU_SOURCE=1 -DWIN32
+	LIBS    := -L/mingw/lib -lopengl32 -lm $(shell sdl2-config --libs)
+	CFLAGS  := -g -mwindows -D_GNU_SOURCE=1 -DWIN32 $(shell sdl2-config --cflags)
 	LDFLAGS := -g -mwindows -D_GNU_SOURCE=1
 
 	RES_GAMELIB := libgame.a
@@ -36,8 +36,8 @@ ifeq ($(TARGET_ARCH),linux)
 	MKDIR    := mkdir
 	ECHO     := echo
 
-	LIBS    := -lSDL -lpthread -L/usr/X11R6/lib -L/usr/lib -lm -lGL -lX11
-	CFLAGS  := -Wall -g -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/
+	LIBS    := -lpthread -L/usr/X11R6/lib -L/usr/lib -lm -lGL -lX11 $(shell sdl2-config --libs)
+	CFLAGS  := -Wall -g -I/usr/include/ -I/usr/X11R6/include/ $(shell sdl2-config --cflags)
 	LDFLAGS :=
 
 	RES_GAMELIB := libgame.a

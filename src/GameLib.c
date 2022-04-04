@@ -1,10 +1,11 @@
 // Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "Anim.h"
 #include "Audio.h"
@@ -409,6 +410,20 @@ void GameLib_DrawLoop(void *data, float f) {
 	t_draw += Time_GetTime() - time;
 
 	fdraw_count++;
+
+#ifndef EMSCRIPTEN
+	if (Input_GetKey(InputKey_Screenshot) == InputKey_Pressed) {
+		// Screenshot key
+		char strFile[255];
+		int idx = -1;
+		do {
+			idx++;
+			snprintf(strFile, 255, "shot-%04d.png", idx);
+		} while (access(strFile, F_OK) != -1);
+		Draw_SaveScreenshoot(strFile);
+		Print("Screenshot saved \"%s\"\n", strFile);
+	}
+#endif // EMSCRIPTEN
 
 	if (Input_GetKey(InputKey_DumpProfiling) == InputKey_Pressed &&
 		fproc_count > 0 && fdraw_count > 0) {
