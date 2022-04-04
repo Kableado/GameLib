@@ -493,20 +493,12 @@ int Draw_LoopIteration() {
 			Input_SetPointerPosition(event.tfinger.x, event.tfinger.y);
 			Input_SetPointerDown(1);
 		}
-		if (event.type == SDL_TOUCHBUTTONDOWN) {
-			Input_SetPointerPosition(event.tfinger.x, event.tfinger.y);
-			Input_SetPointerDown(1);
-		}
 		if (event.type == SDL_MOUSEBUTTONUP) {
 			Input_SetPointerPosition(event.button.x / (float)_width,
 									 event.button.y / (float)_height);
 			Input_SetPointerDown(0);
 		}
 		if (event.type == SDL_FINGERUP) {
-			Input_SetPointerPosition(event.tfinger.x, event.tfinger.y);
-			Input_SetPointerDown(0);
-		}
-		if (event.type == SDL_TOUCHBUTTONUP) {
 			Input_SetPointerPosition(event.tfinger.x, event.tfinger.y);
 			Input_SetPointerDown(0);
 		}

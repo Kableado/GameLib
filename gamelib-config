@@ -16,7 +16,10 @@ gcctarget=$( gcc -v 2>&1 | grep "Target:" | cut --delimiter=' ' --fields=2 )
 if test $# -gt 0; then
 	if test $1 = "emscripten"; then
 		uname="EMSCRIPTEN"
-		unamem="EMSCRIPTEN"
+		shift
+	fi
+	if test $1 = "Darwin"; then
+		uname="Darwin"
 		shift
 	fi
 fi
@@ -24,44 +27,51 @@ case "$uname" in
 	*MINGW* | *MSYS*)
 		# Configuracion de Win32/Mingw
 		libs="-lopengl32 $(sdl2-config --libs)"
-		cflags="-g -mwindows -D_GNU_SOURCE=1 -DWIN32 $(sdl2-config --cflags)"
+		cflags="-g -mwindows -D_GNU_SOURCE=1 -DWIN32 $(sdl2-config --cflags) -I$prefix/src"
 		builddir="build-$gcctarget"
 		platform="$gcctarget"
 		exeextension=".exe"
+		ldflags=""
 		;;
 	*EMSCRIPTEN*)
 		# Configuracion de Emscripten
 		libs=""
-		cflags="-s FULL_ES2=1 -s ASM_JS=1 -Wno-implicit-function-declaration"
+		cflags="-s FULL_ES2=1 -s ASM_JS=1 -s USE_SDL=2 -O2 -Wno-implicit-function-declaration -I$prefix/src"
 		builddir="build-emscripten"
 		platform="emscripten"
 		exeextension=".html"
+		ldflags="--preload-file data -s TOTAL_MEMORY=134217728 -lidbfs.js"
 		;;
 	*Darwin*)
 		# Configuracion de MacOSX
-		libs="-framework Cocoa -lm -framework OpenGL -framework SDL"
-		cflags="-Wall -g -DMACOSX -ObjC -Dmain=SDL_main -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/"
+		libs="-framework Cocoa -lm -framework OpenGL -framework SDL $prefix/macosx/SDLMain.m"
+		cflags="-Wall -g -DMACOSX -ObjC -Dmain=SDL_main -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/ -I$prefix/src"
 		builddir="build-$gcctarget"
 		platform="$gcctarget"
 		exeextension=""
+		ldflags=""
 		;;
 	*)
 		# Configuracion de Linux
 		libs="-lpthread -L/usr/X11R6/lib -L/usr/lib -lm -lGL -lX11 $(sdl2-config --libs)"
-		cflags="-Wall -g -I/usr/include/ -I/usr/X11R6/include/ $(sdl2-config --cflags)"
+		cflags="-Wall -g -I/usr/include/ -I/usr/X11R6/include/ $(sdl2-config --cflags) -I$prefix/src"
 		builddir="build-$gcctarget"
 		platform="$gcctarget"
 		exeextension=""
+		ldflags=""
 		;;
 esac
 
 while test $# -gt 0; do
   case $1 in
     --cflags)
-      echo "$cflags -I$prefix/src"
+      echo "$cflags"
       ;;
     --libs)
       echo "$libs"
+      ;;
+    --ldflags)
+      echo "$ldflags"
       ;;
     --static-libs)
       echo "$prefix/$builddir/libgame.a"

@@ -30,7 +30,7 @@ struct SRect {
 	int y1;
 };
 
-int Rect_UnionRect(Rect r0, Rect r1, Rect rd);
+void Rect_UnionRect(Rect r0, Rect r1, Rect rd);
 int Rect_PointInside(Rect r, int x, int y);
 int Rect_PointInsideAny(TRect r[], int rCount, int x, int y);
 

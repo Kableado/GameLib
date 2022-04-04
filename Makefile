@@ -4,16 +4,21 @@ VERBOSE_BUILD := false
 IsMinGW := $(findstring MINGW,$(shell uname -s)) $(findstring MSYS,$(shell uname -s))
 IsDarwin := $(findstring Darwin,$(shell uname -s))
 ifneq (,$(IsMinGW))
-	TARGET_ARCH := mingw
+	HOST_ARCH := mingw
 else
 ifneq (,$(IsDarwin))
-	TARGET_ARCH := macosx
+	HOST_ARCH := macosx
 else
-	TARGET_ARCH := linux
+	HOST_ARCH := linux
 endif
 endif
 
-ifeq ($(TARGET_ARCH),mingw)
+ifeq ($(arch),emscripten)
+	HOST_ARCH := emscripten
+endif
+
+
+ifeq ($(HOST_ARCH),mingw)
 	CC       := gcc
 	AR       := ar
 	LAUNCHER :=
@@ -28,7 +33,7 @@ ifeq ($(TARGET_ARCH),mingw)
 	RES_GAMELIB := libgame.a
 	BUILDDIR    := build-$(shell gcc -v 2>&1 | grep "Target:" | cut --delimiter=' ' --fields=2)
 endif
-ifeq ($(TARGET_ARCH),linux)
+ifeq ($(HOST_ARCH),linux)
 	CC       := gcc
 	AR       := ar
 	LAUNCHER :=
@@ -44,14 +49,13 @@ ifeq ($(TARGET_ARCH),linux)
 	RES_GAME    := game
 	BUILDDIR    := build-$(shell gcc -v 2>&1 | grep "Target:" | cut --delimiter=' ' --fields=2)
 endif
-ifeq ($(TARGET_ARCH),macosx)
+ifeq ($(HOST_ARCH),macosx)
 	CC       := gcc
 	AR       := ar
 	LAUNCHER :=
 	RM       := rm -rf
 	MKDIR    := mkdir
 	ECHO     := echo
-	VERBOSE_BUILD := false
 
 	LIBS    := -framework Cocoa -lm -framework OpenGL -framework SDL macosx/SDLMain.m
 	CFLAGS  := -Wall -g -DMACOSX -ObjC -Dmain=SDL_main -I/usr/include/ -I/usr/include/SDL/ -I/usr/X11R6/include/
@@ -59,6 +63,21 @@ ifeq ($(TARGET_ARCH),macosx)
 
 	RES_GAMELIB := libgame.a
 	BUILDDIR    := build-$(shell gcc -v 2>&1 | grep "Target:" | cut -d ' ' -f 2)
+endif
+ifeq ($(HOST_ARCH),emscripten)
+	CC       := emcc
+	AR       := emar
+	LAUNCHER := emrun --port 8080
+	RM       := rm -rf
+	MKDIR    := mkdir
+	ECHO     := echo
+
+	LIBS    := 
+	CFLAGS  := -s FULL_ES2=1 -s ASM_JS=1 -s USE_SDL=2 -O2 -Wno-implicit-function-declaration -DEMSCRIPTEN
+	LDFLAGS := --preload-file data -s TOTAL_MEMORY=134217728 -lidbfs.js
+
+	RES_GAMELIB := libgame.a
+	BUILDDIR    := build-emscripten
 endif
 
 include Makefile.common.mk

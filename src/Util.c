@@ -31,7 +31,7 @@ int MaximumInt(int i0, int i1) {
 // Rect
 //
 
-int Rect_UnionRect(Rect r0, Rect r1, Rect rd) {
+void Rect_UnionRect(Rect r0, Rect r1, Rect rd) {
 	rd->x0 = MinimumInt(r0->x0, r1->x0);
 	rd->y0 = MinimumInt(r0->y0, r1->y0);
 	rd->x1 = MaximumInt(r0->x1, r1->x1);

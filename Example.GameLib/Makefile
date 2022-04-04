@@ -2,13 +2,20 @@
 VERBOSE_BUILD := false
 GAMELIB_DIR   := ..
 GameLibConfig := $(GAMELIB_DIR)/gamelib-config
+GAMELIB_MAKEPARAMS := 
 
-LIBS       := $(shell $(GameLibConfig) --libs)
-STATICLIBS := $(shell $(GameLibConfig) --static-libs)
-CFLAGS     := $(shell $(GameLibConfig) --cflags)
-PLATFORM   := $(shell $(GameLibConfig) --platform)
-EXEEXT     := $(shell $(GameLibConfig) --exe-extension)
-LDFLAGS    :=
+ARCH := 
+ifeq ($(arch),emscripten)
+	ARCH := emscripten
+	GAMELIB_MAKEPARAMS := arch=emscripten
+endif
+
+LIBS       := $(shell $(GameLibConfig) $(ARCH) --libs)
+STATICLIBS := $(shell $(GameLibConfig) $(ARCH) --static-libs)
+CFLAGS     := $(shell $(GameLibConfig) $(ARCH) --cflags)
+PLATFORM   := $(shell $(GameLibConfig) $(ARCH) --platform)
+EXEEXT     := $(shell $(GameLibConfig) $(ARCH) --exe-extension)
+LDFLAGS    := $(shell $(GameLibConfig) $(ARCH) --ldflags)
 
 RES_GAME := game$(EXEEXT)
 BUILDDIR := build-$(PLATFORM)
@@ -16,16 +23,16 @@ BUILDDIR := build-$(PLATFORM)
 IsMinGW := $(findstring MINGW,$(shell uname -s)) $(findstring MSYS,$(shell uname -s))
 IsDarwin := $(findstring Darwin,$(shell uname -s))
 ifneq (,$(IsMinGW))
-	TARGET_ARCH := mingw
+	HOST_ARCH := mingw
 else
 ifneq (,$(IsDarwin))
-	TARGET_ARCH := macosx
+	HOST_ARCH := macosx
 else
-	TARGET_ARCH := linux
+	HOST_ARCH := linux
 endif
 endif
 
-ifeq ($(TARGET_ARCH),mingw)
+ifeq ($(HOST_ARCH),mingw)
 	CC       := gcc
 	AR       := ar
 	LAUNCHER :=
@@ -33,7 +40,7 @@ ifeq ($(TARGET_ARCH),mingw)
 	MKDIR    := mkdir
 	ECHO     := echo
 endif
-ifeq ($(TARGET_ARCH),linux)
+ifeq ($(HOST_ARCH),linux)
 	CC       := gcc
 	AR       := ar
 	LAUNCHER :=
@@ -41,14 +48,20 @@ ifeq ($(TARGET_ARCH),linux)
 	MKDIR    := mkdir
 	ECHO     := echo
 endif
-ifeq ($(TARGET_ARCH),macosx)
+ifeq ($(HOST_ARCH),macosx)
 	CC       := gcc
 	AR       := ar
 	LAUNCHER :=
 	RM       := rm -rf
 	MKDIR    := mkdir
 	ECHO     := echo
-	LIBS     := $(LIBS) macosx/SDLMain.m
 endif
+
+ifeq ($(ARCH),emscripten)
+	CC       := emcc
+	AR       := emar
+	LAUNCHER := emrun --port 8080
+endif
+
 
 include Makefile.common.mk
