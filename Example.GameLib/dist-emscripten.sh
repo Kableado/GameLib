@@ -1,4 +1,8 @@
-source /c/emsdk/emsdk_env.sh
+#!/bin/sh
+
+if test -f /c/emsdk/emsdk_env.sh; then
+    source /c/emsdk/emsdk_env.sh
+fi
 
 make arch=emscripten full-clean
 make arch=emscripten

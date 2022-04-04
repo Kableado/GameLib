@@ -12,7 +12,7 @@ fi
 # Preparar configuracion
 uname=$( uname )
 unamem=$( uname -m )
-gcctarget=$( gcc -v 2>&1 | grep "Target:" | cut --delimiter=' ' --fields=2 )
+gcctarget=$( gcc -dumpmachine )
 if test $# -gt 0; then
 	if test $1 = "emscripten"; then
 		uname="EMSCRIPTEN"
@@ -36,7 +36,7 @@ case "$uname" in
 	*EMSCRIPTEN*)
 		# Configuracion de Emscripten
 		libs=""
-		cflags="-s FULL_ES2=1 -s ASM_JS=1 -s USE_SDL=2 -O2 -Wno-implicit-function-declaration -I$prefix/src"
+		cflags="-s USE_SDL=2 -O2 -Wno-implicit-function-declaration -I$prefix/src"
 		builddir="build-emscripten"
 		platform="emscripten"
 		exeextension=".html"

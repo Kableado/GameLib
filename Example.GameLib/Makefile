@@ -20,16 +20,17 @@ LDFLAGS    := $(shell $(GameLibConfig) $(ARCH) --ldflags)
 RES_GAME := game$(EXEEXT)
 BUILDDIR := build-$(PLATFORM)
 
-IsMinGW := $(findstring MINGW,$(shell uname -s)) $(findstring MSYS,$(shell uname -s))
-IsDarwin := $(findstring Darwin,$(shell uname -s))
-ifneq (,$(IsMinGW))
+HOST_ARCH   := 
+HOST_OS     := $(shell uname -o )
+HOST_KERNEL := $(shell uname -s )
+ifeq ($(HOST_OS),Msys)
 	HOST_ARCH := mingw
-else
-ifneq (,$(IsDarwin))
-	HOST_ARCH := macosx
-else
+endif
+ifeq ($(HOST_KERNEL),Linux)
 	HOST_ARCH := linux
 endif
+ifeq ($(HOST_KERNEL),Darwin)
+	HOST_ARCH := macosx
 endif
 
 ifeq ($(HOST_ARCH),mingw)
