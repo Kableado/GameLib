@@ -1,3 +1,4 @@
+# Building stuff
 build-*
 *.dll
 *.exe
@@ -10,3 +11,11 @@ shot-????.png
 .vscode/.BROWSE.VC.DB-wal
 .DS_Store
 */DIST/*
+/CMakeFiles/
+Makefile
+cmake_install.cmake
+CMakeCache.txt
+cmake-build-*/
+
+# Results
+libGameLib.a
