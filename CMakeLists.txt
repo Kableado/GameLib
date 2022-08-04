@@ -4,8 +4,13 @@ project(GameLib)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
-find_package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIRS})
+if (EMSCRIPTEN)
+    message(" * Ignore SDL2 package with Emscripten")
+    SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -s USE_SDL=2")
+else()
+    find_package(SDL2 REQUIRED)
+    include_directories(${SDL2_INCLUDE_DIRS})
+endif()
 
 set(OpenGL_GL_PREFERENCE LEGACY)
 find_package(OpenGL REQUIRED)
