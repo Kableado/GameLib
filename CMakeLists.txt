@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(GameLib)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 
 if (EMSCRIPTEN)
     message(" * Ignore SDL2 package with Emscripten")
