@@ -1,6 +1,7 @@
 // Copyright (C) 2011-2015 Valeriano Alfonso Rodriguez (Kableado)
 
 #ifdef WIN32
+
 //	Windows
 #define _WIN32_WINNT 0x0501
 #include <GL/gl.h>
@@ -13,33 +14,24 @@
 #define USE_OpenGL 1
 #define USE_OpenGLES 0
 #include <unistd.h>
+
 #else
-#ifdef EMSCRIPTEN
-//	Emscripten
-#include <GLES2/gl2.h>
+
+//	Linux
 #include <math.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #define GL_GLEXT_PROTOTYPES 1
-#include <GLES2/gl2ext.h>
-#include <emscripten.h>
+#include <SDL_opengl.h>
 #define USE_OpenGL 0
 #define USE_OpenGLES 1
-#define SDL_GetKeyState SDL_GetKeyboardState
-#include <unistd.h>
-#else
-//	UNIX
-#include <GL/gl.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#define USE_OpenGL 1
-#define USE_OpenGLES 0
-#include <unistd.h>
+// #define SDL_GetKeyState SDL_GetKeyboardState
+#ifdef EMSCRIPTEN
+#include <emscripten.h>
 #endif
+
 #endif
+
 #include "lodepng.c"
 #include <SDL.h>
 
@@ -70,6 +62,7 @@ struct TDrawImage {
 // Globals
 static SDL_Window *_window = NULL;
 static SDL_GLContext _glcontext = NULL;
+static SDL_Renderer *_renderer = NULL;
 int _width;
 int _height;
 long long proc_t_frame = 33333;
@@ -84,8 +77,12 @@ float _color[4];
 GLuint _whiteTex;
 
 GLuint Draw_CompileShader(GLenum type, const char *source) {
+	char *strType = type == GL_VERTEX_SHADER	 ? "VertexShader"
+					: type == GL_FRAGMENT_SHADER ? "fragmentShader"
+												 : "unknownShader";
 	GLuint shader = glCreateShader(type);
 	if (shader == 0) {
+		Print("Error creating shader of type: %s\n", strType);
 		return 0;
 	}
 
@@ -97,6 +94,12 @@ GLuint Draw_CompileShader(GLenum type, const char *source) {
 	GLint compiled;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
 	if (!compiled) {
+		GLint infoLogLength;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+		GLchar strInfoLog[infoLogLength + 1];
+		glGetShaderInfoLog(shader, infoLogLength, NULL, strInfoLog);
+		Print("Error compiling shader of type: %s: %s\n", strType, strInfoLog);
+
 		glDeleteShader(shader);
 		return 0;
 	}
@@ -104,13 +107,10 @@ GLuint Draw_CompileShader(GLenum type, const char *source) {
 	return shader;
 }
 
-GLuint Draw_BuildProgram(const char *vertexShaderSource,
-						 const char *fragmentShaderSource) {
+GLuint Draw_BuildProgram(const char *vertexShaderSource, const char *fragmentShaderSource) {
 	// Compile shaders
-	GLuint vertexShader =
-		Draw_CompileShader(GL_VERTEX_SHADER, vertexShaderSource);
-	GLuint fragmentShader =
-		Draw_CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
+	GLuint vertexShader = Draw_CompileShader(GL_VERTEX_SHADER, vertexShaderSource);
+	GLuint fragmentShader = Draw_CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
 	if (vertexShader == 0 || fragmentShader == 0) {
 		return 0;
 	}
@@ -187,15 +187,17 @@ int Draw_Init(int width, int height, char *title, int pfps, int fps) {
 	}
 
 	// Initialize video mode
-	_window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED,
-							   SDL_WINDOWPOS_UNDEFINED, width, height,
-							   SDL_WINDOW_OPENGL);
+	_window =
+		SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_OPENGL);
 	if (_window == NULL) {
 		Print("Draw_Init: Failure initializing video mode.\n");
 		Print("\tSDL Error: %s\n", SDL_GetError());
 		return (0);
 	}
 	_glcontext = SDL_GL_CreateContext(_window);
+
+	_renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
+
 	Draw_ShowInfo();
 
 #if USE_OpenGL
@@ -237,16 +239,25 @@ int Draw_Init(int width, int height, char *title, int pfps, int fps) {
 									  "   vColor = aColor;             \n"
 									  "}                               \n";
 
-	const char fragmentShaderSource[] =
-		"precision mediump float;                                \n"
-		"varying vec2 vTexCoord;                                 \n"
-		"varying vec4 vColor;                                    \n"
-		"uniform sampler2D sTexture;                             \n"
-		"void main() {                                           \n"
-		"  gl_FragColor = texture2D(sTexture, vTexCoord)*vColor; \n"
-		"}                                                       \n";
+	const char fragmentShaderSource_10[] = "precision mediump float;                                \n"
+										   "varying vec2 vTexCoord;                                 \n"
+										   "varying vec4 vColor;                                    \n"
+										   "uniform sampler2D sTexture;                             \n"
+										   "void main() {                                           \n"
+										   "  gl_FragColor = texture2D(sTexture, vTexCoord)*vColor; \n"
+										   "}                                                       \n";
 
-	programObject = Draw_BuildProgram(vertexShaderSource, fragmentShaderSource);
+	const char fragmentShaderSource_20[] = "varying vec2 vTexCoord;                                 \n"
+										   "varying vec4 vColor;                                    \n"
+										   "uniform sampler2D sTexture;                             \n"
+										   "void main() {                                           \n"
+										   "  gl_FragColor = texture2D(sTexture, vTexCoord)*vColor; \n"
+										   "}                                                       \n";
+
+	programObject = Draw_BuildProgram(vertexShaderSource, fragmentShaderSource_20);
+	if (programObject == 0) {
+		programObject = Draw_BuildProgram(vertexShaderSource, fragmentShaderSource_10);
+	}
 	glUseProgram(programObject);
 
 	vertPosLoc = glGetAttribLocation(programObject, "aPosition");
@@ -254,27 +265,21 @@ int Draw_Init(int width, int height, char *title, int pfps, int fps) {
 	vertColorLoc = glGetAttribLocation(programObject, "aColor");
 
 	textureLoc = glGetUniformLocation(programObject, "sTexture");
-	projectionMatrixLoc =
-		glGetUniformLocation(programObject, "sProjectionMatrix");
+	projectionMatrixLoc = glGetUniformLocation(programObject, "sProjectionMatrix");
 
 	glUniform1i(textureLoc, 0);
 
 	glGenBuffers(1, &vertexObject);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexObject);
-	glBufferData(GL_ARRAY_BUFFER,
-				 Vertex2D_Length * sizeof(float) * Max_Vertices, NULL,
-				 GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, Vertex2D_Length * sizeof(float) * Max_Vertices, NULL, GL_DYNAMIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertexObject);
 
-	glVertexAttribPointer(vertPosLoc, 2, GL_FLOAT, GL_FALSE,
-						  Vertex2D_Length * sizeof(float),
+	glVertexAttribPointer(vertPosLoc, 2, GL_FLOAT, GL_FALSE, Vertex2D_Length * sizeof(float),
 						  (void *)(0 * sizeof(float)));
-	glVertexAttribPointer(vertTexLoc, 2, GL_FLOAT, GL_FALSE,
-						  Vertex2D_Length * sizeof(float),
+	glVertexAttribPointer(vertTexLoc, 2, GL_FLOAT, GL_FALSE, Vertex2D_Length * sizeof(float),
 						  (void *)(2 * sizeof(float)));
-	glVertexAttribPointer(vertColorLoc, 4, GL_FLOAT, GL_FALSE,
-						  Vertex2D_Length * sizeof(float),
+	glVertexAttribPointer(vertColorLoc, 4, GL_FLOAT, GL_FALSE, Vertex2D_Length * sizeof(float),
 						  (void *)(4 * sizeof(float)));
 
 	glEnableVertexAttribArray(vertPosLoc);
@@ -288,8 +293,7 @@ int Draw_Init(int width, int height, char *title, int pfps, int fps) {
 
 	// Set the proyection (2D)
 	glViewport(0, 0, _width, _height);
-	float projectionMatrix[16] = {1, 0, 0, 0, 0, 1, 0, 0,
-								  0, 0, 1, 0, 0, 0, 0, 1};
+	float projectionMatrix[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 	projectionMatrix[0] = (2.0f / _width);
 	projectionMatrix[5] = -(2.0f / _height);
 	projectionMatrix[10] = -0.001f;
@@ -323,6 +327,12 @@ void Draw_ShowInfo() {
 	Print(" Renderer: %s\n", str);
 	str = (char *)glGetString(GL_VERSION);
 	Print(" Version: %s\n", str);
+	GLint major, minor;
+	glGetIntegerv(GL_MAJOR_VERSION, &major);
+	glGetIntegerv(GL_MINOR_VERSION, &minor);
+	Print(" Version : %d.%d\n", major, minor);
+	str = (char *)glGetString(GL_SHADING_LANGUAGE_VERSION);
+	Print(" Shader Version: %s\n", str);
 	Print("*********************************\n");
 }
 
@@ -332,10 +342,8 @@ void Draw_ShowInfo() {
 // Sets the render matrix
 void Draw_SetMatrix(float matrix[16]) {
 #if USE_OpenGL
-	float tempMatrix[16] = {matrix[0], matrix[4], matrix[8],  matrix[12],
-							matrix[1], matrix[5], matrix[9],  matrix[13],
-							matrix[2], matrix[6], matrix[10], matrix[14],
-							matrix[3], matrix[7], matrix[11], matrix[15]};
+	float tempMatrix[16] = {matrix[0], matrix[4], matrix[8],  matrix[12], matrix[1], matrix[5], matrix[9],	matrix[13],
+							matrix[2], matrix[6], matrix[10], matrix[14], matrix[3], matrix[7], matrix[11], matrix[15]};
 	glLoadMatrixf(tempMatrix);
 #endif
 #if USE_OpenGLES
@@ -364,8 +372,7 @@ GLuint Draw_UploadGLTexture(int w, int h, unsigned char *pixels) {
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, w);
 #endif
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-				 pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
 	return (tex);
 }
@@ -379,28 +386,22 @@ void Draw_Flush() {
 		return;
 	}
 	if (_currentImg->tex == -1) {
-		_currentImg->tex = Draw_UploadGLTexture(_currentImg->w, _currentImg->h,
-												_currentImg->data);
+		_currentImg->tex = Draw_UploadGLTexture(_currentImg->w, _currentImg->h, _currentImg->data);
 	}
 
 #if USE_OpenGL
 	// Draw the quad array
 	glBindTexture(GL_TEXTURE_2D, _currentImg->tex);
-	glColorPointer(4, GL_FLOAT, Vertex2D_Length * sizeof(float),
-				   (GLvoid *)(_quadArray->vertexData + 4));
-	glTexCoordPointer(2, GL_FLOAT, Vertex2D_Length * sizeof(float),
-					  (GLvoid *)(_quadArray->vertexData + 2));
-	glVertexPointer(2, GL_FLOAT, Vertex2D_Length * sizeof(float),
-					(GLvoid *)(_quadArray->vertexData));
+	glColorPointer(4, GL_FLOAT, Vertex2D_Length * sizeof(float), (GLvoid *)(_quadArray->vertexData + 4));
+	glTexCoordPointer(2, GL_FLOAT, Vertex2D_Length * sizeof(float), (GLvoid *)(_quadArray->vertexData + 2));
+	glVertexPointer(2, GL_FLOAT, Vertex2D_Length * sizeof(float), (GLvoid *)(_quadArray->vertexData));
 	glDrawArrays(GL_TRIANGLES, 0, _quadArray->nVertex);
 
 #else
 
 	// Draw the quad array
 	glBindTexture(GL_TEXTURE_2D, _currentImg->tex);
-	glBufferSubData(GL_ARRAY_BUFFER, 0,
-					Vertex2D_Length * sizeof(float) * _quadArray->nVertex,
-					_quadArray->vertexData);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, Vertex2D_Length * sizeof(float) * _quadArray->nVertex, _quadArray->vertexData);
 	glDrawArrays(GL_TRIANGLES, 0, _quadArray->nVertex);
 
 #endif
@@ -414,7 +415,7 @@ void Draw_Flush() {
 //
 // Cleans the game window.
 void Draw_Clean(unsigned char r, unsigned char g, unsigned char b) {
-#ifndef EMSCRIPTEN
+#if USE_OpenGL
 	glClearColor(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 #else
@@ -478,12 +479,10 @@ int Draw_LoopIteration() {
 			}
 		}
 		if (event.type == SDL_MOUSEMOTION) {
-			Input_SetPointerPosition(event.motion.x / (float)_width,
-									 event.motion.y / (float)_height);
+			Input_SetPointerPosition(event.motion.x / (float)_width, event.motion.y / (float)_height);
 		}
 		if (event.type == SDL_MOUSEBUTTONDOWN) {
-			Input_SetPointerPosition(event.button.x / (float)_width,
-									 event.button.y / (float)_height);
+			Input_SetPointerPosition(event.button.x / (float)_width, event.button.y / (float)_height);
 			Input_SetPointerDown(1);
 		}
 		if (event.type == SDL_FINGERMOTION) {
@@ -494,8 +493,7 @@ int Draw_LoopIteration() {
 			Input_SetPointerDown(1);
 		}
 		if (event.type == SDL_MOUSEBUTTONUP) {
-			Input_SetPointerPosition(event.button.x / (float)_width,
-									 event.button.y / (float)_height);
+			Input_SetPointerPosition(event.button.x / (float)_width, event.button.y / (float)_height);
 			Input_SetPointerDown(0);
 		}
 		if (event.type == SDL_FINGERUP) {
@@ -520,17 +518,14 @@ int Draw_LoopIteration() {
 			}
 		}
 		if (event.type == SDL_MOUSEMOTION) {
-			Input_SetPointerPosition(event.motion.x / (float)_width,
-									 event.motion.y / (float)_height);
+			Input_SetPointerPosition(event.motion.x / (float)_width, event.motion.y / (float)_height);
 		}
 		if (event.type == SDL_MOUSEBUTTONDOWN) {
-			Input_SetPointerPosition(event.button.x / (float)_width,
-									 event.button.y / (float)_height);
+			Input_SetPointerPosition(event.button.x / (float)_width, event.button.y / (float)_height);
 			Input_SetPointerDown(1);
 		}
 		if (event.type == SDL_MOUSEBUTTONUP) {
-			Input_SetPointerPosition(event.button.x / (float)_width,
-									 event.button.y / (float)_height);
+			Input_SetPointerPosition(event.button.x / (float)_width, event.button.y / (float)_height);
 			Input_SetPointerDown(0);
 		}
 	}
@@ -579,8 +574,7 @@ void Draw_LoopIterationAux() {
 // Draw_Loop
 //
 // Loops updating the game window.
-void Draw_Loop(void (*proc)(void *data), void (*draw)(void *data, float f),
-			   void *data) {
+void Draw_Loop(void (*proc)(void *data), void (*draw)(void *data, float f), void *data) {
 
 	_proc_func = proc;
 	_draw_func = draw;
@@ -662,12 +656,9 @@ DrawImg Draw_LoadImage(char *filename) {
 	// Try loading PNG images
 	if (EndsWith(filename, ".png") || EndsWith(filename, ".PNG")) {
 		image = malloc(sizeof(TDrawImage));
-		unsigned error =
-			lodepng_decode32_file(&image->data, (unsigned *)&image->w,
-								  (unsigned *)&image->h, filename);
+		unsigned error = lodepng_decode32_file(&image->data, (unsigned *)&image->w, (unsigned *)&image->h, filename);
 		if (error) {
-			Print("Draw_LoadImage: PNG decoder error %u: %s on file %s\n",
-				  error, lodepng_error_text(error), filename);
+			Print("Draw_LoadImage: PNG decoder error %u: %s on file %s\n", error, lodepng_error_text(error), filename);
 			return (NULL);
 		}
 		image->x = -(int)(image->w / 2);
@@ -803,8 +794,7 @@ void Draw_DrawImgResized(DrawImg img, int x, int y, float w, float h) {
 // Draw_DrawImgPart
 //
 // Draws an image part.
-void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j,
-					  float scale[2]) {
+void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j, float scale[2]) {
 	DrawImage image = img;
 	int x1, x2, y1, y2;
 	float us, u1, u2;
@@ -848,8 +838,7 @@ void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j,
 // Draw_DrawImgPartHoriz
 //
 // Draws an image part horizontally.
-void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i,
-						   float scale[2]) {
+void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i, float scale[2]) {
 	DrawImage image = img;
 	int x1, x2, y1, y2;
 	float us, u1, u2;
@@ -890,8 +879,7 @@ void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i,
 // Draw_ImgParallax
 //
 //
-void Draw_ImgParallax(DrawImg img, int imgSize[2], int imgOffset[2],
-					  float parallaxFactor[2], int gamePos[2],
+void Draw_ImgParallax(DrawImg img, int imgSize[2], int imgOffset[2], float parallaxFactor[2], int gamePos[2],
 					  int gameSize[2]) {
 	int paralaxPos[2];
 	int mult[2];
@@ -947,8 +935,7 @@ typedef struct {
 //
 // Creates a image with the default font.
 #include "FontData.h"
-DrawImage Draw_DefaultFontImage(unsigned char r, unsigned char g,
-								unsigned char b, unsigned char a) {
+DrawImage Draw_DefaultFontImage(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
 	DrawImage img;
 	int x, y, c;
 
@@ -979,8 +966,7 @@ DrawImage Draw_DefaultFontImage(unsigned char r, unsigned char g,
 // Draw_DefaultFont
 //
 // Creates the default font.
-DrawFnt Draw_DefaultFont(unsigned char r, unsigned char g, unsigned char b,
-						 unsigned char a) {
+DrawFnt Draw_DefaultFont(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
 	DrawFont *font;
 
 	// Create the default font
@@ -1038,8 +1024,7 @@ void Draw_DrawText(DrawFnt f, char *text, int x, int y) {
 	ptr = text;
 	while (*ptr) {
 		if ((*ptr) < font->max) {
-			Draw_DrawImgPartHoriz(font->img, x, y, font->w, (*ptr) - font->min,
-								  font->scale);
+			Draw_DrawImgPartHoriz(font->img, x, y, font->w, (*ptr) - font->min, font->scale);
 		}
 		x += font->w * font->scale[0];
 		ptr++;
@@ -1050,15 +1035,14 @@ void Draw_DrawText(DrawFnt f, char *text, int x, int y) {
 // Draw_SaveRGBAToBMP
 //
 //
-void Draw_SaveRGBAToBMP(char *filename, unsigned char *data, int width,
-						int height) {
+void Draw_SaveRGBAToBMP(char *filename, unsigned char *data, int width, int height) {
 	SDL_Surface *surf;
 
 	// Create the surface
 	surf = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 32, 0, 0, 0, 0);
 	surf->format->Amask = 0xFF000000;
 	surf->format->Ashift = 24;
-	//SDL_SetAlpha(surf, GL_SRC_ALPHA, 255);
+	// SDL_SetAlpha(surf, GL_SRC_ALPHA, 255);
 	SDL_LockSurface(surf);
 	memcpy(surf->pixels, data, width * height * 4);
 	SDL_UnlockSurface(surf);
@@ -1088,12 +1072,10 @@ void Draw_SaveRGBAToBMP(char *filename, unsigned char *data, int width,
 // Draw_SaveRGBAToPNG
 //
 //
-void Draw_SaveRGBAToPNG(char *filename, unsigned char *data, int width,
-						int height) {
+void Draw_SaveRGBAToPNG(char *filename, unsigned char *data, int width, int height) {
 	unsigned error = lodepng_encode32_file(filename, data, width, height);
 	if (error) {
-		Print("Draw_SaveRGBAToPNG: Error %u: %s\n", error,
-			  lodepng_error_text(error));
+		Print("Draw_SaveRGBAToPNG: Error %u: %s\n", error, lodepng_error_text(error));
 	}
 }
 
@@ -1117,10 +1099,8 @@ void Draw_SaveScreenshoot(char *filename) {
 	image_line = malloc(line_size);
 	for (i = 0; i < half_height; i++) {
 		memcpy(image_line, pixelData + i * line_size, line_size);
-		memcpy(pixelData + i * line_size,
-			   pixelData + (_height - (i + 1)) * line_size, line_size);
-		memcpy(pixelData + (_height - (i + 1)) * line_size, image_line,
-			   line_size);
+		memcpy(pixelData + i * line_size, pixelData + (_height - (i + 1)) * line_size, line_size);
+		memcpy(pixelData + (_height - (i + 1)) * line_size, image_line, line_size);
 	}
 
 	// Save the image

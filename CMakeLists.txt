@@ -6,13 +6,14 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/" "${CMAKE
 
 if (EMSCRIPTEN)
     message(" * Ignore SDL2 package with Emscripten")
-    SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -s USE_SDL=2")
+    SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -s USE_SDL=2 -Wno-implicit-function-declaration -DEMSCRIPTEN")
+    SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -s USE_SDL=2 -s TOTAL_MEMORY=134217728 -lidbfs.js")
 else()
     find_package(SDL2 REQUIRED)
     include_directories(${SDL2_INCLUDE_DIRS})
 endif()
 
-set(OpenGL_GL_PREFERENCE LEGACY)
+set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 
 
