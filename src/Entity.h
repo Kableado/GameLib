@@ -153,8 +153,7 @@ struct TCollisionInfo {
 // CollisionInfo_New
 //
 //
-CollisionInfo CollisionInfo_New(int responseType, Entity ent1, Entity ent2,
-								float t, vec2 n, int applyFriction);
+CollisionInfo CollisionInfo_New(int responseType, Entity ent1, Entity ent2, float t, vec2 n, int applyFriction);
 
 /////////////////////////////
 // CollisionInfo_Destroy
@@ -166,15 +165,14 @@ void CollisionInfo_Destroy(CollisionInfo *collInfoRef);
 // CollisionInfo_Add
 //
 //
-void CollisionInfo_Add(CollisionInfo *collInfo, int responseType, Entity ent1,
-					   Entity ent2, float t, vec2 n, int applyFriction);
+void CollisionInfo_Add(
+	CollisionInfo *collInfo, int responseType, Entity ent1, Entity ent2, float t, vec2 n, int applyFriction);
 
 /////////////////////////////
 // CollisionInfo_CheckRepetition
 //
 //
-int CollisionInfo_CheckRepetition(CollisionInfo collInfo, Entity ent1,
-								  Entity ent2);
+int CollisionInfo_CheckRepetition(CollisionInfo collInfo, Entity ent1, Entity ent2);
 
 /////////////////////////////
 // Entity_CheckCollision
@@ -192,8 +190,7 @@ void Entity_CollisionResponseCircle(Entity b1, Entity b2, float t, vec2 n);
 // Entity_CollisionResponseLine
 //
 // Normal response to a collision with a line.
-void Entity_CollisionResponseLine(Entity ent, Entity ent2, float t, vec2 n,
-								  int applyFriction);
+void Entity_CollisionResponseLine(Entity ent, Entity ent2, float t, vec2 n, int applyFriction);
 
 /////////////////////////////
 // Entity_CollisionInfoResponse

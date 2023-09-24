@@ -19,8 +19,7 @@ void Draw_Clean(unsigned char r, unsigned char g, unsigned char b);
 // Draw_Loop
 //
 // Loops updating the game window.
-void Draw_Loop(void (*proc)(void *data), void (*draw)(void *data, float f),
-			   void *data);
+void Draw_Loop(void (*proc)(void *data), void (*draw)(void *data, float f), void *data);
 
 /////////////////////////////
 // Draw_BreakLoop
@@ -95,22 +94,20 @@ void Draw_DrawImgResized(DrawImg img, int x, int y, float w, float h);
 // Draw_DrawImgPart
 //
 // Draws an image part.
-void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j,
-					  float scale[2]);
+void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j, float scale[2]);
 
 /////////////////////////////
 // Draw_DrawImgPartHoriz
 //
 // Draws an image part horizontally.
-void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i,
-						   float scale[2]);
+void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i, float scale[2]);
 
 /////////////////////////////
 // Draw_ImgParallax
 //
 //
-void Draw_ImgParallax(DrawImg img, int imgSize[2], int imgOffset[2],
-					  float parallaxFactor[2], int gamePos[2], int gameSize[2]);
+void Draw_ImgParallax(
+	DrawImg img, int imgSize[2], int imgOffset[2], float parallaxFactor[2], int gamePos[2], int gameSize[2]);
 
 /////////////////////////////
 // Draw_SetColor
@@ -128,8 +125,7 @@ typedef void *DrawFnt;
 // Draw_DefaultFont
 //
 // Creates the default font.
-DrawFnt Draw_DefaultFont(unsigned char r, unsigned char g, unsigned char b,
-						 unsigned char a);
+DrawFnt Draw_DefaultFont(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 
 /////////////////////////////
 // Draw_LoadFont
@@ -152,15 +148,13 @@ void Draw_DrawText(DrawFnt f, char *text, int x, int y);
 // Draw_SaveRGBAToBMP
 //
 //
-void Draw_SaveRGBAToBMP(char *filename, unsigned char *data, int width,
-						int height);
+void Draw_SaveRGBAToBMP(char *filename, unsigned char *data, int width, int height);
 
 /////////////////////////////
 // Draw_SaveRGBAToPNG
 //
 //
-void Draw_SaveRGBAToPNG(char *filename, unsigned char *data, int width,
-						int height);
+void Draw_SaveRGBAToPNG(char *filename, unsigned char *data, int width, int height);
 
 /////////////////////////////
 // Draw_SaveScreenshoot

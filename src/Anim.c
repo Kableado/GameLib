@@ -36,16 +36,16 @@ Anim Anim_LoadAnim(char *fichero, int width, int frames, float fps) {
 	Draw_SetOffset(img, -(width / 2), -(h / 2));
 
 	// Create the animation container
-	anim = malloc(sizeof(Animation));
+	anim      = malloc(sizeof(Animation));
 	anim->img = img;
-	anim->w = width;
+	anim->w   = width;
 	if (width <= 0) {
 		anim->w = w / frames;
 	}
-	anim->fps = fps;
+	anim->fps    = fps;
 	anim->frames = frames;
-	anim->ftime = 1000 / fps;
-	anim->time = anim->ftime * frames;
+	anim->ftime  = 1000 / fps;
+	anim->time   = anim->ftime * frames;
 
 	return ((Anim)anim);
 }
@@ -124,12 +124,12 @@ void AnimPlay_Copy(AnimPlay *ad, AnimPlay *ao) {
 	ad->img = ao->img;
 
 	ad->imgPart = ao->imgPart;
-	ad->w = ao->w;
-	ad->h = ao->h;
-	ad->i = ao->i;
-	ad->j = ao->j;
+	ad->w       = ao->w;
+	ad->h       = ao->h;
+	ad->i       = ao->i;
+	ad->j       = ao->j;
 
-	ad->anim = ao->anim;
+	ad->anim    = ao->anim;
 	ad->time_ms = ao->time_ms;
 }
 
@@ -140,7 +140,7 @@ void AnimPlay_Copy(AnimPlay *ad, AnimPlay *ao) {
 //
 //
 void AnimPlay_SetImg(AnimPlay *ap, DrawImg img) {
-	ap->anim = NULL;
+	ap->anim    = NULL;
 	ap->time_ms = 0;
 
 	ap->img = img;
@@ -152,25 +152,24 @@ void AnimPlay_SetAnim(AnimPlay *ap, Anim ani) {
 	if (ap->anim == ani) {
 		return;
 	}
-	ap->anim = ani;
+	ap->anim    = ani;
 	ap->time_ms = 0;
 
 	ap->img = NULL;
 
 	ap->imgPart = NULL;
 }
-void AnimPlay_SetImgPart(AnimPlay *ap, DrawImg img, int w, int h, int i,
-						 int j) {
-	ap->anim = NULL;
+void AnimPlay_SetImgPart(AnimPlay *ap, DrawImg img, int w, int h, int i, int j) {
+	ap->anim    = NULL;
 	ap->time_ms = 0;
 
 	ap->img = NULL;
 
 	ap->imgPart = img;
-	ap->w = w;
-	ap->h = h;
-	ap->i = i;
-	ap->j = j;
+	ap->w       = w;
+	ap->h       = h;
+	ap->i       = i;
+	ap->j       = j;
 }
 
 /////////////////////////////
@@ -187,8 +186,7 @@ void AnimPlay_Draw(AnimPlay *ani, int x, int y, float scale[2]) {
 		return;
 	}
 	if (ani->imgPart) {
-		Draw_DrawImgPart(ani->imgPart, x, y, ani->w, ani->h, ani->i, ani->j,
-						 scale);
+		Draw_DrawImgPart(ani->imgPart, x, y, ani->w, ani->h, ani->i, ani->j, scale);
 		return;
 	}
 }

@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
 	/////////////////////////////
 	// Load and initialize media.
 	//
-	font = Draw_DefaultFont(255, 255, 255, 255);
+	font          = Draw_DefaultFont(255, 255, 255, 255);
 	imgBackground = Draw_LoadImage("data/background.png");
 	Draw_SetOffset(imgBackground, 0, 0);
 	GameEnts_Init();
@@ -59,8 +59,7 @@ int main(int argc, char *argv[]) {
 	// Run the world.
 	//
 	GameLib_CleanParallaxBackgrounds();
-	GameLib_AddParallaxBackground(imgBackground, (int[2]){512, 512},
-								  (int[2]){0, 0}, (float[2]){0.5f, 0.0f});
+	GameLib_AddParallaxBackground(imgBackground, (int[2]){512, 512}, (int[2]){0, 0}, (float[2]){0.5f, 0.0f});
 	GameLib_Loop(ProcGame, PostProcGame, PreDrawGame, DrawGame);
 
 	return (0);

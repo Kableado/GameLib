@@ -59,7 +59,7 @@ int GameMap_LoadLevel(char *filename, int res) {
 	}
 
 	// Read the file to determine sizes
-	width = 0;
+	width  = 0;
 	height = 0;
 	do {
 		len = ReadLine(file, line, MaxLineLen);

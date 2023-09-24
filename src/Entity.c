@@ -26,7 +26,7 @@ Entity Entity_New() {
 
 	if (!_free_entity) {
 		// Allocate a big block of entities
-		int n = 1024, i;
+		int n            = 1024, i;
 		TEntity *newEnts = malloc(sizeof(TEntity) * n);
 		for (i = 0; i < n; i++) {
 			if (i < (n - 1)) {
@@ -37,31 +37,31 @@ Entity Entity_New() {
 		}
 		_free_entity = newEnts;
 	}
-	e = _free_entity;
+	e            = _free_entity;
 	_free_entity = e->next;
 
 	e->base = NULL;
 	e->type = 0;
 	vec2_set(e->pos0, 0.0f, 0.0f);
 	vec2_set(e->pos, 0.0f, 0.0f);
-	e->flags = EntityFlag_Collision | EntityFlag_Overlap;
+	e->flags         = EntityFlag_Collision | EntityFlag_Overlap;
 	e->internalFlags = EntityIntFlag_UpdateColor;
-	e->zorder = 1;
-	e->sortYOffset = 0;
+	e->zorder        = 1;
+	e->sortYOffset   = 0;
 
 	vec2_set(e->dir, 0.0f, 0.0f);
 
 	vec2_set(e->vel, 0.0f, 0.0f);
-	e->radius = 1.0f;
-	e->width = 1.0f;
-	e->height = 1.0f;
-	e->mass = 1.0f;
-	e->elast = 0.0f;
+	e->radius          = 1.0f;
+	e->width           = 1.0f;
+	e->height          = 1.0f;
+	e->mass            = 1.0f;
+	e->elast           = 0.0f;
 	e->backFric_static = 0.0f;
 
 	e->backFric_dynamic = 0.0f;
-	e->fric_static = 0.0f;
-	e->fric_dynamic = 0.0f;
+	e->fric_static      = 0.0f;
+	e->fric_dynamic     = 0.0f;
 
 	AnimPlay_SetImg(&e->anim, NULL);
 
@@ -69,27 +69,26 @@ Entity Entity_New() {
 	e->color[0] = e->color[1] = e->color[2] = e->color[3] = 1.0f;
 
 	e->light[0] = e->light[1] = e->light[2] = e->light[3] = 1.0f;
-	e->defaultColor[0] = e->defaultColor[1] = e->defaultColor[2] =
-		e->defaultColor[3] = 1.0f;
+	e->defaultColor[0] = e->defaultColor[1] = e->defaultColor[2] = e->defaultColor[3] = 1.0f;
 
 	e->scale0[0] = 1.0f;
 	e->scale0[1] = 1.0f;
-	e->scale[0] = 1.0f;
-	e->scale[1] = 1.0f;
+	e->scale[0]  = 1.0f;
+	e->scale[1]  = 1.0f;
 
-	e->oncopy = NULL;
-	e->oninit = NULL;
-	e->ondelete = NULL;
-	e->proc = NULL;
-	e->postproc = NULL;
+	e->oncopy    = NULL;
+	e->oninit    = NULL;
+	e->ondelete  = NULL;
+	e->proc      = NULL;
+	e->postproc  = NULL;
 	e->collision = NULL;
-	e->overlap = NULL;
+	e->overlap   = NULL;
 
-	e->A = 0;
-	e->B = 0;
-	e->C = 0;
-	e->D = 0;
-	e->E = 0;
+	e->A     = 0;
+	e->B     = 0;
+	e->C     = 0;
+	e->D     = 0;
+	e->E     = 0;
 	e->child = NULL;
 
 	e->next = NULL;
@@ -115,7 +114,7 @@ void Entity_Destroy(Entity e) {
 	if (e->ondelete) {
 		e->ondelete(e);
 	}
-	e->next = _free_entity;
+	e->next      = _free_entity;
 	_free_entity = e;
 }
 
@@ -131,35 +130,35 @@ Entity Entity_Copy(Entity e) {
 	n->base = e;
 	n->type = e->type;
 	vec2_set(n->pos, e->pos[0], e->pos[1]);
-	n->flags = e->flags;
+	n->flags         = e->flags;
 	n->internalFlags = e->internalFlags;
-	n->zorder = e->zorder;
-	n->sortYOffset = e->sortYOffset;
+	n->zorder        = e->zorder;
+	n->sortYOffset   = e->sortYOffset;
 
 	vec2_set(n->vel, e->vel[0], e->vel[1]);
-	n->radius = e->radius;
-	n->width = e->width;
-	n->height = e->height;
-	n->mass = e->mass;
-	n->elast = e->elast;
-	n->backFric_static = e->backFric_static;
+	n->radius           = e->radius;
+	n->width            = e->width;
+	n->height           = e->height;
+	n->mass             = e->mass;
+	n->elast            = e->elast;
+	n->backFric_static  = e->backFric_static;
 	n->backFric_dynamic = e->backFric_dynamic;
-	n->fric_static = e->fric_static;
-	n->fric_dynamic = e->fric_dynamic;
+	n->fric_static      = e->fric_static;
+	n->fric_dynamic     = e->fric_dynamic;
 
 	AnimPlay_Copy(&n->anim, &e->anim);
-	n->color0[0] = e->color0[0];
-	n->color0[1] = e->color0[1];
-	n->color0[2] = e->color0[2];
-	n->color0[3] = e->color0[3];
-	n->color[0] = e->color[0];
-	n->color[1] = e->color[1];
-	n->color[2] = e->color[2];
-	n->color[3] = e->color[3];
-	n->light[0] = e->light[0];
-	n->light[1] = e->light[1];
-	n->light[2] = e->light[2];
-	n->light[3] = e->light[3];
+	n->color0[0]       = e->color0[0];
+	n->color0[1]       = e->color0[1];
+	n->color0[2]       = e->color0[2];
+	n->color0[3]       = e->color0[3];
+	n->color[0]        = e->color[0];
+	n->color[1]        = e->color[1];
+	n->color[2]        = e->color[2];
+	n->color[3]        = e->color[3];
+	n->light[0]        = e->light[0];
+	n->light[1]        = e->light[1];
+	n->light[2]        = e->light[2];
+	n->light[3]        = e->light[3];
 	n->defaultColor[0] = e->defaultColor[0];
 	n->defaultColor[1] = e->defaultColor[1];
 	n->defaultColor[2] = e->defaultColor[2];
@@ -167,22 +166,22 @@ Entity Entity_Copy(Entity e) {
 
 	n->scale0[0] = e->scale[0];
 	n->scale0[1] = e->scale[1];
-	n->scale[0] = e->scale[0];
-	n->scale[1] = e->scale[1];
+	n->scale[0]  = e->scale[0];
+	n->scale[1]  = e->scale[1];
 
-	n->oncopy = e->oncopy;
-	n->oninit = e->oninit;
-	n->ondelete = e->ondelete;
-	n->proc = e->proc;
-	n->postproc = e->postproc;
+	n->oncopy    = e->oncopy;
+	n->oninit    = e->oninit;
+	n->ondelete  = e->ondelete;
+	n->proc      = e->proc;
+	n->postproc  = e->postproc;
 	n->collision = e->collision;
-	n->overlap = e->overlap;
+	n->overlap   = e->overlap;
 
-	n->A = e->A;
-	n->B = e->B;
-	n->C = e->C;
-	n->D = e->D;
-	n->E = e->E;
+	n->A     = e->A;
+	n->B     = e->B;
+	n->C     = e->C;
+	n->D     = e->D;
+	n->E     = e->E;
 	n->child = e->child;
 
 	Entity_CalcBBox(n);
@@ -203,7 +202,7 @@ Entity Entity_Copy(Entity e) {
 #define max(a, b) ((a) > (b) ? (a) : (b))
 void Entity_CalcBBox(Entity e) {
 	float hHeight = (max(e->height, e->radius) / 2) + BBox_ExtraMargin;
-	float hWidth = (max(e->width, e->radius) / 2) + BBox_ExtraMargin;
+	float hWidth  = (max(e->width, e->radius) / 2) + BBox_ExtraMargin;
 	if (e->vel[0] > 0) {
 		e->maxX = e->pos[0] + e->vel[0] + hWidth;
 		e->minX = e->pos[0] - hWidth;
@@ -225,8 +224,7 @@ void Entity_CalcBBox(Entity e) {
 //
 //
 int Entity_BBoxIntersect(Entity ent1, Entity ent2) {
-	if (ent1->maxX >= ent2->minX && ent1->minX <= ent2->maxX &&
-		ent1->maxY >= ent2->minY && ent1->minY <= ent2->maxY) {
+	if (ent1->maxX >= ent2->minX && ent1->minX <= ent2->maxX && ent1->maxY >= ent2->minY && ent1->minY <= ent2->maxY) {
 		return (1);
 	}
 	return (0);
@@ -240,10 +238,11 @@ void Entity_Draw(Entity e, int x, int y, float f) {
 	vec2 fPos;
 	float scale[2];
 	if (e->internalFlags & EntityIntFlag_UpdatedColor) {
-		Draw_SetColor(e->color0[0] - f * (e->color0[0] - e->color[0]),
-					  e->color0[1] - f * (e->color0[1] - e->color[1]),
-					  e->color0[2] - f * (e->color0[2] - e->color[2]),
-					  e->color0[3] - f * (e->color0[3] - e->color[3]));
+		Draw_SetColor(
+			e->color0[0] - f * (e->color0[0] - e->color[0]),
+			e->color0[1] - f * (e->color0[1] - e->color[1]),
+			e->color0[2] - f * (e->color0[2] - e->color[2]),
+			e->color0[3] - f * (e->color0[3] - e->color[3]));
 	} else {
 		Draw_SetColor(e->color[0], e->color[1], e->color[2], e->color[3]);
 	}
@@ -278,8 +277,7 @@ int Entity_IsVisible(Entity e, int x, int y, int w, int h) {
 	ymin = y - ih;
 	ymax = y + h + ih;
 
-	if (e->pos[0] < xmin || e->pos[0] > xmax || e->pos[1] < ymin ||
-		e->pos[1] > ymax) {
+	if (e->pos[0] < xmin || e->pos[0] > xmax || e->pos[1] < ymin || e->pos[1] > ymax) {
 		return (0);
 	}
 	return (1);
@@ -336,9 +334,7 @@ void Entity_PostProcess(Entity e, int ft) {
 			vec2_set(e->vel, 0, 0);
 		} else {
 			// Apply dynamic friction
-			vec2_scale(e->vel, e->vel,
-					   1.0f -
-						   (e->backFric_dynamic + (e->backFric_static / len)));
+			vec2_scale(e->vel, e->vel, 1.0f - (e->backFric_dynamic + (e->backFric_static / len)));
 		}
 
 		// Mark the update of the position.
@@ -362,22 +358,21 @@ void Entity_PostProcess(Entity e, int ft) {
 //
 //
 CollisionInfo _free_collInfo = NULL;
-CollisionInfo CollisionInfo_New(int responseType, Entity ent1, Entity ent2,
-								float t, vec2 n, int applyFriction) {
+CollisionInfo CollisionInfo_New(int responseType, Entity ent1, Entity ent2, float t, vec2 n, int applyFriction) {
 	CollisionInfo collInfo;
 
 	if (!_free_collInfo) {
 		collInfo = malloc(sizeof(TCollisionInfo));
 	} else {
-		collInfo = _free_collInfo;
+		collInfo       = _free_collInfo;
 		_free_collInfo = collInfo->next;
 	}
 	collInfo->next = NULL;
 
 	collInfo->responseType = responseType;
-	collInfo->ent1 = ent1;
-	collInfo->ent2 = ent2;
-	collInfo->t = t;
+	collInfo->ent1         = ent1;
+	collInfo->ent2         = ent2;
+	collInfo->t            = t;
 	vec2_copy(collInfo->n, n);
 	collInfo->applyFriction = applyFriction;
 
@@ -396,10 +391,10 @@ void CollisionInfo_Destroy(CollisionInfo *collInfoRef) {
 	CollisionInfo collInfo = collInfoRef[0];
 	CollisionInfo nextCollInfo;
 	while (collInfo != NULL) {
-		nextCollInfo = collInfo->next;
+		nextCollInfo   = collInfo->next;
 		collInfo->next = _free_collInfo;
 		_free_collInfo = collInfo;
-		collInfo = nextCollInfo;
+		collInfo       = nextCollInfo;
 	}
 	collInfoRef[0] = NULL;
 }
@@ -408,20 +403,18 @@ void CollisionInfo_Destroy(CollisionInfo *collInfoRef) {
 // CollisionInfo_Add
 //
 //
-void CollisionInfo_Add(CollisionInfo *collInfoRef, int responseType,
-					   Entity ent1, Entity ent2, float t, vec2 n,
-					   int applyFriction) {
+void CollisionInfo_Add(
+	CollisionInfo *collInfoRef, int responseType, Entity ent1, Entity ent2, float t, vec2 n, int applyFriction) {
 	if (collInfoRef == NULL) {
 		return;
 	}
 	CollisionInfo prevCollInfo = NULL;
-	CollisionInfo collInfo = collInfoRef[0];
-	CollisionInfo newCollInfo =
-		CollisionInfo_New(responseType, ent1, ent2, t, n, applyFriction);
+	CollisionInfo collInfo     = collInfoRef[0];
+	CollisionInfo newCollInfo  = CollisionInfo_New(responseType, ent1, ent2, t, n, applyFriction);
 
 	while (collInfo != NULL && collInfo->t < t) {
 		prevCollInfo = collInfo;
-		collInfo = collInfo->next;
+		collInfo     = collInfo->next;
 	}
 	if (prevCollInfo == NULL) {
 		collInfoRef[0] = newCollInfo;
@@ -435,11 +428,9 @@ void CollisionInfo_Add(CollisionInfo *collInfoRef, int responseType,
 // CollisionInfo_CheckRepetition
 //
 //
-int CollisionInfo_CheckRepetition(CollisionInfo collInfo, Entity ent1,
-								  Entity ent2) {
+int CollisionInfo_CheckRepetition(CollisionInfo collInfo, Entity ent1, Entity ent2) {
 	while (collInfo != NULL) {
-		if ((collInfo->ent1 == ent1 && collInfo->ent2 == ent2) ||
-			(collInfo->ent1 == ent2 && collInfo->ent2 == ent1)) {
+		if ((collInfo->ent1 == ent1 && collInfo->ent2 == ent2) || (collInfo->ent1 == ent2 && collInfo->ent2 == ent1)) {
 			return (1);
 		}
 		collInfo = collInfo->next;
@@ -451,8 +442,7 @@ int CollisionInfo_CheckRepetition(CollisionInfo collInfo, Entity ent1,
 // Entity_CheckCollisions
 //
 //
-int Entity_CheckCollision(Entity ent1, Entity ent2,
-						  CollisionInfo *collInfoRef) {
+int Entity_CheckCollision(Entity ent1, Entity ent2, CollisionInfo *collInfoRef) {
 	float t;
 	vec2 n;
 	vec2 vel;
@@ -467,10 +457,10 @@ int Entity_CheckCollision(Entity ent1, Entity ent2,
 
 		// Decide who is the block and who is the ent
 		if (ent1->mass <= 0.0f && ent2->mass > 0.0f) {
-			ent = ent2;
+			ent       = ent2;
 			ent_block = ent1;
 		} else if (ent2->mass <= 0.0f && ent1->mass > 0.0f) {
-			ent = ent1;
+			ent       = ent1;
 			ent_block = ent2;
 		} else {
 			// Two static or two dinamic entities?!?
@@ -478,19 +468,17 @@ int Entity_CheckCollision(Entity ent1, Entity ent2,
 		}
 
 		// Prepare some variables
-		t = 1.0f;
+		t             = 1.0f;
 		applyFriction = 1;
 
 		if (flags & EntityFlag_BlockTop) {
 			vec2_set(auxN, 0, -1);
-			vec2_scaleadd(p, ent_block->pos, auxN,
-						  (ent->height + ent_block->height) / 2);
+			vec2_scaleadd(p, ent_block->pos, auxN, (ent->height + ent_block->height) / 2);
 			block_len = ent_block->width + ent->width;
-			if (Intersect_RayEdge(ent->pos, ent->vel, auxN, p, block_len,
-								  &auxT)) {
+			if (Intersect_RayEdge(ent->pos, ent->vel, auxN, p, block_len, &auxT)) {
 				if (auxT < t) {
 					vec2_copy(n, auxN);
-					t = auxT;
+					t             = auxT;
 					applyFriction = 1;
 				}
 			}
@@ -498,14 +486,12 @@ int Entity_CheckCollision(Entity ent1, Entity ent2,
 
 		if (flags & EntityFlag_BlockBottom) {
 			vec2_set(auxN, 0, 1);
-			vec2_scaleadd(p, ent_block->pos, auxN,
-						  (ent->height + ent_block->height) / 2);
+			vec2_scaleadd(p, ent_block->pos, auxN, (ent->height + ent_block->height) / 2);
 			block_len = ent_block->width + ent->width;
-			if (Intersect_RayEdge(ent->pos, ent->vel, auxN, p, block_len,
-								  &auxT)) {
+			if (Intersect_RayEdge(ent->pos, ent->vel, auxN, p, block_len, &auxT)) {
 				if (auxT < t) {
 					vec2_copy(n, auxN);
-					t = auxT;
+					t             = auxT;
 					applyFriction = 1;
 				}
 			}
@@ -513,14 +499,12 @@ int Entity_CheckCollision(Entity ent1, Entity ent2,
 
 		if (flags & EntityFlag_BlockRight) {
 			vec2_set(auxN, 1, 0);
-			vec2_scaleadd(p, ent_block->pos, auxN,
-						  (ent->width + ent_block->width) / 2);
+			vec2_scaleadd(p, ent_block->pos, auxN, (ent->width + ent_block->width) / 2);
 			block_len = ent_block->height + ent->height;
-			if (Intersect_RayEdge(ent->pos, ent->vel, auxN, p, block_len,
-								  &auxT)) {
+			if (Intersect_RayEdge(ent->pos, ent->vel, auxN, p, block_len, &auxT)) {
 				if (auxT < t) {
 					vec2_copy(n, auxN);
-					t = auxT;
+					t             = auxT;
 					applyFriction = 0;
 				}
 			}
@@ -528,22 +512,19 @@ int Entity_CheckCollision(Entity ent1, Entity ent2,
 
 		if (flags & EntityFlag_BlockLeft) {
 			vec2_set(auxN, -1, 0);
-			vec2_scaleadd(p, ent_block->pos, auxN,
-						  (ent->width + ent_block->width) / 2);
+			vec2_scaleadd(p, ent_block->pos, auxN, (ent->width + ent_block->width) / 2);
 			block_len = ent_block->height + ent->height;
-			if (Intersect_RayEdge(ent->pos, ent->vel, auxN, p, block_len,
-								  &auxT)) {
+			if (Intersect_RayEdge(ent->pos, ent->vel, auxN, p, block_len, &auxT)) {
 				if (auxT < t) {
 					vec2_copy(n, auxN);
-					t = auxT;
+					t             = auxT;
 					applyFriction = 0;
 				}
 			}
 		}
 
 		if (t < 1.0f) {
-			CollisionInfo_Add(collInfoRef, CollisionResponse_Line, ent,
-							  ent_block, t, n, applyFriction);
+			CollisionInfo_Add(collInfoRef, CollisionResponse_Line, ent, ent_block, t, n, applyFriction);
 			return (1);
 		}
 
@@ -552,10 +533,8 @@ int Entity_CheckCollision(Entity ent1, Entity ent2,
 
 	// Circle-Circle test from ent1
 	vec2_minus(vel, ent1->vel, ent2->vel);
-	if (Colision_CircleCircle(ent1->pos, ent1->radius, vel, ent2->pos,
-							  ent2->radius, &t, n)) {
-		CollisionInfo_Add(collInfoRef, CollisionResponse_Circle, ent1, ent2, t,
-						  n, 0);
+	if (Colision_CircleCircle(ent1->pos, ent1->radius, vel, ent2->pos, ent2->radius, &t, n)) {
+		CollisionInfo_Add(collInfoRef, CollisionResponse_Circle, ent1, ent2, t, n, 0);
 		return (1);
 	}
 	return (0);
@@ -572,13 +551,11 @@ void Entity_CollisionResponseCircle(Entity b1, Entity b2, float t, vec2 n) {
 
 	if (b1->mass > 0.0f && b2->mass > 0.0f) {
 		// Calculate elasticity
-		elast = (b1->mass * b1->elast + b2->mass * b2->elast) /
-				(b1->mass + b2->mass);
+		elast = (b1->mass * b1->elast + b2->mass * b2->elast) / (b1->mass + b2->mass);
 
 		// Collision between two massed balls
-		moment = ((1.0f + elast) * b1->mass * b2->mass *
-				  (fabs(vec2_dot(b1->vel, n)) + fabs(vec2_dot(b2->vel, n)))) /
-				 (b1->mass + b2->mass);
+		moment = ((1.0f + elast) * b1->mass * b2->mass * (fabs(vec2_dot(b1->vel, n)) + fabs(vec2_dot(b2->vel, n)))) /
+		         (b1->mass + b2->mass);
 		vec2_scale(temp, n, moment / b1->mass);
 		vec2_minus(b1->vel, b1->vel, temp);
 		Entity_CalcBBox(b1);
@@ -612,8 +589,7 @@ void Entity_CollisionResponseCircle(Entity b1, Entity b2, float t, vec2 n) {
 // Entity_CollisionResponseLine
 //
 // Normal response to a collision with a line.
-void Entity_CollisionResponseLine(Entity ent, Entity ent2, float t, vec2 norm,
-								  int applyFriction) {
+void Entity_CollisionResponseLine(Entity ent, Entity ent2, float t, vec2 norm, int applyFriction) {
 	vec2 pos2, vel2, velFric, intersection;
 	float dist, fric_static, fric_dynamic, fricLen;
 
@@ -628,7 +604,7 @@ void Entity_CollisionResponseLine(Entity ent, Entity ent2, float t, vec2 norm,
 
 	if (applyFriction) {
 		// Calculate friction
-		fric_static = (ent->fric_static + ent2->fric_static) / 2;
+		fric_static  = (ent->fric_static + ent2->fric_static) / 2;
 		fric_dynamic = (ent->fric_dynamic + ent2->fric_dynamic) / 2;
 
 		// Apply friction
@@ -640,8 +616,7 @@ void Entity_CollisionResponseLine(Entity ent, Entity ent2, float t, vec2 norm,
 		} else {
 			// Apply dynamic friction
 			if (fricLen > 0.0f) {
-				vec2_scaleadd(pos2, intersection, velFric,
-							  1.0f - (fric_dynamic + (fric_static / fricLen)));
+				vec2_scaleadd(pos2, intersection, velFric, 1.0f - (fric_dynamic + (fric_static / fricLen)));
 			} else {
 				vec2_scaleadd(pos2, intersection, velFric, 1.0f - fric_dynamic);
 			}
@@ -671,16 +646,14 @@ int Entity_CollisionInfoResponse(CollisionInfo collInfo) {
 
 		// Check the collision methods
 		if (collInfo->ent1->collision) {
-			rc = collInfo->ent1->collision(collInfo->ent1, collInfo->ent2,
-										   collInfo->t, n1);
+			rc = collInfo->ent1->collision(collInfo->ent1, collInfo->ent2, collInfo->t, n1);
 			if (rc == 0)
 				response = 0;
 			if (rc > 1)
 				response = 2;
 		}
 		if (collInfo->ent2->collision) {
-			rc = collInfo->ent2->collision(collInfo->ent2, collInfo->ent1,
-										   collInfo->t, n2);
+			rc = collInfo->ent2->collision(collInfo->ent2, collInfo->ent1, collInfo->t, n2);
 			if (rc == 0)
 				response = 0;
 			if (rc > 1)
@@ -690,17 +663,14 @@ int Entity_CollisionInfoResponse(CollisionInfo collInfo) {
 		// Collision response
 		if (response == 1) {
 			if (collInfo->responseType == CollisionResponse_Line) {
-				Entity_CollisionResponseLine(collInfo->ent1, collInfo->ent2,
-											 collInfo->t, collInfo->n,
-											 collInfo->applyFriction);
+				Entity_CollisionResponseLine(
+					collInfo->ent1, collInfo->ent2, collInfo->t, collInfo->n, collInfo->applyFriction);
 			} else if (collInfo->responseType == CollisionResponse_Circle) {
 				if (vec2_dot(collInfo->ent1->vel, collInfo->ent1->vel) >
-					vec2_dot(collInfo->ent2->vel, collInfo->ent2->vel)) {
-					Entity_CollisionResponseCircle(
-						collInfo->ent1, collInfo->ent2, collInfo->t, n2);
+				    vec2_dot(collInfo->ent2->vel, collInfo->ent2->vel)) {
+					Entity_CollisionResponseCircle(collInfo->ent1, collInfo->ent2, collInfo->t, n2);
 				} else {
-					Entity_CollisionResponseCircle(
-						collInfo->ent2, collInfo->ent1, collInfo->t, n1);
+					Entity_CollisionResponseCircle(collInfo->ent2, collInfo->ent1, collInfo->t, n1);
 				}
 			}
 			return (1);
@@ -873,10 +843,10 @@ void Entity_AddVelLimitV(Entity e, float v, float limit) {
 //
 //
 void Entity_SetColor(Entity e, float r, float g, float b, float a) {
-	e->color[0] = r;
-	e->color[1] = g;
-	e->color[2] = b;
-	e->color[3] = a;
+	e->color[0]  = r;
+	e->color[1]  = g;
+	e->color[2]  = b;
+	e->color[3]  = a;
 	e->color0[0] = r;
 	e->color0[1] = g;
 	e->color0[2] = b;
@@ -970,15 +940,14 @@ void Entity_Iluminate(Entity e, Entity *elist, int n) {
 	float qrad;
 
 	if (e->flags & EntityFlag_Light) {
-		Entity_SetColor(e, e->defaultColor[0], e->defaultColor[1],
-						e->defaultColor[2], e->defaultColor[3]);
+		Entity_SetColor(e, e->defaultColor[0], e->defaultColor[1], e->defaultColor[2], e->defaultColor[3]);
 		return;
 	}
 
 	e->color[0] = e->light[0];
 	e->color[1] = e->light[1];
 	e->color[2] = e->light[2];
-	
+
 	e->color[3] = e->color[3];
 
 	for (i = 0; i < n; i++) {
@@ -987,16 +956,14 @@ void Entity_Iluminate(Entity e, Entity *elist, int n) {
 
 		vec2_minus(vdist, e->pos, elist[i]->pos);
 		qdist = vec2_dot(vdist, vdist);
-		qrad = elist[i]->light[3] * elist[i]->light[3];
+		qrad  = elist[i]->light[3] * elist[i]->light[3];
 		if (qdist < qrad) {
 			f = 1.0f - qdist / qrad;
-			Entity_AddColor(e, f * elist[i]->light[0], f * elist[i]->light[1],
-							f * elist[i]->light[2], 0.0f);
+			Entity_AddColor(e, f * elist[i]->light[0], f * elist[i]->light[1], f * elist[i]->light[2], 0.0f);
 		}
 	}
 
-	Entity_MultColor(e, e->defaultColor[0], e->defaultColor[1],
-					 e->defaultColor[2], e->defaultColor[3]);
+	Entity_MultColor(e, e->defaultColor[0], e->defaultColor[1], e->defaultColor[2], e->defaultColor[3]);
 	e->internalFlags &= ~EntityIntFlag_UpdateLight;
 
 	if (e->internalFlags & EntityIntFlag_UpdateColor) {
@@ -1032,9 +999,8 @@ void Entity_MarkUpdateLight(Entity e, Entity *elist, int n) {
 			max[1] = e->pos0[1] + e->light[3];
 		}
 		for (i = 0; i < n; i++) {
-			if (elist[i] != NULL && min[0] <= elist[i]->pos0[0] &&
-				max[0] >= elist[i]->pos0[0] && min[1] <= elist[i]->pos0[1] &&
-				max[1] >= elist[i]->pos0[1]) {
+			if (elist[i] != NULL && min[0] <= elist[i]->pos0[0] && max[0] >= elist[i]->pos0[0] &&
+			    min[1] <= elist[i]->pos0[1] && max[1] >= elist[i]->pos0[1]) {
 				elist[i]->internalFlags |= EntityIntFlag_UpdateLight;
 			}
 		}
@@ -1051,13 +1017,9 @@ int Entity_IsLight(Entity e) { return (e->flags & EntityFlag_Light); }
 /////////////////////////////
 // Entity_IsUpdateLight
 //
-int Entity_IsUpdateLight(Entity e) {
-	return (e->internalFlags & EntityIntFlag_UpdateLight);
-}
+int Entity_IsUpdateLight(Entity e) { return (e->internalFlags & EntityIntFlag_UpdateLight); }
 
 /////////////////////////////
 // Entity_IsMoving
 //
-int Entity_IsMoving(Entity e) {
-	return (e->internalFlags & EntityIntFlag_UpdatedPos);
-}
+int Entity_IsMoving(Entity e) { return (e->internalFlags & EntityIntFlag_UpdatedPos); }

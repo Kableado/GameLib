@@ -13,10 +13,10 @@
 InputKeyStatus _keys[InputKey_Max];
 
 int _pointerDown = 0;
-float _pointerX = 0;
-float _pointerY = 0;
+float _pointerX  = 0;
+float _pointerY  = 0;
 
-int _clicked = 0;
+int _clicked            = 0;
 float _clickedPositionX = 0;
 float _clickedPositionY = 0;
 
@@ -53,8 +53,9 @@ void Input_Frame() {
 	Input_SetKey(InputKey_Left, keys[SDL_SCANCODE_LEFT] | keys[SDL_SCANCODE_A]);
 	Input_SetKey(InputKey_Right, keys[SDL_SCANCODE_RIGHT] | keys[SDL_SCANCODE_D]);
 	Input_SetKey(InputKey_Jump, keys[SDL_SCANCODE_SPACE]);
-	Input_SetKey(InputKey_Continue,
-				 keys[SDL_SCANCODE_RETURN] | keys[SDL_SCANCODE_RETURN2] | keys[SDL_SCANCODE_KP_ENTER] | _pointerDown);
+	Input_SetKey(
+		InputKey_Continue,
+		keys[SDL_SCANCODE_RETURN] | keys[SDL_SCANCODE_RETURN2] | keys[SDL_SCANCODE_KP_ENTER] | _pointerDown);
 
 	Input_SetKey(InputKey_DumpProfiling, keys[SDL_SCANCODE_M]);
 	Input_SetKey(InputKey_Screenshot, keys[SDL_SCANCODE_F12]);
@@ -104,7 +105,7 @@ void Input_SetPointerPosition(float x, float y) {
 //
 void Input_SetPointerDown(int pointerDown) {
 	if (pointerDown == 0 && _pointerDown == 1) {
-		_clicked = 1;
+		_clicked          = 1;
 		_clickedPositionX = _pointerX;
 		_clickedPositionY = _pointerY;
 	}

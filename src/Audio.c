@@ -47,7 +47,7 @@ struct TAudioChan {
 
 	AudioChan next;
 };
-AudioChan _channels = NULL;
+AudioChan _channels      = NULL;
 AudioChan _free_channels = NULL;
 
 static SDL_AudioDeviceID _audioDeviceID = 0;
@@ -68,11 +68,11 @@ int Audio_Init() {
 	}
 
 	// Open the audio device using the desired parameters
-	as.freq = 44100;
-	as.format = AUDIO_S16SYS;
-	as.channels = 2;
-	as.samples = 2048;
-	as.callback = Audio_MixerCallback;
+	as.freq        = 44100;
+	as.format      = AUDIO_S16SYS;
+	as.channels    = 2;
+	as.samples     = 2048;
+	as.callback    = Audio_MixerCallback;
 	_audioDeviceID = SDL_OpenAudioDevice(NULL, 0, &as, &as2, 0);
 	if (_audioDeviceID == 0) {
 		Print("Audio_Init: Failure opening audio.\n");
@@ -112,14 +112,14 @@ static void Audio_MixerCallback(void *ud, Uint8 *stream, int l) {
 
 	// Mix all the channels
 	prevchan = NULL;
-	chan = _channels;
+	chan     = _channels;
 	while (chan) {
 		if (!chan->wave) {
 			// Remove finished channels
 			AudioChan aux_chan = chan->next;
-			chan->next = _free_channels;
-			_free_channels = chan;
-			chan = aux_chan;
+			chan->next         = _free_channels;
+			_free_channels     = chan;
+			chan               = aux_chan;
 			if (prevchan) {
 				prevchan->next = chan;
 			} else {
@@ -129,9 +129,9 @@ static void Audio_MixerCallback(void *ud, Uint8 *stream, int l) {
 		}
 
 		// Prepare the pointers
-		ptr_out = (signed short *)stream;
+		ptr_out  = (signed short *)stream;
 		ptr_wave = ((signed short *)chan->wave->buffer) + chan->pos;
-		wave = chan->wave;
+		wave     = chan->wave;
 
 		// Determine mixing lenght
 		chan_remain = wave->len - chan->pos;
@@ -174,8 +174,7 @@ static void Audio_MixerCallback(void *ud, Uint8 *stream, int l) {
 
 			// Next sample
 			ptr_out += 2;
-			if (ptr_wave >=
-				(((signed short *)wave->buffer) + (wave->len - 1))) {
+			if (ptr_wave >= (((signed short *)wave->buffer) + (wave->len - 1))) {
 				ptr_wave = ((signed short *)wave->buffer);
 			} else {
 				ptr_wave++;
@@ -192,7 +191,7 @@ static void Audio_MixerCallback(void *ud, Uint8 *stream, int l) {
 
 		// Next channel
 		prevchan = chan;
-		chan = chan->next;
+		chan     = chan->next;
 	}
 }
 
@@ -260,9 +259,12 @@ AudioSnd Audio_LoadSound(char *filename) {
 
 	// Assert sound format
 	if (sampleRate != 44100 || channels != 1 || bitsPerSample != 2) {
-		Print("Audio_LoadSound: Format not supported: "
-			  "sampleRate:%d; channels:%d; BPB:%d\n",
-			  sampleRate, channels, bitsPerSample);
+		Print(
+			"Audio_LoadSound: Format not supported: "
+			"sampleRate:%d; channels:%d; BPB:%d\n",
+			sampleRate,
+			channels,
+			bitsPerSample);
 		fclose(f);
 		return (NULL);
 	}
@@ -294,17 +296,17 @@ AudioSnd Audio_LoadSound(char *filename) {
 	fclose(f);
 
 	// Build the wave object
-	AudioWave wave = malloc(sizeof(TAudioWave));
+	AudioWave wave   = malloc(sizeof(TAudioWave));
 	wave->sampleRate = sampleRate;
-	wave->channels = channels;
-	wave->buffer = (Uint8 *)sndBuffer;
-	wave->BPB = bitsPerSample;
-	wave->bpb = wave->BPB * 8;
-	wave->len = dataSize / (wave->BPB * wave->channels);
+	wave->channels   = channels;
+	wave->buffer     = (Uint8 *)sndBuffer;
+	wave->BPB        = bitsPerSample;
+	wave->bpb        = wave->BPB * 8;
+	wave->len        = dataSize / (wave->BPB * wave->channels);
 
 	// Take a reference
 	wave->next = _waves;
-	_waves = wave;
+	_waves     = wave;
 
 	return (wave);
 }
@@ -313,8 +315,7 @@ AudioSnd Audio_LoadSound(char *filename) {
 // Audio_PlaySound
 //
 // Loads a sound, giving a reference.
-AudioChn Audio_PlaySound(AudioSnd snd, float leftvol, float rightvol,
-						 int loop) {
+AudioChn Audio_PlaySound(AudioSnd snd, float leftvol, float rightvol, int loop) {
 	AudioChan chan;
 	AudioWave wave;
 	if (!snd) {
@@ -326,24 +327,24 @@ AudioChn Audio_PlaySound(AudioSnd snd, float leftvol, float rightvol,
 
 	// Get a free channel
 	if (_free_channels) {
-		chan = _free_channels;
+		chan           = _free_channels;
 		_free_channels = chan->next;
-		chan->next = NULL;
+		chan->next     = NULL;
 	} else {
-		chan = malloc(sizeof(TAudioChan));
+		chan       = malloc(sizeof(TAudioChan));
 		chan->next = NULL;
 	}
 
 	// Initialize the channel
-	chan->wave = wave;
-	chan->pos = 0;
+	chan->wave     = wave;
+	chan->pos      = 0;
 	chan->rightvol = (rightvol * 255);
-	chan->leftvol = (leftvol * 255);
-	chan->loop = loop;
+	chan->leftvol  = (leftvol * 255);
+	chan->loop     = loop;
 
 	// Include in sounds list
 	chan->next = _channels;
-	_channels = chan;
+	_channels  = chan;
 
 	return chan;
 }

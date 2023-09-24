@@ -24,8 +24,8 @@ void QuadArray2D_Clean(QuadArray2D quadArray);
 
 void QuadArray2D_AddVertex(QuadArray2D quadArray, float v[]);
 
-void QuadArray2D_AddQuad(QuadArray2D quadArray, float x0, float y0, float u0,
-						 float v0, float x1, float y1, float u1, float v1,
-						 float color[]);
+void QuadArray2D_AddQuad(
+	QuadArray2D quadArray, float x0, float y0, float u0, float v0, float x1, float y1, float u1, float v1,
+	float color[]);
 
 #endif

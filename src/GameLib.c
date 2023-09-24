@@ -18,16 +18,16 @@
 #include "GameLib.h"
 
 // Globals
-Entity *_entity = NULL;
-int *_entity_flag = NULL;
-int _n_entities = 0;
-int _n_entities_res = 0;
-int _entities_lock = 0;
-int _entities_compactate = 0;
-void (*_gameproc)() = NULL;
-void (*_gamepostproc)() = NULL;
+Entity *_entity               = NULL;
+int *_entity_flag             = NULL;
+int _n_entities               = 0;
+int _n_entities_res           = 0;
+int _entities_lock            = 0;
+int _entities_compactate      = 0;
+void (*_gameproc)()           = NULL;
+void (*_gamepostproc)()       = NULL;
 void (*_gamepredraw)(float f) = NULL;
-void (*_gamedraw)(float f) = NULL;
+void (*_gamedraw)(float f)    = NULL;
 int _pft;
 int _game_size[2];
 int _game_pos0[2];
@@ -95,22 +95,22 @@ void GameLib_AddEntity(Entity e) {
 			_n_entities_res = 32;
 		else
 			_n_entities_res *= 2;
-		entity_aux = malloc(sizeof(Entity) * _n_entities_res);
+		entity_aux      = malloc(sizeof(Entity) * _n_entities_res);
 		entity_flag_aux = malloc(sizeof(int) * _n_entities_res);
 		for (i = 0; i < _n_entities; i++) {
-			entity_aux[i] = _entity[i];
+			entity_aux[i]      = _entity[i];
 			entity_flag_aux[i] = _entity_flag[i];
 		}
 		if (_entity) {
 			free(_entity);
 			free(_entity_flag);
 		}
-		_entity = entity_aux;
+		_entity      = entity_aux;
 		_entity_flag = entity_flag_aux;
 	}
 
 	// Add the entity
-	_entity[_n_entities] = e;
+	_entity[_n_entities]      = e;
 	_entity_flag[_n_entities] = 1;
 	_n_entities++;
 
@@ -134,7 +134,7 @@ int GameLib_UnrefEntity(Entity e) {
 			if (_entities_lock) {
 				_entity_flag[i] = -2;
 			} else {
-				_entity[i] = NULL;
+				_entity[i]      = NULL;
 				_entity_flag[i] = 0;
 			}
 			_entities_compactate = 1;
@@ -158,7 +158,7 @@ int GameLib_DelEntity(Entity e) {
 	}
 	if (_entities_lock) {
 		// Delete latter
-		_entity[i] = e;
+		_entity[i]      = e;
 		_entity_flag[i] = -1;
 	} else {
 		// Delete now
@@ -184,12 +184,12 @@ void GameLib_Compactate() {
 			continue;
 		}
 		if (i > j) {
-			_entity[j] = _entity[i];
+			_entity[j]      = _entity[i];
 			_entity_flag[j] = _entity_flag[i];
 		}
 		j++;
 	}
-	_n_entities = j;
+	_n_entities          = j;
 	_entities_compactate = 0;
 }
 
@@ -207,7 +207,7 @@ void GameLib_ProcLoop(void *data) {
 	_game_pos0[1] = _game_pos1[1] + _game_posOffset[1];
 
 	// Process
-	time = Time_GetTime();
+	time           = Time_GetTime();
 	_entities_lock = 1;
 	if (_gameproc) {
 		_gameproc();
@@ -222,25 +222,23 @@ void GameLib_ProcLoop(void *data) {
 	t_proc += Time_GetTime() - time;
 
 	// Colisions between entities
-	time = Time_GetTime();
+	time           = Time_GetTime();
 	_entities_lock = 1;
-	count = 0;
+	count          = 0;
 	do {
-		repeat = 0;
+		repeat                 = 0;
 		CollisionInfo collInfo = NULL;
 		for (i = 0; i < _n_entities; i++) {
-			if (!(_entity[i]->flags & EntityFlag_Collision) ||
-				_entity[i]->mass < 0.0f)
+			if (!(_entity[i]->flags & EntityFlag_Collision) || _entity[i]->mass < 0.0f)
 				continue;
-			if (_entity[i]->vel[0] <= 0.0f && _entity[i]->vel[0] >= -0.0f &&
-				_entity[i]->vel[1] <= 0.0f && _entity[i]->vel[1] >= -0.0f) {
+			if (_entity[i]->vel[0] <= 0.0f && _entity[i]->vel[0] >= -0.0f && _entity[i]->vel[1] <= 0.0f &&
+			    _entity[i]->vel[1] >= -0.0f) {
 				continue;
 			}
 			for (j = 0; j < _n_entities; j++) {
 				if (i == j || !(_entity[j]->flags & EntityFlag_Collision) ||
-					CollisionInfo_CheckRepetition(collInfo, _entity[i],
-												  _entity[j]) ||
-					!Entity_BBoxIntersect(_entity[i], _entity[j])) {
+				    CollisionInfo_CheckRepetition(collInfo, _entity[i], _entity[j]) ||
+				    !Entity_BBoxIntersect(_entity[i], _entity[j])) {
 					continue;
 				}
 				Entity_CheckCollision(_entity[i], _entity[j], &collInfo);
@@ -256,12 +254,11 @@ void GameLib_ProcLoop(void *data) {
 	// Stop remaining collisions
 	if (count == 10) {
 		for (i = 0; i < _n_entities; i++) {
-			if (!(_entity[i]->flags & EntityFlag_Collision) ||
-				_entity[i]->mass < 0.0f)
+			if (!(_entity[i]->flags & EntityFlag_Collision) || _entity[i]->mass < 0.0f)
 				continue;
 			for (j = 0; j < _n_entities; j++) {
 				if (i == j || !(_entity[j]->flags & EntityFlag_Collision) ||
-					!Entity_BBoxIntersect(_entity[i], _entity[j])) {
+				    !Entity_BBoxIntersect(_entity[i], _entity[j])) {
 					continue;
 				}
 				if (Entity_CheckCollision(_entity[i], _entity[j], NULL)) {
@@ -278,11 +275,10 @@ void GameLib_ProcLoop(void *data) {
 	t_col += Time_GetTime() - time;
 
 	// Process Overlaps
-	time = Time_GetTime();
+	time           = Time_GetTime();
 	_entities_lock = 1;
 	for (i = 0; i < _n_entities; i++) {
-		if (!(_entity[i]->flags & EntityFlag_Overlap) ||
-			_entity[i]->mass < 0.0f)
+		if (!(_entity[i]->flags & EntityFlag_Overlap) || _entity[i]->mass < 0.0f)
 			continue;
 		for (j = 0; j < _n_entities; j++) {
 			if (!(_entity[j]->flags & EntityFlag_Overlap) || i == j)
@@ -302,7 +298,7 @@ void GameLib_ProcLoop(void *data) {
 		for (i = 1; i < n; i++) {
 			Entity ent1 = _entity[i - 1];
 			Entity ent2 = _entity[i];
-			swap = 0;
+			swap        = 0;
 			if (ent1->zorder > ent2->zorder) {
 				// Lower level
 				swap = 1;
@@ -322,17 +318,17 @@ void GameLib_ProcLoop(void *data) {
 			}
 			if (swap) {
 				Entity ent;
-				ent = _entity[i];
-				_entity[i] = _entity[i - 1];
+				ent            = _entity[i];
+				_entity[i]     = _entity[i - 1];
 				_entity[i - 1] = ent;
-				n2 = i;
+				n2             = i;
 			}
 		}
 		n = n2;
 	} while (n > 0);
 
 	// PostProcess
-	time = Time_GetTime();
+	time           = Time_GetTime();
 	_entities_lock = 1;
 	for (i = 0; i < _n_entities; i++) {
 		Entity_PostProcess(_entity[i], _pft);
@@ -376,9 +372,12 @@ void GameLib_DrawLoop(void *data, float f) {
 	// Draw parallax backgrounds
 	for (i = 0; i < _nParallaxBackgrounds; i++) {
 		Draw_ImgParallax(
-			_parallaxBackground[i].img, _parallaxBackground[i].imgSize,
+			_parallaxBackground[i].img,
+			_parallaxBackground[i].imgSize,
 			_parallaxBackground[i].imgOffset,
-			_parallaxBackground[i].parallaxFactor, game_pos, _game_size);
+			_parallaxBackground[i].parallaxFactor,
+			game_pos,
+			_game_size);
 	}
 
 	// Draw entities
@@ -387,8 +386,7 @@ void GameLib_DrawLoop(void *data, float f) {
 		Entity e = _entity[i];
 
 		// Check visivility
-		if (!Entity_IsVisible(e, game_pos[0], game_pos[1], _game_size[0],
-							  _game_size[1])) {
+		if (!Entity_IsVisible(e, game_pos[0], game_pos[1], _game_size[0], _game_size[1])) {
 			continue;
 		}
 
@@ -425,8 +423,7 @@ void GameLib_DrawLoop(void *data, float f) {
 	}
 #endif // EMSCRIPTEN
 
-	if (Input_GetKey(InputKey_DumpProfiling) == InputKey_Pressed &&
-		fproc_count > 0 && fdraw_count > 0) {
+	if (Input_GetKey(InputKey_DumpProfiling) == InputKey_Pressed && fproc_count > 0 && fdraw_count > 0) {
 		Print("Profiling:::::::::\n");
 		Print("t_proc.....:%6lldus\n", t_proc / fproc_count);
 		Print("t_col......:%6lldus\n", t_col / fproc_count);
@@ -434,11 +431,11 @@ void GameLib_DrawLoop(void *data, float f) {
 		Print("t_postproc.:%6lldus\n", t_postproc / fproc_count);
 		Print("t_draw.....:%6lldus\n", t_draw / fdraw_count);
 		Print("n_ents.....:%6lld\n", _n_entities);
-		t_proc = 0;
-		t_col = 0;
-		t_over = 0;
-		t_postproc = 0;
-		t_draw = 0;
+		t_proc      = 0;
+		t_col       = 0;
+		t_over      = 0;
+		t_postproc  = 0;
+		t_draw      = 0;
 		fproc_count = 0;
 		fdraw_count = 0;
 	}
@@ -448,19 +445,18 @@ void GameLib_DrawLoop(void *data, float f) {
 // GameLib_Loop
 //
 // Loops the game.
-void GameLib_Loop(void (*gameproc)(), void (*gamepostproc)(),
-				  void (*gamepredraw)(float f), void (*gamedraw)(float f)) {
-	_gameproc = gameproc;
+void GameLib_Loop(void (*gameproc)(), void (*gamepostproc)(), void (*gamepredraw)(float f), void (*gamedraw)(float f)) {
+	_gameproc     = gameproc;
 	_gamepostproc = gamepostproc;
-	_gamepredraw = gamepredraw;
-	_gamedraw = gamedraw;
-	t_proc = 0;
-	t_col = 0;
-	t_over = 0;
-	t_postproc = 0;
-	t_draw = 0;
-	fproc_count = 0;
-	fdraw_count = 0;
+	_gamepredraw  = gamepredraw;
+	_gamedraw     = gamedraw;
+	t_proc        = 0;
+	t_col         = 0;
+	t_over        = 0;
+	t_postproc    = 0;
+	t_draw        = 0;
+	fproc_count   = 0;
+	fdraw_count   = 0;
 	Draw_Loop(GameLib_ProcLoop, GameLib_DrawLoop, NULL);
 }
 
@@ -492,10 +488,8 @@ void GameLib_GetSize(int size[2]) {
 	size[1] = _game_size[1];
 }
 void GameLib_GetPosInstant(int pos[2], float f) {
-	pos[0] = _game_pos0[0] +
-			 f * ((_game_pos1[0] + _game_posOffset[0]) - _game_pos0[0]);
-	pos[1] = _game_pos0[1] +
-			 f * ((_game_pos1[1] + _game_posOffset[1]) - _game_pos0[1]);
+	pos[0] = _game_pos0[0] + f * ((_game_pos1[0] + _game_posOffset[0]) - _game_pos0[0]);
+	pos[1] = _game_pos0[1] + f * ((_game_pos1[1] + _game_posOffset[1]) - _game_pos0[1]);
 }
 void GameLib_SetPosOffset(int posOffset[2]) {
 	_game_posOffset[0] = posOffset[0];
@@ -513,12 +507,10 @@ void GameLib_MoveToPos(vec2 pos, float f) {
 	GameLib_MoveToPosV(pos, f);
 }
 void GameLib_MoveToPosH(vec2 pos, float f) {
-	_game_pos1[0] =
-		_game_pos1[0] + (pos[0] - (_game_pos1[0] + (_game_size[0] / 2.0f))) * f;
+	_game_pos1[0] = _game_pos1[0] + (pos[0] - (_game_pos1[0] + (_game_size[0] / 2.0f))) * f;
 }
 void GameLib_MoveToPosV(vec2 pos, float f) {
-	_game_pos1[1] =
-		_game_pos1[1] + (pos[1] - (_game_pos1[1] + (_game_size[1] / 2.0f))) * f;
+	_game_pos1[1] = _game_pos1[1] + (pos[1] - (_game_pos1[1] + (_game_size[1] / 2.0f))) * f;
 }
 
 /////////////////////////////
@@ -574,7 +566,7 @@ Entity GameLib_SearchEnt(int (*func)(Entity ent, void *d), void *d) {
 //
 //
 int GameLib_EntityCustomCheckCollision(Entity ent, vec2 vel) {
-	int collision = 0;
+	int collision          = 0;
 	CollisionInfo collInfo = NULL;
 	vec2 originalVel;
 	int j;
@@ -584,8 +576,7 @@ int GameLib_EntityCustomCheckCollision(Entity ent, vec2 vel) {
 	Entity_CalcBBox(ent);
 
 	for (j = 0; j < _n_entities; j++) {
-		if (!(_entity[j]->flags & EntityFlag_Collision) ||
-			!Entity_BBoxIntersect(ent, _entity[j])) {
+		if (!(_entity[j]->flags & EntityFlag_Collision) || !Entity_BBoxIntersect(ent, _entity[j])) {
 			continue;
 		}
 		Entity_CheckCollision(ent, _entity[j], &collInfo);
@@ -618,16 +609,16 @@ void GameLib_PlaySound(AudioSnd snd, int x, int y) {
 	} else {
 		r = _game_size[1] / 2;
 	}
-	r = r * 1.2f;
+	r   = r * 1.2f;
 	off = r / 10.0f;
 
 	// Calculate volumes
-	dx = x - (cx + off);
-	dy = y - (cy);
+	dx     = x - (cx + off);
+	dy     = y - (cy);
 	vright = 1.0f - (sqrtf(dx * dx + dy * dy) / (float)r);
-	dx = x - (cx - off);
-	dy = y - (cy);
-	vleft = 1.0f - (sqrtf(dx * dx + dy * dy) / (float)r);
+	dx     = x - (cx - off);
+	dy     = y - (cy);
+	vleft  = 1.0f - (sqrtf(dx * dx + dy * dy) / (float)r);
 
 	// Clamp to 0
 	if (vleft < 0.0f)
@@ -669,14 +660,11 @@ void GameLib_EntitySetLight(Entity e, float r, float g, float b, float rad) {
 // GameLib_ConvertScreenPositionToGamePosition
 //
 //
-void GameLib_ConvertScreenPositionToGamePosition(vec2 screenPos, vec2 gamePos,
-												 float f) {
+void GameLib_ConvertScreenPositionToGamePosition(vec2 screenPos, vec2 gamePos, float f) {
 	int game_pos[2];
 
-	game_pos[0] = _game_pos0[0] +
-				  f * ((_game_pos1[0] + _game_posOffset[0]) - _game_pos0[0]);
-	game_pos[1] = _game_pos0[1] +
-				  f * ((_game_pos1[1] + _game_posOffset[1]) - _game_pos0[1]);
+	game_pos[0] = _game_pos0[0] + f * ((_game_pos1[0] + _game_posOffset[0]) - _game_pos0[0]);
+	game_pos[1] = _game_pos0[1] + f * ((_game_pos1[1] + _game_posOffset[1]) - _game_pos0[1]);
 
 	gamePos[0] = (screenPos[0] * _game_size[0]) + game_pos[0];
 	gamePos[1] = (screenPos[1] * _game_size[1]) + game_pos[1];
@@ -686,18 +674,17 @@ void GameLib_ConvertScreenPositionToGamePosition(vec2 screenPos, vec2 gamePos,
 // GameLib_AddParallaxBackground
 //
 //
-void GameLib_AddParallaxBackground(DrawImg img, int imgSize[2],
-								   int imgOffset[2], float parallaxFactor[2]) {
+void GameLib_AddParallaxBackground(DrawImg img, int imgSize[2], int imgOffset[2], float parallaxFactor[2]) {
 	int idx = _nParallaxBackgrounds;
 	if ((idx + 1) >= MaxParallaxBackgrounds) {
 		Print("GameLib: Can't add parallaxBackground, limit reached.");
 		return;
 	}
-	_parallaxBackground[idx].img = img;
-	_parallaxBackground[idx].imgSize[0] = imgSize[0];
-	_parallaxBackground[idx].imgSize[1] = imgSize[1];
-	_parallaxBackground[idx].imgOffset[0] = imgOffset[0];
-	_parallaxBackground[idx].imgOffset[1] = imgOffset[1];
+	_parallaxBackground[idx].img               = img;
+	_parallaxBackground[idx].imgSize[0]        = imgSize[0];
+	_parallaxBackground[idx].imgSize[1]        = imgSize[1];
+	_parallaxBackground[idx].imgOffset[0]      = imgOffset[0];
+	_parallaxBackground[idx].imgOffset[1]      = imgOffset[1];
 	_parallaxBackground[idx].parallaxFactor[0] = parallaxFactor[0];
 	_parallaxBackground[idx].parallaxFactor[1] = parallaxFactor[1];
 	_nParallaxBackgrounds++;

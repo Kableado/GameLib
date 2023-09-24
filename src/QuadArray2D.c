@@ -12,8 +12,8 @@ QuadArray2D QuadArray2D_Create(int resVertex) {
 	quadArray = malloc(sizeof(TQuadArray2D));
 
 	quadArray->vertexData = malloc(sizeof(float) * Vertex2D_Length * resVertex);
-	quadArray->nVertex = 0;
-	quadArray->resVertex = resVertex;
+	quadArray->nVertex    = 0;
+	quadArray->resVertex  = resVertex;
 
 	return quadArray;
 }
@@ -35,23 +35,20 @@ void QuadArray2D_AddVertex(QuadArray2D quadArray, float v[]) {
 	if (quadArray->resVertex <= quadArray->nVertex) {
 		// Grow vertexData
 		quadArray->resVertex *= 2;
-		float *newVertexData =
-			malloc(sizeof(float) * Vertex2D_Length * quadArray->resVertex);
-		memcpy(newVertexData, quadArray->vertexData,
-			   sizeof(float) * Vertex2D_Length * quadArray->nVertex);
+		float *newVertexData = malloc(sizeof(float) * Vertex2D_Length * quadArray->resVertex);
+		memcpy(newVertexData, quadArray->vertexData, sizeof(float) * Vertex2D_Length * quadArray->nVertex);
 		free(quadArray->vertexData);
 		quadArray->vertexData = newVertexData;
 	}
 
 	// Add the vertex
-	memcpy(quadArray->vertexData + (Vertex2D_Length * quadArray->nVertex), v,
-		   sizeof(float) * Vertex2D_Length);
+	memcpy(quadArray->vertexData + (Vertex2D_Length * quadArray->nVertex), v, sizeof(float) * Vertex2D_Length);
 	quadArray->nVertex++;
 }
 
-void QuadArray2D_AddQuad(QuadArray2D quadArray, float x0, float y0, float u0,
-						 float v0, float x1, float y1, float u1, float v1,
-						 float color[]) {
+void QuadArray2D_AddQuad(
+	QuadArray2D quadArray, float x0, float y0, float u0, float v0, float x1, float y1, float u1, float v1,
+	float color[]) {
 	float v[Vertex2D_Length];
 
 	// Set the color

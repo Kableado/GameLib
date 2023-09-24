@@ -38,9 +38,7 @@ void Rect_UnionRect(Rect r0, Rect r1, Rect rd) {
 	rd->y1 = MaximumInt(r0->y1, r1->y1);
 }
 
-int Rect_PointInside(Rect r, int x, int y) {
-	return (x >= r->x0 && x < r->x1 && y >= r->y0 && y < r->y1);
-}
+int Rect_PointInside(Rect r, int x, int y) { return (x >= r->x0 && x < r->x1 && y >= r->y0 && y < r->y1); }
 
 int Rect_PointInsideAny(TRect r[], int rCount, int x, int y) {
 	int insideAny = 0;
@@ -62,7 +60,7 @@ int SolveQuadratic(float a, float b, float c, float *Rmin, float *Rmax) {
 	float root;
 	float divisor;
 	float b2;
-	b2 = b * b;
+	b2   = b * b;
 	root = b2 - 4.0 * a * c;
 	if (root < 0) {
 		// Complex
@@ -73,7 +71,7 @@ int SolveQuadratic(float a, float b, float c, float *Rmin, float *Rmax) {
 		// +inf -inf
 		return (0);
 	}
-	root = sqrtf(root);
+	root    = sqrtf(root);
 	Rmin[0] = (float)((-b - root) / divisor);
 	Rmax[0] = (float)((-b + root) / divisor);
 	return (1);
@@ -183,8 +181,7 @@ int Intersec_RayUnitCircle(vec2 orig, vec2 vel, vec2 center, float *t) {
 // Colision_CircleCircle
 //
 // Colision point of a circle against another circle.
-int Colision_CircleCircle(vec2 cir1, float rad1, vec2 vel, vec2 cir2,
-						  float rad2, float *t, vec2 n) {
+int Colision_CircleCircle(vec2 cir1, float rad1, vec2 vel, vec2 cir2, float rad2, float *t, vec2 n) {
 	vec2 vel_a, orig_a, cen_a, temp;
 	float rads, invrads;
 	float maxx, minx;
@@ -230,8 +227,7 @@ int Colision_CircleCircle(vec2 cir1, float rad1, vec2 vel, vec2 cir2,
 // Intersect_RayEdge
 //
 // Intersection between a ray and a edge.
-int Intersect_RayEdge(vec2 pos, vec2 vel, vec2 norm, vec2 edgePos, float len,
-					  float *t) {
+int Intersect_RayEdge(vec2 pos, vec2 vel, vec2 norm, vec2 edgePos, float len, float *t) {
 	vec2 pos2, intersection, perp, edgePos2;
 	float delta, d1, d2, hLen;
 
@@ -240,8 +236,8 @@ int Intersect_RayEdge(vec2 pos, vec2 vel, vec2 norm, vec2 edgePos, float len,
 
 	// Check intersection against the line
 	delta = vec2_dot(norm, edgePos);
-	d1 = vec2_dot(pos, norm) - delta;
-	d2 = vec2_dot(pos2, norm) - delta;
+	d1    = vec2_dot(pos, norm) - delta;
+	d2    = vec2_dot(pos2, norm) - delta;
 	if (d1 >= -0.0001f && d2 <= 0.0001f) {
 		// Intersection with line, Calculate intersection point
 		*t = d1 / (d1 - d2);
@@ -253,11 +249,11 @@ int Intersect_RayEdge(vec2 pos, vec2 vel, vec2 norm, vec2 edgePos, float len,
 		// Check sides
 		vec2_scaleadd(edgePos2, edgePos, perp, -hLen);
 		delta = -vec2_dot(perp, edgePos2);
-		d1 = (-vec2_dot(perp, intersection)) - delta;
+		d1    = (-vec2_dot(perp, intersection)) - delta;
 
 		vec2_scaleadd(edgePos2, edgePos, perp, hLen);
 		delta = vec2_dot(perp, edgePos2);
-		d2 = vec2_dot(perp, intersection) - delta;
+		d2    = vec2_dot(perp, intersection) - delta;
 
 		if (d1 <= 0.0f && d2 <= 0.0f) {
 			// Intersection inside Edge.
@@ -305,7 +301,7 @@ int IsBigEndian() {
 int EndsWith(char *str, char *suffix) {
 	if (!str || !suffix)
 		return 0;
-	int lenStr = strlen(str);
+	int lenStr    = strlen(str);
 	int lenSuffix = strlen(suffix);
 	if (lenSuffix > lenStr)
 		return 0;
@@ -322,9 +318,9 @@ int EndsWith(char *str, char *suffix) {
 #define __seed_b 5
 #define __seed_c 10
 #define __seed_d 15
-//#define __LGC_a 1664525ul
-//#define __LGC_c 1013904223ul
-//#define __LGC_m 4294967296ul
+// #define __LGC_a 1664525ul
+// #define __LGC_c 1013904223ul
+// #define __LGC_m 4294967296ul
 #define __LGC_a 16807ul
 #define __LGC_c 2
 #define __LGC_m 2147483647ul
@@ -344,7 +340,7 @@ void Rand_Seed(unsigned seed) {
 	__seed_i = 29;
 
 	// Cambio de semilla
-	__rand_count = 0;
+	__rand_count     = 0;
 	__rand_orig_seed = seed;
 }
 unsigned Rand_Get() {

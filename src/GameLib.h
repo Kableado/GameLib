@@ -39,8 +39,7 @@ int GameLib_DelEntity(Entity e);
 // GameLib_Loop
 //
 // Loops the game.
-void GameLib_Loop(void (*gameproc)(), void (*gamepostproc)(),
-				  void (*gamepredraw)(float f), void (*gamedraw)(float f));
+void GameLib_Loop(void (*gameproc)(), void (*gamepostproc)(), void (*gamepredraw)(float f), void (*gamedraw)(float f));
 
 /////////////////////////////
 // GameLib_GetPos
@@ -114,15 +113,13 @@ void GameLib_EntitySetLight(Entity e, float r, float g, float b, float rad);
 // GameLib_ConvertScreenPositionToGamePosition
 //
 //
-void GameLib_ConvertScreenPositionToGamePosition(vec2 screenPos, vec2 gamePos,
-												 float f);
+void GameLib_ConvertScreenPositionToGamePosition(vec2 screenPos, vec2 gamePos, float f);
 
 /////////////////////////////
 // GameLib_AddParallaxBackground
 //
 //
-void GameLib_AddParallaxBackground(DrawImg img, int imgSize[2],
-								   int imgOffset[2], float parallaxFactor[2]);
+void GameLib_AddParallaxBackground(DrawImg img, int imgSize[2], int imgOffset[2], float parallaxFactor[2]);
 
 /////////////////////////////
 // GameLib_CleanParallaxBackgrounds

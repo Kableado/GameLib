@@ -54,11 +54,7 @@ void Input_SetKey(InputKey key, int status);
 // InputKeyStatus //
 ///////////////////
 // Key status enumeration.
-typedef enum {
-	InputKey_Released,
-	InputKey_Pressed,
-	InputKey_Holded
-} InputKeyStatus;
+typedef enum { InputKey_Released, InputKey_Pressed, InputKey_Holded } InputKeyStatus;
 
 /////////////////////////////
 // Input_GetKey

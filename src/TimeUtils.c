@@ -32,7 +32,7 @@ long long Time_GetTime() {
 void Time_Pause(int pausa) {
 	long long tend, t, diff;
 
-	t = Time_GetTime();
+	t    = Time_GetTime();
 	tend = t + pausa;
 	do {
 		diff = tend - t;
@@ -55,7 +55,7 @@ long long Time_GetTime() {
 }
 void Time_Pause(int pausa) {
 	struct timeval tv;
-	tv.tv_sec = (long long)pausa / 1000000;
+	tv.tv_sec  = (long long)pausa / 1000000;
 	tv.tv_usec = (long long)pausa % 1000000;
 	select(0, NULL, NULL, NULL, &tv);
 }
