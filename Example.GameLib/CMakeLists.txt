@@ -2,14 +2,21 @@ cmake_minimum_required(VERSION 3.10)
 
 project(Example.GameLib)
 
-
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../ ${CMAKE_CURRENT_BINARY_DIR}/GameLib)
+IF (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/GameLib)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/GameLib ${CMAKE_CURRENT_BINARY_DIR}/GameLib)
+endif ()
+IF (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../GameLib)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../GameLib ${CMAKE_CURRENT_BINARY_DIR}/GameLib)
+endif ()
+IF (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../../GameLib)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../GameLib ${CMAKE_CURRENT_BINARY_DIR}/GameLib)
+endif ()
 
 if (EMSCRIPTEN)
-    SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -s USE_SDL=2 -O2 -Wno-implicit-function-declaration -DEMSCRIPTEN")
-    SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -s USE_SDL=2 --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/data@/data -s TOTAL_MEMORY=134217728 -lidbfs.js")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s USE_SDL=2 -O2 -Wno-implicit-function-declaration -DEMSCRIPTEN")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s USE_SDL=2 -s TOTAL_MEMORY=134217728 -lidbfs.js --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/data@/data")
     SET(CMAKE_EXECUTABLE_SUFFIX ".html")
-endif()
+endif ()
 
 
 # -------------------------------------------------------------
