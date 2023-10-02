@@ -1,7 +1,7 @@
-// Copyright (C) 2012 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2012-2023 Valeriano Alfonso Rodriguez (Kableado)
 
-#ifndef _GAMEENTS_H_
-#define _GAMEENTS_H_
+#ifndef GameEnts_H
+#define GameEnts_H
 
 #define Ent_Player 1
 #define Ent_Platform 2

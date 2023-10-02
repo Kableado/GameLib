@@ -1,7 +1,7 @@
-// Copyright (C) 2011-2014 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011-2023 Valeriano Alfonso Rodriguez (Kableado)
 
-#ifndef _ENTITY_H_
-#define _ENTITY_H_
+#ifndef Entity_H
+#define Entity_H
 
 #include "Anim.h"
 #include "Draw.h"
@@ -81,6 +81,11 @@ struct TEntity {
 };
 
 /////////////////////////////
+// Entity_GetFree
+//
+Entity Entity_GetFree();
+
+/////////////////////////////
 // Entity_New
 //
 Entity Entity_New();
@@ -153,7 +158,7 @@ struct TCollisionInfo {
 // CollisionInfo_New
 //
 //
-CollisionInfo CollisionInfo_New(int responseType, Entity ent1, Entity ent2, float t, vec2 n, int applyFriction);
+CollisionInfo CollisionInfo_New(int responseType, Entity ent1, Entity ent2, float t, const vec2 n, int applyFriction);
 
 /////////////////////////////
 // CollisionInfo_Destroy
@@ -184,7 +189,7 @@ int Entity_CheckCollision(Entity ent1, Entity ent2, CollisionInfo *collInfoRef);
 // Entity_CollisionResponseClircle
 //
 // Normal response to a collision of spheres.
-void Entity_CollisionResponseCircle(Entity b1, Entity b2, float t, vec2 n);
+void Entity_CollisionResponseCircle(Entity b1, Entity b2, float t, const vec2 n);
 
 /////////////////////////////
 // Entity_CollisionResponseLine
@@ -210,9 +215,9 @@ void Entity_Overlaps(Entity b1, Entity b2);
 // Entity_UpdatePos
 //
 void Entity_GetPos(Entity e, vec2 pos);
-void Entity_SetPos(Entity e, vec2 pos);
-void Entity_AddPos(Entity e, vec2 pos);
-void Entity_UpdatePos(Entity e, vec2 pos);
+void Entity_SetPos(Entity e, const vec2 pos);
+void Entity_AddPos(Entity e, const vec2 pos);
+void Entity_UpdatePos(Entity e, const vec2 pos);
 
 /////////////////////////////
 // Entity_AddVel
@@ -223,11 +228,11 @@ void Entity_UpdatePos(Entity e, vec2 pos);
 // Entity_AddVelLimitH
 // Entity_AddVelLimitH
 //
-void Entity_AddVel(Entity e, vec2 vel);
-void Entity_SetVel(Entity e, vec2 vel);
+void Entity_AddVel(Entity e, const vec2 vel);
+void Entity_SetVel(Entity e, const vec2 vel);
 void Entity_SetVelH(Entity e, float v);
 void Entity_SetVelV(Entity e, float v);
-void Entity_AddVelLimit(Entity e, vec2 vel, float limit);
+void Entity_AddVelLimit(Entity e, const vec2 vel, float limit);
 void Entity_AddVelLimitH(Entity e, float v, float limit);
 void Entity_AddVelLimitV(Entity e, float v, float limit);
 
@@ -248,13 +253,13 @@ void Entity_SetDefaultColor(Entity e, float r, float g, float b, float a);
 // Entity_SetScale
 // Entity_GetScale
 //
-void Entity_SetScale(Entity e, float scale[2]);
+void Entity_SetScale(Entity e, const float scale[2]);
 void Entity_GetScale(Entity e, float scale[2]);
 
 /////////////////////////////
 // Entity_Iluminate
 //
-void Entity_Iluminate(Entity e, Entity *elist, int n);
+void Entity_Iluminate(Entity e, Entity *entityList, int n);
 
 /////////////////////////////
 // Entity_MarkUpdateLight

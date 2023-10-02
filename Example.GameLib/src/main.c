@@ -1,4 +1,4 @@
-// Copyright (C) 2012 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2012-2023 Valeriano Alfonso Rodriguez (Kableado)
 
 #include <math.h>
 #include <stdio.h>
@@ -7,7 +7,6 @@
 #include <unistd.h>
 
 #include "GameLib.h"
-extern int gamelib_debug;
 
 #include "GameEnts.h"
 #include "GameMap.h"
@@ -31,13 +30,6 @@ void PreDrawGame(float f) {}
 void DrawGame(float f) { MainGame_Text(8, 8, "Hello world!"); }
 
 int main(int argc, char *argv[]) {
-
-	if (argc > 1) {
-		if (!strcmp(argv[1], "debug")) {
-			gamelib_debug = 1;
-			printf("Debug Mode Activated!\n");
-		}
-	}
 
 	GameLib_Init(640, 480, "Game", 20, 60);
 

@@ -1,7 +1,7 @@
-// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011-2023 Valeriano Alfonso Rodriguez (Kableado)
 
-#ifndef _ANIM_H_
-#define _ANIM_H_
+#ifndef Amin_H
+#define Amin_H
 
 #include "Draw.h"
 
@@ -15,7 +15,7 @@ typedef void *Anim;
 // Anim_LoadAnim
 //
 //
-Anim Anim_LoadAnim(char *fichero, int width, int frames, float fps);
+Anim Anim_LoadAnim(char *filename, int width, int frames, float fps);
 
 /////////////////////////////
 // Anim_GetTime

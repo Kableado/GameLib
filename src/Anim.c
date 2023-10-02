@@ -1,4 +1,4 @@
-// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011-2023 Valeriano Alfonso Rodriguez (Kableado)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,23 +12,23 @@
 //
 typedef struct {
 	DrawImg img;
-	int w;
+	int32_t w;
 	float fps;
-	int frames;
-	int ftime;
-	int time;
+	int32_t frames;
+	int32_t frameTime;
+	int32_t time;
 } Animation;
 
 /////////////////////////////
 // Anim_LoadAnim
 //
 //
-Anim Anim_LoadAnim(char *fichero, int width, int frames, float fps) {
+Anim Anim_LoadAnim(char *filename, int width, int frames, float fps) {
 	DrawImg img;
 	Animation *anim;
 	int w, h;
 
-	img = Draw_LoadImage(fichero);
+	img = Draw_LoadImage(filename);
 	if (!img) {
 		return (NULL);
 	}
@@ -42,10 +42,10 @@ Anim Anim_LoadAnim(char *fichero, int width, int frames, float fps) {
 	if (width <= 0) {
 		anim->w = w / frames;
 	}
-	anim->fps    = fps;
-	anim->frames = frames;
-	anim->ftime  = 1000 / fps;
-	anim->time   = anim->ftime * frames;
+	anim->fps       = fps;
+	anim->frames    = frames;
+	anim->frameTime = (int)(1000.0f / fps);
+	anim->time      = anim->frameTime * frames;
 
 	return ((Anim)anim);
 }
@@ -66,10 +66,10 @@ int Anim_GetTime(Anim a) {
 // Gets the animation size.
 void Anim_GetSize(Anim a, int *w, int *h) {
 	Animation *anim = a;
-	int waux;
+	int widthAux;
 
 	*w = anim->w;
-	Draw_GetSize(anim->img, &waux, h);
+	Draw_GetSize(anim->img, &widthAux, h);
 }
 
 /////////////////////////////
@@ -112,7 +112,7 @@ void Anim_Draw(Anim a, int time_ms, int x, int y, float scale[2]) {
 	Animation *anim = a;
 	int frame;
 
-	frame = (time_ms / anim->ftime) % anim->frames;
+	frame = (time_ms / anim->frameTime) % anim->frames;
 	Draw_DrawImgPartHoriz(anim->img, x, y, anim->w, frame, scale);
 }
 
@@ -214,7 +214,8 @@ void AnimPlay_GetSize(AnimPlay *ani, int *w, int *h) {
 	if (ani->anim) {
 		Anim_GetSize(ani->anim, w, h);
 		return;
-	} else if (ani->img) {
+	}
+	if (ani->img) {
 		Draw_GetSize(ani->img, w, h);
 		return;
 	}

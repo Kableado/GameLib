@@ -1,4 +1,4 @@
-// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011-2023 Valeriano Alfonso Rodriguez (Kableado)
 
 #ifdef WIN32
 #define _WIN32_WINNT 0x0501
@@ -21,16 +21,16 @@ static void Audio_MixerCallback(void *ud, Uint8 *stream, int l);
 // Reference to a sound.
 typedef struct TAudioWave TAudioWave, *AudioWave;
 struct TAudioWave {
-	unsigned int sampleRate;
-	int channels;
-	int bpb;
-	int BPB;
-	Uint32 len;
-	Uint8 *buffer;
+	uint32_t sampleRate;
+	int32_t channels;
+	int32_t bpb;
+	int32_t BPB;
+	int32_t len;
+	uint8_t *buffer;
 
 	AudioWave next;
 };
-AudioWave _waves = NULL;
+AudioWave g_Waves = NULL;
 
 ////////////////////////////////////////////////
 // AudioChan //
@@ -39,18 +39,18 @@ AudioWave _waves = NULL;
 typedef struct TAudioChan TAudioChan, *AudioChan;
 struct TAudioChan {
 	AudioWave wave;
-	Uint32 pos;
-	unsigned char rightvol;
-	unsigned char leftvol;
+	int32_t pos;
+	uint8_t rightVolume;
+	uint8_t leftVolume;
 
-	int loop;
+	int32_t loop;
 
 	AudioChan next;
 };
-AudioChan _channels      = NULL;
-AudioChan _free_channels = NULL;
+AudioChan g_Channels     = NULL;
+AudioChan g_FreeChannels = NULL;
 
-static SDL_AudioDeviceID _audioDeviceID = 0;
+static SDL_AudioDeviceID g_AudioDeviceID = 0;
 
 /////////////////////////////
 // Audio_Init
@@ -60,10 +60,9 @@ int Audio_Init() {
 	SDL_AudioSpec as;
 	SDL_AudioSpec as2;
 
-	// Initialize audio subsistem
+	// Initialize audio subsystem
 	if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0) {
-		Print("Audio_Init: Failure initializing SDL Audio.\n");
-		Print("\tSDL Error: %s\n", SDL_GetError());
+		Print("ERROR: Audio_Init: Failure initializing SDL Audio. %s\n", SDL_GetError());
 		return (0);
 	}
 
@@ -73,22 +72,21 @@ int Audio_Init() {
 	as.channels    = 2;
 	as.samples     = 2048;
 	as.callback    = Audio_MixerCallback;
-	_audioDeviceID = SDL_OpenAudioDevice(NULL, 0, &as, &as2, 0);
-	if (_audioDeviceID == 0) {
-		Print("Audio_Init: Failure opening audio.\n");
-		Print("\tSDL Error: %s\n", SDL_GetError());
+	g_AudioDeviceID = SDL_OpenAudioDevice(NULL, 0, &as, &as2, 0);
+	if (g_AudioDeviceID == 0) {
+		Print("ERROR: Audio_Init: Failure opening audio. %s\n", SDL_GetError());
 		return (0);
 	}
 
 	// Asert results
 	if (as2.format != AUDIO_S16SYS || as2.freq != 44100 || as2.channels != 2) {
-		Print("Audio_Init: Failure opening audio. (44.1Khz/16b/2c).\n");
+		Print("ERROR: Audio_Init: Failure opening audio. (44.1Khz/16b/2c).\n");
 		SDL_CloseAudio();
 		return (0);
 	}
 
 	// Unpause and ready to go
-	SDL_PauseAudioDevice(_audioDeviceID, 0);
+	SDL_PauseAudioDevice(g_AudioDeviceID, 0);
 
 	return (1);
 }
@@ -97,13 +95,13 @@ int Audio_Init() {
 // Audio_MixerCallback
 //
 // Mixes the audio channels.
-static void Audio_MixerCallback(void *ud, Uint8 *stream, int l) {
-	signed short *ptr_out, *ptr_wave;
-	AudioChan prevchan;
+static void Audio_MixerCallback(void *ud, uint8_t *stream, int l) {
+	int16_t *ptr_out, *ptr_wave;
+	AudioChan previousChannel;
 	AudioChan chan;
 	AudioWave wave;
 	int len = l / 4; // Asume 16bpb and 2 output chan
-	int chan_remain;
+	int channelRemaining;
 	int len_mix;
 	int i;
 
@@ -111,19 +109,19 @@ static void Audio_MixerCallback(void *ud, Uint8 *stream, int l) {
 	memset(stream, 0, l);
 
 	// Mix all the channels
-	prevchan = NULL;
-	chan     = _channels;
+	previousChannel = NULL;
+	chan     = g_Channels;
 	while (chan) {
 		if (!chan->wave) {
 			// Remove finished channels
 			AudioChan aux_chan = chan->next;
-			chan->next         = _free_channels;
-			_free_channels     = chan;
+			chan->next         = g_FreeChannels;
+			g_FreeChannels     = chan;
 			chan               = aux_chan;
-			if (prevchan) {
-				prevchan->next = chan;
+			if (previousChannel) {
+				previousChannel->next = chan;
 			} else {
-				_channels = chan;
+				g_Channels = chan;
 			}
 			continue;
 		}
@@ -133,15 +131,15 @@ static void Audio_MixerCallback(void *ud, Uint8 *stream, int l) {
 		ptr_wave = ((signed short *)chan->wave->buffer) + chan->pos;
 		wave     = chan->wave;
 
-		// Determine mixing lenght
-		chan_remain = wave->len - chan->pos;
-		if (chan_remain > len) {
+		// Determine mixing length
+		channelRemaining = wave->len - chan->pos;
+		if (channelRemaining > len) {
 			len_mix = len;
 		} else {
 			if (chan->loop) {
 				len_mix = len;
 			} else {
-				len_mix = chan_remain;
+				len_mix = channelRemaining;
 			}
 			chan->wave = NULL;
 		}
@@ -152,24 +150,24 @@ static void Audio_MixerCallback(void *ud, Uint8 *stream, int l) {
 
 			// Left Channel
 			temp = ptr_out[0];
-			temp += (ptr_wave[0] * chan->leftvol) >> 8;
+			temp += (ptr_wave[0] * chan->leftVolume) >> 8;
 			if (temp > (1 << 14)) {
 				ptr_out[0] = 1 << 14;
 			} else if (temp < -(1 << 14)) {
 				ptr_out[0] = -(1 << 14);
 			} else {
-				ptr_out[0] = temp;
+				ptr_out[0] = (int16_t)temp;
 			}
 
 			// Right Channel
 			temp = ptr_out[1];
-			temp += (ptr_wave[0] * chan->rightvol) >> 8;
+			temp += (ptr_wave[0] * chan->rightVolume) >> 8;
 			if (temp > (1 << 14)) {
 				ptr_out[1] = 1 << 14;
 			} else if (temp < -(1 << 14)) {
 				ptr_out[1] = -(1 << 14);
 			} else {
-				ptr_out[1] = temp;
+				ptr_out[1] = (int16_t)temp;
 			}
 
 			// Next sample
@@ -190,7 +188,7 @@ static void Audio_MixerCallback(void *ud, Uint8 *stream, int l) {
 		}
 
 		// Next channel
-		prevchan = chan;
+		previousChannel = chan;
 		chan     = chan->next;
 	}
 }
@@ -213,14 +211,14 @@ AudioSnd Audio_LoadSound(char *filename) {
 
 	f = fopen(filename, "rb");
 	if (!f) {
-		Print("Audio_LoadSound: Failure opening file.\n");
+		Print("ERROR: Audio_LoadSound: Failure opening file. \"%s\".\n", filename);
 		return (NULL);
 	}
 
 	// Read id "RIFF"
 	fread(id, 4, sizeof(char), f);
-	if (strcmp(id, "RIFF")) {
-		Print("Audio_LoadSound: File is not RIFF.\n");
+	if (strcmp(id, "RIFF") != 0) {
+		Print("ERROR: Audio_LoadSound: File is not RIFF. \"%s\".\n", filename);
 		fclose(f);
 		return (NULL);
 	}
@@ -230,8 +228,8 @@ AudioSnd Audio_LoadSound(char *filename) {
 
 	// Read id "WAVE"
 	fread(id, 4, sizeof(char), f);
-	if (strcmp(id, "WAVE")) {
-		Print("Audio_LoadSound: File is not WAVE.\n");
+	if (strcmp(id, "WAVE") != 0) {
+		Print("ERROR:Audio_LoadSound: File is not WAVE. \"%s\".\n", filename);
 		fclose(f);
 		return (NULL);
 	}
@@ -240,13 +238,13 @@ AudioSnd Audio_LoadSound(char *filename) {
 	fread(id, 1, sizeof(char) * 4, f); // Read "fmt "
 	fread(&formatLen, 1, sizeof(int), f);
 	if (formatLen < 14) {
-		Print("Audio_LoadSound: File too short.\n");
+		Print("ERROR: Audio_LoadSound: File too short. \"%s\".\n", filename);
 		fclose(f);
 		return (NULL);
 	}
 	fread(&formatTag, 1, sizeof(short), f); // 1=PCM
 	if (formatTag != 1) {
-		Print("Audio_LoadSound: Not PCM format.\n");
+		Print("ERROR: Audio_LoadSound: Not PCM format. \"%s\".\n", filename);
 		fclose(f);
 		return (NULL);
 	}
@@ -260,30 +258,31 @@ AudioSnd Audio_LoadSound(char *filename) {
 	// Assert sound format
 	if (sampleRate != 44100 || channels != 1 || bitsPerSample != 2) {
 		Print(
-			"Audio_LoadSound: Format not supported: "
-			"sampleRate:%d; channels:%d; BPB:%d\n",
+			"ERROR: Audio_LoadSound: Format not supported: "
+			"sampleRate:%d; channels:%d; BPB:%d. \"%s\"\n",
 			sampleRate,
 			channels,
-			bitsPerSample);
+			bitsPerSample,
+			filename);
 		fclose(f);
 		return (NULL);
 	}
 
 	// Skip no "data" blocks
 	do {
-		int lenRead = fread(id, 1, sizeof(char) * 4, f);
+		size_t lenRead = fread(id, 1, sizeof(char) * 4, f);
 		if (lenRead < 4) {
 			break;
 		}
-		if (strcmp(id, "data")) {
+		if (strcmp(id, "data") != 0) {
 			fread(&dataSize, 1, sizeof(int), f);
 			fseek(f, dataSize, SEEK_CUR);
 		} else {
 			break;
 		}
 	} while (1);
-	if (strcmp(id, "data")) {
-		Print("Audio_LoadSound: DATA block not found\n");
+	if (strcmp(id, "data") != 0) {
+		Print("ERROR: Audio_LoadSound: DATA block not found. \"%s\".\n", filename);
 		fclose(f);
 		return (NULL);
 	}
@@ -305,8 +304,8 @@ AudioSnd Audio_LoadSound(char *filename) {
 	wave->len        = dataSize / (wave->BPB * wave->channels);
 
 	// Take a reference
-	wave->next = _waves;
-	_waves     = wave;
+	wave->next = g_Waves;
+	g_Waves    = wave;
 
 	return (wave);
 }
@@ -315,7 +314,7 @@ AudioSnd Audio_LoadSound(char *filename) {
 // Audio_PlaySound
 //
 // Loads a sound, giving a reference.
-AudioChn Audio_PlaySound(AudioSnd snd, float leftvol, float rightvol, int loop) {
+AudioChn Audio_PlaySound(AudioSnd snd, float leftVolume, float rightVolume, int loop) {
 	AudioChan chan;
 	AudioWave wave;
 	if (!snd) {
@@ -326,9 +325,9 @@ AudioChn Audio_PlaySound(AudioSnd snd, float leftvol, float rightvol, int loop) 
 	wave = snd;
 
 	// Get a free channel
-	if (_free_channels) {
-		chan           = _free_channels;
-		_free_channels = chan->next;
+	if (g_FreeChannels) {
+		chan           = g_FreeChannels;
+		g_FreeChannels = chan->next;
 		chan->next     = NULL;
 	} else {
 		chan       = malloc(sizeof(TAudioChan));
@@ -338,13 +337,13 @@ AudioChn Audio_PlaySound(AudioSnd snd, float leftvol, float rightvol, int loop) 
 	// Initialize the channel
 	chan->wave     = wave;
 	chan->pos      = 0;
-	chan->rightvol = (rightvol * 255);
-	chan->leftvol  = (leftvol * 255);
+	chan->rightVolume = (uint8_t)(rightVolume * 255.0f);
+	chan->leftVolume  = (uint8_t)(leftVolume * 255.0f);
 	chan->loop     = loop;
 
 	// Include in sounds list
-	chan->next = _channels;
-	_channels  = chan;
+	chan->next = g_Channels;
+	g_Channels = chan;
 
 	return chan;
 }

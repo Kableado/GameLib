@@ -1,13 +1,13 @@
-// Copyright (C) 2011-2015 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011-2023 Valeriano Alfonso Rodriguez (Kableado)
 
-#ifndef _DRAW_H_
-#define _DRAW_H_
+#ifndef Draw_H
+#define Draw_H
 
 /////////////////////////////
 // Draw_Init
 //
 // Initializes the game window.
-int Draw_Init(int width, int height, char *title, int pfps, int fps);
+int Draw_Init(int width, int height, char *title, int pFps, int fps);
 
 /////////////////////////////
 // Draw_Clean
@@ -42,7 +42,7 @@ void Draw_Flush();
 ////////////////////////////////////////////////
 // DrawImg //
 /////////////
-// Reference to a image.
+// Reference to an image.
 typedef void *DrawImg;
 
 /////////////////////////////
@@ -53,7 +53,7 @@ DrawImg Draw_CreateImage(int w, int h);
 /////////////////////////////
 // Draw_LoadImage
 //
-// Loads a image, giving a reference.
+// Loads an image, giving a reference.
 DrawImg Draw_LoadImage(char *filename);
 
 /////////////////////////////
@@ -82,7 +82,7 @@ int Draw_GetFlip(DrawImg img);
 // Draw_DrawImg
 //
 // Draws an image.
-void Draw_DrawImg(DrawImg img, int x, int y, float scale[2]);
+void Draw_DrawImg(DrawImg img, int x, int y, const float scale[2]);
 
 /////////////////////////////
 // Draw_DrawImgResized
@@ -94,20 +94,20 @@ void Draw_DrawImgResized(DrawImg img, int x, int y, float w, float h);
 // Draw_DrawImgPart
 //
 // Draws an image part.
-void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j, float scale[2]);
+void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j, const float scale[2]);
 
 /////////////////////////////
 // Draw_DrawImgPartHoriz
 //
 // Draws an image part horizontally.
-void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i, float scale[2]);
+void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i, const float scale[2]);
 
 /////////////////////////////
 // Draw_ImgParallax
 //
 //
 void Draw_ImgParallax(
-	DrawImg img, int imgSize[2], int imgOffset[2], float parallaxFactor[2], int gamePos[2], int gameSize[2]);
+	DrawImg img, int imgSize[2], const int imgOffset[2], const float parallaxFactor[2], const int gamePos[2], const int gameSize[2]);
 
 /////////////////////////////
 // Draw_SetColor
@@ -136,7 +136,7 @@ DrawFnt Draw_LoadFont(char *fichero, int min, int max);
 /////////////////////////////
 // Draw_FontScale
 //
-void Draw_FontScale(DrawFnt f, float scale[2]);
+void Draw_FontScale(DrawFnt f, const float scale[2]);
 
 /////////////////////////////
 // Draw_DrawText
@@ -157,10 +157,10 @@ void Draw_SaveRGBAToBMP(char *filename, unsigned char *data, int width, int heig
 void Draw_SaveRGBAToPNG(char *filename, unsigned char *data, int width, int height);
 
 /////////////////////////////
-// Draw_SaveScreenshoot
+// Draw_SaveScreenshot
 //
 //
-void Draw_SaveScreenshoot(char *filename);
+void Draw_SaveScreenshot(char *filename);
 
 /////////////////////////////
 // Draw_ShowCursor

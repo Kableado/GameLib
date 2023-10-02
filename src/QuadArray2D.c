@@ -1,6 +1,5 @@
-// Copyright (C) 2013 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2013-2023 Valeriano Alfonso Rodriguez (Kableado)
 
-#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -19,10 +18,12 @@ QuadArray2D QuadArray2D_Create(int resVertex) {
 }
 
 void QuadArray2D_Destroy(QuadArray2D *quadArray) {
-	if (!quadArray)
+	if (!quadArray) {
 		return;
-	if (!quadArray[0])
+	}
+	if (!quadArray[0]) {
 		return;
+	}
 
 	free(quadArray[0]->vertexData);
 	free(quadArray[0]);
@@ -48,7 +49,7 @@ void QuadArray2D_AddVertex(QuadArray2D quadArray, float v[]) {
 
 void QuadArray2D_AddQuad(
 	QuadArray2D quadArray, float x0, float y0, float u0, float v0, float x1, float y1, float u1, float v1,
-	float color[]) {
+	const float color[]) {
 	float v[Vertex2D_Length];
 
 	// Set the color

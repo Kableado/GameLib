@@ -1,7 +1,7 @@
-// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011-2023 Valeriano Alfonso Rodriguez (Kableado)
 
-#ifndef _TIME_H_
-#define _TIME_H_
+#ifndef TimeUtils_H
+#define TimeUtils_H
 
 /////////////////////////////
 // Time_GetTime
@@ -13,6 +13,6 @@ long long Time_GetTime();
 // Time_Pause
 //
 // Pauses the execution for t usecs.
-void Time_Pause(int pausa);
+void Time_Pause(long long pause);
 
 #endif

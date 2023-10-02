@@ -1,38 +1,29 @@
-// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011-2023 Valeriano Alfonso Rodriguez (Kableado)
 
-#include <SDL.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#include "Anim.h"
-#include "Audio.h"
-#include "Draw.h"
-#include "Entity.h"
-#include "Input.h"
-#include "TimeUtils.h"
-#include "Util.h"
-
 #include "GameLib.h"
 
 // Globals
-Entity *_entity               = NULL;
-int *_entity_flag             = NULL;
-int _n_entities               = 0;
-int _n_entities_res           = 0;
-int _entities_lock            = 0;
-int _entities_compactate      = 0;
-void (*_gameproc)()           = NULL;
-void (*_gamepostproc)()       = NULL;
-void (*_gamepredraw)(float f) = NULL;
-void (*_gamedraw)(float f)    = NULL;
-int _pft;
-int _game_size[2];
-int _game_pos0[2];
-int _game_pos1[2];
-int _game_posOffset[2];
+Entity *g_Entity                   = NULL;
+int *g_EntityFlag                  = NULL;
+int g_NumEntities                  = 0;
+int g_NumEntitiesAllocated         = 0;
+int g_EntitiesLock                 = 0;
+int g_EntitiesCompactate           = 0;
+void (*g_GameProcFunc)()           = NULL;
+void (*g_GamePostProcFunc)()       = NULL;
+void (*g_GamePreDrawFunc)(float f) = NULL;
+void (*g_GameDrawFunc)(float f)    = NULL;
+int g_ProcFt;
+int g_GameSize[2];
+int g_GamePos0[2];
+int g_GamePos1[2];
+int g_GamePosOffset[2];
 
 long long t_proc;
 long long t_col;
@@ -50,17 +41,15 @@ struct TParallaxBackground {
 	float parallaxFactor[2];
 };
 #define MaxParallaxBackgrounds 10
-TParallaxBackground _parallaxBackground[MaxParallaxBackgrounds];
-int _nParallaxBackgrounds = 0;
-
-int gamelib_debug = 0;
+TParallaxBackground g_ParallaxBackground[MaxParallaxBackgrounds];
+int g_NumParallaxBackgrounds = 0;
 
 /////////////////////////////
 // GameLib_Init
 //
 // Initializes the game.
-int GameLib_Init(int w, int h, char *title, int pfps, int fps) {
-	if (!Draw_Init(w, h, title, pfps, fps)) {
+int GameLib_Init(int w, int h, char *title, int pFps, int fps) {
+	if (!Draw_Init(w, h, title, pFps, fps)) {
 		return (0);
 	}
 	if (!Input_Init()) {
@@ -68,14 +57,14 @@ int GameLib_Init(int w, int h, char *title, int pfps, int fps) {
 	}
 	Audio_Init();
 
-	_game_size[0] = w;
-	_game_size[1] = h;
-	_game_pos0[0] = 0;
-	_game_pos0[1] = 0;
-	_game_pos1[0] = 0;
-	_game_pos1[1] = 0;
+	g_GameSize[0] = w;
+	g_GameSize[1] = h;
+	g_GamePos0[0] = 0;
+	g_GamePos0[1] = 0;
+	g_GamePos1[0] = 0;
+	g_GamePos1[1] = 0;
 
-	_pft = 1000 / pfps;
+	g_ProcFt = 1000 / pFps;
 
 	return (1);
 }
@@ -85,37 +74,38 @@ int GameLib_Init(int w, int h, char *title, int pfps, int fps) {
 //
 // Adds an entity to the game.
 void GameLib_AddEntity(Entity e) {
-	if (_n_entities >= _n_entities_res) {
+	if (g_NumEntities >= g_NumEntitiesAllocated) {
 		Entity *entity_aux;
 		int *entity_flag_aux;
 		int i;
 
 		// Grow the array
-		if (_n_entities_res == 0)
-			_n_entities_res = 32;
-		else
-			_n_entities_res *= 2;
-		entity_aux      = malloc(sizeof(Entity) * _n_entities_res);
-		entity_flag_aux = malloc(sizeof(int) * _n_entities_res);
-		for (i = 0; i < _n_entities; i++) {
-			entity_aux[i]      = _entity[i];
-			entity_flag_aux[i] = _entity_flag[i];
+		if (g_NumEntitiesAllocated == 0) {
+			g_NumEntitiesAllocated = 32;
+		} else {
+			g_NumEntitiesAllocated *= 2;
 		}
-		if (_entity) {
-			free(_entity);
-			free(_entity_flag);
+		entity_aux      = malloc(sizeof(Entity) * g_NumEntitiesAllocated);
+		entity_flag_aux = malloc(sizeof(int) * g_NumEntitiesAllocated);
+		for (i = 0; i < g_NumEntities; i++) {
+			entity_aux[i]      = g_Entity[i];
+			entity_flag_aux[i] = g_EntityFlag[i];
 		}
-		_entity      = entity_aux;
-		_entity_flag = entity_flag_aux;
+		if (g_Entity) {
+			free(g_Entity);
+			free(g_EntityFlag);
+		}
+		g_Entity     = entity_aux;
+		g_EntityFlag = entity_flag_aux;
 	}
 
 	// Add the entity
-	_entity[_n_entities]      = e;
-	_entity_flag[_n_entities] = 1;
-	_n_entities++;
+	g_Entity[g_NumEntities]     = e;
+	g_EntityFlag[g_NumEntities] = 1;
+	g_NumEntities++;
 
 	// Mark for light update
-	Entity_MarkUpdateLight(e, _entity, _n_entities);
+	Entity_MarkUpdateLight(e, g_Entity, g_NumEntities);
 
 	Entity_CalcBBox(e);
 
@@ -128,19 +118,19 @@ void GameLib_AddEntity(Entity e) {
 // removes the reference to the entity.
 int GameLib_UnrefEntity(Entity e) {
 	int i;
-	for (i = 0; i < _n_entities; i++) {
-		if (e == _entity[i]) {
+	for (i = 0; i < g_NumEntities; i++) {
+		if (e == g_Entity[i]) {
 			// Mark or unref
-			if (_entities_lock) {
-				_entity_flag[i] = -2;
+			if (g_EntitiesLock) {
+				g_EntityFlag[i] = -2;
 			} else {
-				_entity[i]      = NULL;
-				_entity_flag[i] = 0;
+				g_Entity[i]     = NULL;
+				g_EntityFlag[i] = 0;
 			}
-			_entities_compactate = 1;
+			g_EntitiesCompactate = 1;
 
 			// Mark for light update
-			Entity_MarkUpdateLight(e, _entity, _n_entities);
+			Entity_MarkUpdateLight(e, g_Entity, g_NumEntities);
 			return (i);
 		}
 	}
@@ -156,10 +146,10 @@ int GameLib_DelEntity(Entity e) {
 	if ((i = GameLib_UnrefEntity(e)) == -1) {
 		return (0);
 	}
-	if (_entities_lock) {
+	if (g_EntitiesLock) {
 		// Delete latter
-		_entity[i]      = e;
-		_entity_flag[i] = -1;
+		g_Entity[i]     = e;
+		g_EntityFlag[i] = -1;
 	} else {
 		// Delete now
 		Entity_Destroy(e);
@@ -174,23 +164,25 @@ int GameLib_DelEntity(Entity e) {
 void GameLib_Compactate() {
 	int i, j;
 	j = 0;
-	if (!_entities_compactate)
+	if (!g_EntitiesCompactate) {
 		return;
-	for (i = 0; i < _n_entities; i++) {
-		if (!_entity[i] || _entity_flag[i] == -2)
+	}
+	for (i = 0; i < g_NumEntities; i++) {
+		if (!g_Entity[i] || g_EntityFlag[i] == -2) {
 			continue;
-		if (_entity_flag[i] == -1) {
-			Entity_Destroy(_entity[i]);
+		}
+		if (g_EntityFlag[i] == -1) {
+			Entity_Destroy(g_Entity[i]);
 			continue;
 		}
 		if (i > j) {
-			_entity[j]      = _entity[i];
-			_entity_flag[j] = _entity_flag[i];
+			g_Entity[j]     = g_Entity[i];
+			g_EntityFlag[j] = g_EntityFlag[i];
 		}
 		j++;
 	}
-	_n_entities          = j;
-	_entities_compactate = 0;
+	g_NumEntities        = j;
+	g_EntitiesCompactate = 0;
 }
 
 /////////////////////////////
@@ -203,45 +195,47 @@ void GameLib_ProcLoop(void *data) {
 	long long time;
 
 	// Step the gamePosition
-	_game_pos0[0] = _game_pos1[0] + _game_posOffset[0];
-	_game_pos0[1] = _game_pos1[1] + _game_posOffset[1];
+	g_GamePos0[0] = g_GamePos1[0] + g_GamePosOffset[0];
+	g_GamePos0[1] = g_GamePos1[1] + g_GamePosOffset[1];
 
 	// Process
 	time           = Time_GetTime();
-	_entities_lock = 1;
-	if (_gameproc) {
-		_gameproc();
+	g_EntitiesLock = 1;
+	if (g_GameProcFunc) {
+		g_GameProcFunc();
 	}
-	for (i = 0; i < _n_entities; i++) {
-		if (!_entity[i])
+	for (i = 0; i < g_NumEntities; i++) {
+		if (!g_Entity[i]) {
 			continue;
-		Entity_Process(_entity[i], _pft);
+		}
+		Entity_Process(g_Entity[i], g_ProcFt);
 	}
 	GameLib_Compactate();
-	_entities_lock = 0;
+	g_EntitiesLock = 0;
 	t_proc += Time_GetTime() - time;
 
-	// Colisions between entities
+	// Collisions between entities
 	time           = Time_GetTime();
-	_entities_lock = 1;
+	g_EntitiesLock = 1;
 	count          = 0;
 	do {
 		repeat                 = 0;
 		CollisionInfo collInfo = NULL;
-		for (i = 0; i < _n_entities; i++) {
-			if (!(_entity[i]->flags & EntityFlag_Collision) || _entity[i]->mass < 0.0f)
-				continue;
-			if (_entity[i]->vel[0] <= 0.0f && _entity[i]->vel[0] >= -0.0f && _entity[i]->vel[1] <= 0.0f &&
-			    _entity[i]->vel[1] >= -0.0f) {
+		for (i = 0; i < g_NumEntities; i++) {
+			if (!(g_Entity[i]->flags & EntityFlag_Collision) || g_Entity[i]->mass < 0.0f) {
 				continue;
 			}
-			for (j = 0; j < _n_entities; j++) {
-				if (i == j || !(_entity[j]->flags & EntityFlag_Collision) ||
-				    CollisionInfo_CheckRepetition(collInfo, _entity[i], _entity[j]) ||
-				    !Entity_BBoxIntersect(_entity[i], _entity[j])) {
+			if (g_Entity[i]->vel[0] <= 0.0f && g_Entity[i]->vel[0] >= -0.0f && g_Entity[i]->vel[1] <= 0.0f &&
+			    g_Entity[i]->vel[1] >= -0.0f) {
+				continue;
+			}
+			for (j = 0; j < g_NumEntities; j++) {
+				if (i == j || !(g_Entity[j]->flags & EntityFlag_Collision) ||
+				    CollisionInfo_CheckRepetition(collInfo, g_Entity[i], g_Entity[j]) ||
+				    !Entity_BBoxIntersect(g_Entity[i], g_Entity[j])) {
 					continue;
 				}
-				Entity_CheckCollision(_entity[i], _entity[j], &collInfo);
+				Entity_CheckCollision(g_Entity[i], g_Entity[j], &collInfo);
 			}
 		}
 		if (Entity_CollisionInfoResponse(collInfo)) {
@@ -253,51 +247,54 @@ void GameLib_ProcLoop(void *data) {
 
 	// Stop remaining collisions
 	if (count == 10) {
-		for (i = 0; i < _n_entities; i++) {
-			if (!(_entity[i]->flags & EntityFlag_Collision) || _entity[i]->mass < 0.0f)
+		for (i = 0; i < g_NumEntities; i++) {
+			if (!(g_Entity[i]->flags & EntityFlag_Collision) || g_Entity[i]->mass < 0.0f) {
 				continue;
-			for (j = 0; j < _n_entities; j++) {
-				if (i == j || !(_entity[j]->flags & EntityFlag_Collision) ||
-				    !Entity_BBoxIntersect(_entity[i], _entity[j])) {
+			}
+			for (j = 0; j < g_NumEntities; j++) {
+				if (i == j || !(g_Entity[j]->flags & EntityFlag_Collision) ||
+				    !Entity_BBoxIntersect(g_Entity[i], g_Entity[j])) {
 					continue;
 				}
-				if (Entity_CheckCollision(_entity[i], _entity[j], NULL)) {
-					vec2_set(_entity[i]->vel, 0, 0);
-					Entity_CalcBBox(_entity[i]);
-					vec2_set(_entity[j]->vel, 0, 0);
-					Entity_CalcBBox(_entity[j]);
+				if (Entity_CheckCollision(g_Entity[i], g_Entity[j], NULL)) {
+					vec2_set(g_Entity[i]->vel, 0, 0);
+					Entity_CalcBBox(g_Entity[i]);
+					vec2_set(g_Entity[j]->vel, 0, 0);
+					Entity_CalcBBox(g_Entity[j]);
 				}
 			}
 		}
 	}
 	GameLib_Compactate();
-	_entities_lock = 0;
+	g_EntitiesLock = 0;
 	t_col += Time_GetTime() - time;
 
 	// Process Overlaps
 	time           = Time_GetTime();
-	_entities_lock = 1;
-	for (i = 0; i < _n_entities; i++) {
-		if (!(_entity[i]->flags & EntityFlag_Overlap) || _entity[i]->mass < 0.0f)
+	g_EntitiesLock = 1;
+	for (i = 0; i < g_NumEntities; i++) {
+		if (!(g_Entity[i]->flags & EntityFlag_Overlap) || g_Entity[i]->mass < 0.0f) {
 			continue;
-		for (j = 0; j < _n_entities; j++) {
-			if (!(_entity[j]->flags & EntityFlag_Overlap) || i == j)
+		}
+		for (j = 0; j < g_NumEntities; j++) {
+			if (!(g_Entity[j]->flags & EntityFlag_Overlap) || i == j) {
 				continue;
-			Entity_Overlaps(_entity[i], _entity[j]);
+			}
+			Entity_Overlaps(g_Entity[i], g_Entity[j]);
 		}
 	}
 	GameLib_Compactate();
-	_entities_lock = 0;
+	g_EntitiesLock = 0;
 	t_over += Time_GetTime() - time;
 
 	// Sort
 	int n, n2, swap;
-	n = _n_entities;
+	n = g_NumEntities;
 	do {
 		n2 = 0;
 		for (i = 1; i < n; i++) {
-			Entity ent1 = _entity[i - 1];
-			Entity ent2 = _entity[i];
+			Entity ent1 = g_Entity[i - 1];
+			Entity ent2 = g_Entity[i];
 			swap        = 0;
 			if (ent1->zorder > ent2->zorder) {
 				// Lower level
@@ -318,10 +315,10 @@ void GameLib_ProcLoop(void *data) {
 			}
 			if (swap) {
 				Entity ent;
-				ent            = _entity[i];
-				_entity[i]     = _entity[i - 1];
-				_entity[i - 1] = ent;
-				n2             = i;
+				ent             = g_Entity[i];
+				g_Entity[i]     = g_Entity[i - 1];
+				g_Entity[i - 1] = ent;
+				n2              = i;
 			}
 		}
 		n = n2;
@@ -329,18 +326,18 @@ void GameLib_ProcLoop(void *data) {
 
 	// PostProcess
 	time           = Time_GetTime();
-	_entities_lock = 1;
-	for (i = 0; i < _n_entities; i++) {
-		Entity_PostProcess(_entity[i], _pft);
-		if (Entity_IsMoving(_entity[i])) {
-			Entity_MarkUpdateLight(_entity[i], _entity, _n_entities);
+	g_EntitiesLock = 1;
+	for (i = 0; i < g_NumEntities; i++) {
+		Entity_PostProcess(g_Entity[i], g_ProcFt);
+		if (Entity_IsMoving(g_Entity[i])) {
+			Entity_MarkUpdateLight(g_Entity[i], g_Entity, g_NumEntities);
 		}
 	}
-	if (_gamepostproc) {
-		_gamepostproc();
+	if (g_GamePostProcFunc) {
+		g_GamePostProcFunc();
 	}
 	GameLib_Compactate();
-	_entities_lock = 0;
+	g_EntitiesLock = 0;
 	t_postproc += Time_GetTime() - time;
 
 	fproc_count++;
@@ -360,50 +357,50 @@ void GameLib_DrawLoop(void *data, float f) {
 	time = Time_GetTime();
 
 	// PreDraw
-	if (_gamepredraw) {
-		_gamepredraw(f);
+	if (g_GamePreDrawFunc) {
+		g_GamePreDrawFunc(f);
 	} else {
-		if (_nParallaxBackgrounds == 0) {
+		if (g_NumParallaxBackgrounds == 0) {
 			// Clean screen
 			Draw_Clean(0, 0, 0);
 		}
 	}
 
 	// Draw parallax backgrounds
-	for (i = 0; i < _nParallaxBackgrounds; i++) {
+	for (i = 0; i < g_NumParallaxBackgrounds; i++) {
 		Draw_ImgParallax(
-			_parallaxBackground[i].img,
-			_parallaxBackground[i].imgSize,
-			_parallaxBackground[i].imgOffset,
-			_parallaxBackground[i].parallaxFactor,
+			g_ParallaxBackground[i].img,
+			g_ParallaxBackground[i].imgSize,
+			g_ParallaxBackground[i].imgOffset,
+			g_ParallaxBackground[i].parallaxFactor,
 			game_pos,
-			_game_size);
+			g_GameSize);
 	}
 
 	// Draw entities
 	GameLib_Compactate();
-	for (i = 0; i < _n_entities; i++) {
-		Entity e = _entity[i];
+	for (i = 0; i < g_NumEntities; i++) {
+		Entity e = g_Entity[i];
 
-		// Check visivility
-		if (!Entity_IsVisible(e, game_pos[0], game_pos[1], _game_size[0], _game_size[1])) {
+		// Check visibility
+		if (!Entity_IsVisible(e, game_pos[0], game_pos[1], g_GameSize[0], g_GameSize[1])) {
 			continue;
 		}
 
-		// Update ilumination of this entity
+		// Update illumination of this entity
 		if (Entity_IsUpdateLight(e)) {
-			Entity_Iluminate(e, _entity, _n_entities);
+			Entity_Iluminate(e, g_Entity, g_NumEntities);
 		}
 
 		Entity_Draw(e, -game_pos[0], -game_pos[1], f);
 	}
 	Draw_SetColor(1, 1, 1, 1);
-	_entities_lock = 1;
-	if (_gamedraw) {
-		_gamedraw(f);
+	g_EntitiesLock = 1;
+	if (g_GameDrawFunc) {
+		g_GameDrawFunc(f);
 	}
 	GameLib_Compactate();
-	_entities_lock = 0;
+	g_EntitiesLock = 0;
 
 	t_draw += Time_GetTime() - time;
 
@@ -418,7 +415,7 @@ void GameLib_DrawLoop(void *data, float f) {
 			idx++;
 			snprintf(strFile, 255, "shot-%04d.png", idx);
 		} while (access(strFile, F_OK) != -1);
-		Draw_SaveScreenshoot(strFile);
+		Draw_SaveScreenshot(strFile);
 		Print("Screenshot saved \"%s\"\n", strFile);
 	}
 #endif // EMSCRIPTEN
@@ -430,7 +427,7 @@ void GameLib_DrawLoop(void *data, float f) {
 		Print("t_over.....:%6lldus\n", t_over / fproc_count);
 		Print("t_postproc.:%6lldus\n", t_postproc / fproc_count);
 		Print("t_draw.....:%6lldus\n", t_draw / fdraw_count);
-		Print("n_ents.....:%6lld\n", _n_entities);
+		Print("n_ents.....:%6lld\n", g_NumEntities);
 		t_proc      = 0;
 		t_col       = 0;
 		t_over      = 0;
@@ -446,17 +443,17 @@ void GameLib_DrawLoop(void *data, float f) {
 //
 // Loops the game.
 void GameLib_Loop(void (*gameproc)(), void (*gamepostproc)(), void (*gamepredraw)(float f), void (*gamedraw)(float f)) {
-	_gameproc     = gameproc;
-	_gamepostproc = gamepostproc;
-	_gamepredraw  = gamepredraw;
-	_gamedraw     = gamedraw;
-	t_proc        = 0;
-	t_col         = 0;
-	t_over        = 0;
-	t_postproc    = 0;
-	t_draw        = 0;
-	fproc_count   = 0;
-	fdraw_count   = 0;
+	g_GameProcFunc     = gameproc;
+	g_GamePostProcFunc = gamepostproc;
+	g_GamePreDrawFunc  = gamepredraw;
+	g_GameDrawFunc     = gamedraw;
+	t_proc             = 0;
+	t_col              = 0;
+	t_over             = 0;
+	t_postproc         = 0;
+	t_draw             = 0;
+	fproc_count        = 0;
+	fdraw_count        = 0;
 	Draw_Loop(GameLib_ProcLoop, GameLib_DrawLoop, NULL);
 }
 
@@ -470,30 +467,30 @@ void GameLib_Loop(void (*gameproc)(), void (*gamepostproc)(), void (*gamepredraw
 //
 //
 void GameLib_GetPos(int pos[2]) {
-	pos[0] = _game_pos1[0];
-	pos[1] = _game_pos1[1];
+	pos[0] = g_GamePos1[0];
+	pos[1] = g_GamePos1[1];
 }
-void GameLib_SetPos(int pos[2]) {
-	_game_pos0[0] = pos[0];
-	_game_pos0[1] = pos[1];
-	_game_pos1[0] = pos[0];
-	_game_pos1[1] = pos[1];
+void GameLib_SetPos(const int pos[2]) {
+	g_GamePos0[0] = pos[0];
+	g_GamePos0[1] = pos[1];
+	g_GamePos1[0] = pos[0];
+	g_GamePos1[1] = pos[1];
 }
-void GameLib_UpdatePos(int pos[2]) {
-	_game_pos1[0] = pos[0];
-	_game_pos1[1] = pos[1];
+void GameLib_UpdatePos(const int pos[2]) {
+	g_GamePos1[0] = pos[0];
+	g_GamePos1[1] = pos[1];
 }
 void GameLib_GetSize(int size[2]) {
-	size[0] = _game_size[0];
-	size[1] = _game_size[1];
+	size[0] = g_GameSize[0];
+	size[1] = g_GameSize[1];
 }
 void GameLib_GetPosInstant(int pos[2], float f) {
-	pos[0] = _game_pos0[0] + f * ((_game_pos1[0] + _game_posOffset[0]) - _game_pos0[0]);
-	pos[1] = _game_pos0[1] + f * ((_game_pos1[1] + _game_posOffset[1]) - _game_pos0[1]);
+	pos[0] = g_GamePos0[0] + f * ((g_GamePos1[0] + g_GamePosOffset[0]) - g_GamePos0[0]);
+	pos[1] = g_GamePos0[1] + f * ((g_GamePos1[1] + g_GamePosOffset[1]) - g_GamePos0[1]);
 }
-void GameLib_SetPosOffset(int posOffset[2]) {
-	_game_posOffset[0] = posOffset[0];
-	_game_posOffset[1] = posOffset[1];
+void GameLib_SetPosOffset(const int posOffset[2]) {
+	g_GamePosOffset[0] = posOffset[0];
+	g_GamePosOffset[1] = posOffset[1];
 }
 
 /////////////////////////////
@@ -506,11 +503,11 @@ void GameLib_MoveToPos(vec2 pos, float f) {
 	GameLib_MoveToPosH(pos, f);
 	GameLib_MoveToPosV(pos, f);
 }
-void GameLib_MoveToPosH(vec2 pos, float f) {
-	_game_pos1[0] = _game_pos1[0] + (pos[0] - (_game_pos1[0] + (_game_size[0] / 2.0f))) * f;
+void GameLib_MoveToPosH(const vec2 pos, float f) {
+	g_GamePos1[0] = g_GamePos1[0] + (pos[0] - (g_GamePos1[0] + (g_GameSize[0] / 2.0f))) * f;
 }
-void GameLib_MoveToPosV(vec2 pos, float f) {
-	_game_pos1[1] = _game_pos1[1] + (pos[1] - (_game_pos1[1] + (_game_size[1] / 2.0f))) * f;
+void GameLib_MoveToPosV(const vec2 pos, float f) {
+	g_GamePos1[1] = g_GamePos1[1] + (pos[1] - (g_GamePos1[1] + (g_GameSize[1] / 2.0f))) * f;
 }
 
 /////////////////////////////
@@ -520,12 +517,13 @@ void GameLib_MoveToPosV(vec2 pos, float f) {
 void GameLib_DelEnts() {
 	int i;
 
-	for (i = 0; i < _n_entities; i++) {
-		if (!_entity[i])
+	for (i = 0; i < g_NumEntities; i++) {
+		if (!g_Entity[i]) {
 			continue;
-		Entity_Destroy(_entity[i]);
+		}
+		Entity_Destroy(g_Entity[i]);
 	}
-	_n_entities = 0;
+	g_NumEntities = 0;
 }
 
 /////////////////////////////
@@ -534,10 +532,11 @@ void GameLib_DelEnts() {
 // Iterates every entity.
 void GameLib_ForEachEnt(int (*func)(Entity ent)) {
 	int i;
-	for (i = 0; i < _n_entities; i++) {
-		if (!_entity[i])
+	for (i = 0; i < g_NumEntities; i++) {
+		if (!g_Entity[i]) {
 			continue;
-		if (!func(_entity[i])) {
+		}
+		if (!func(g_Entity[i])) {
 			break;
 		}
 	}
@@ -550,11 +549,12 @@ void GameLib_ForEachEnt(int (*func)(Entity ent)) {
 Entity GameLib_SearchEnt(int (*func)(Entity ent, void *d), void *d) {
 	int i;
 	Entity ent = NULL;
-	for (i = 0; i < _n_entities; i++) {
-		if (!_entity[i])
+	for (i = 0; i < g_NumEntities; i++) {
+		if (!g_Entity[i]) {
 			continue;
-		if (func(_entity[i], d)) {
-			ent = _entity[i];
+		}
+		if (func(g_Entity[i], d)) {
+			ent = g_Entity[i];
 			break;
 		}
 	}
@@ -575,11 +575,11 @@ int GameLib_EntityCustomCheckCollision(Entity ent, vec2 vel) {
 	vec2_copy(ent->vel, vel);
 	Entity_CalcBBox(ent);
 
-	for (j = 0; j < _n_entities; j++) {
-		if (!(_entity[j]->flags & EntityFlag_Collision) || !Entity_BBoxIntersect(ent, _entity[j])) {
+	for (j = 0; j < g_NumEntities; j++) {
+		if (!(g_Entity[j]->flags & EntityFlag_Collision) || !Entity_BBoxIntersect(ent, g_Entity[j])) {
 			continue;
 		}
-		Entity_CheckCollision(ent, _entity[j], &collInfo);
+		Entity_CheckCollision(ent, g_Entity[j], &collInfo);
 		if (collInfo != NULL) {
 			collision = 1;
 			break;
@@ -598,16 +598,16 @@ int GameLib_EntityCustomCheckCollision(Entity ent, vec2 vel) {
 //
 //
 void GameLib_PlaySound(AudioSnd snd, int x, int y) {
-	float vleft, vright, dx, dy;
+	float vLeft, vRight, dx, dy;
 	int r, cx, cy, off;
 
 	// Get the screen context
-	cx = _game_pos1[0] + _game_size[0] / 2;
-	cy = _game_pos1[1] + _game_size[1] / 2;
-	if (_game_size[0] > _game_size[1]) {
-		r = _game_size[0] / 2;
+	cx = g_GamePos1[0] + g_GameSize[0] / 2;
+	cy = g_GamePos1[1] + g_GameSize[1] / 2;
+	if (g_GameSize[0] > g_GameSize[1]) {
+		r = g_GameSize[0] / 2;
 	} else {
-		r = _game_size[1] / 2;
+		r = g_GameSize[1] / 2;
 	}
 	r   = r * 1.2f;
 	off = r / 10.0f;
@@ -615,22 +615,24 @@ void GameLib_PlaySound(AudioSnd snd, int x, int y) {
 	// Calculate volumes
 	dx     = x - (cx + off);
 	dy     = y - (cy);
-	vright = 1.0f - (sqrtf(dx * dx + dy * dy) / (float)r);
+	vRight = 1.0f - (sqrtf(dx * dx + dy * dy) / (float)r);
 	dx     = x - (cx - off);
 	dy     = y - (cy);
-	vleft  = 1.0f - (sqrtf(dx * dx + dy * dy) / (float)r);
+	vLeft  = 1.0f - (sqrtf(dx * dx + dy * dy) / (float)r);
 
 	// Clamp to 0
-	if (vleft < 0.0f)
-		vleft = 0.0f;
-	if (vright < 0.0f)
-		vright = 0.0f;
-	if (vleft <= 0.0f && vright <= 0.0f) {
+	if (vLeft < 0.0f) {
+		vLeft = 0.0f;
+	}
+	if (vRight < 0.0f) {
+		vRight = 0.0f;
+	}
+	if (vLeft <= 0.0f && vRight <= 0.0f) {
 		return;
 	}
 
 	// PLAY!
-	Audio_PlaySound(snd, vleft, vright, 0);
+	Audio_PlaySound(snd, vLeft, vRight, 0);
 }
 
 /////////////////////////////
@@ -648,9 +650,9 @@ AudioChn GameLib_PlayLoopingSound(AudioSnd snd) {
 //
 void GameLib_EntitySetLight(Entity e, float r, float g, float b, float rad) {
 	if (Entity_IsLight(e)) {
-		Entity_MarkUpdateLight(e, _entity, _n_entities);
+		Entity_MarkUpdateLight(e, g_Entity, g_NumEntities);
 		Entity_SetLight(e, r, g, b, rad);
-		Entity_MarkUpdateLight(e, _entity, _n_entities);
+		Entity_MarkUpdateLight(e, g_Entity, g_NumEntities);
 	} else {
 		Entity_SetLight(e, r, g, b, rad);
 	}
@@ -663,11 +665,11 @@ void GameLib_EntitySetLight(Entity e, float r, float g, float b, float rad) {
 void GameLib_ConvertScreenPositionToGamePosition(vec2 screenPos, vec2 gamePos, float f) {
 	int game_pos[2];
 
-	game_pos[0] = _game_pos0[0] + f * ((_game_pos1[0] + _game_posOffset[0]) - _game_pos0[0]);
-	game_pos[1] = _game_pos0[1] + f * ((_game_pos1[1] + _game_posOffset[1]) - _game_pos0[1]);
+	game_pos[0] = g_GamePos0[0] + f * ((g_GamePos1[0] + g_GamePosOffset[0]) - g_GamePos0[0]);
+	game_pos[1] = g_GamePos0[1] + f * ((g_GamePos1[1] + g_GamePosOffset[1]) - g_GamePos0[1]);
 
-	gamePos[0] = (screenPos[0] * _game_size[0]) + game_pos[0];
-	gamePos[1] = (screenPos[1] * _game_size[1]) + game_pos[1];
+	gamePos[0] = (screenPos[0] * g_GameSize[0]) + game_pos[0];
+	gamePos[1] = (screenPos[1] * g_GameSize[1]) + game_pos[1];
 }
 
 /////////////////////////////
@@ -675,23 +677,23 @@ void GameLib_ConvertScreenPositionToGamePosition(vec2 screenPos, vec2 gamePos, f
 //
 //
 void GameLib_AddParallaxBackground(DrawImg img, int imgSize[2], int imgOffset[2], float parallaxFactor[2]) {
-	int idx = _nParallaxBackgrounds;
+	int idx = g_NumParallaxBackgrounds;
 	if ((idx + 1) >= MaxParallaxBackgrounds) {
 		Print("GameLib: Can't add parallaxBackground, limit reached.");
 		return;
 	}
-	_parallaxBackground[idx].img               = img;
-	_parallaxBackground[idx].imgSize[0]        = imgSize[0];
-	_parallaxBackground[idx].imgSize[1]        = imgSize[1];
-	_parallaxBackground[idx].imgOffset[0]      = imgOffset[0];
-	_parallaxBackground[idx].imgOffset[1]      = imgOffset[1];
-	_parallaxBackground[idx].parallaxFactor[0] = parallaxFactor[0];
-	_parallaxBackground[idx].parallaxFactor[1] = parallaxFactor[1];
-	_nParallaxBackgrounds++;
+	g_ParallaxBackground[idx].img               = img;
+	g_ParallaxBackground[idx].imgSize[0]        = imgSize[0];
+	g_ParallaxBackground[idx].imgSize[1]        = imgSize[1];
+	g_ParallaxBackground[idx].imgOffset[0]      = imgOffset[0];
+	g_ParallaxBackground[idx].imgOffset[1]      = imgOffset[1];
+	g_ParallaxBackground[idx].parallaxFactor[0] = parallaxFactor[0];
+	g_ParallaxBackground[idx].parallaxFactor[1] = parallaxFactor[1];
+	g_NumParallaxBackgrounds++;
 }
 
 /////////////////////////////
 // GameLib_CleanParallaxBackgrounds
 //
 //
-void GameLib_CleanParallaxBackgrounds() { _nParallaxBackgrounds = 0; }
+void GameLib_CleanParallaxBackgrounds() { g_NumParallaxBackgrounds = 0; }

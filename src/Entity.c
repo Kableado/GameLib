@@ -1,4 +1,4 @@
-// Copyright (C) 2011-2014 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011-2023 Valeriano Alfonso Rodriguez (Kableado)
 
 #include <math.h>
 #include <stdio.h>
@@ -17,28 +17,37 @@
 #define EntityIntFlag_UpdatedScale 16
 
 /////////////////////////////
+// Entity_GetFree
+//
+//
+Entity g_FreeEntity = NULL;
+Entity Entity_GetFree() {
+	Entity e;
+
+	if (!g_FreeEntity) {
+		// Allocate a big block of entities
+		int n                = 1024, i;
+		TEntity *newEntities = malloc(sizeof(TEntity) * n);
+		for (i = 0; i < n; i++) {
+			if (i < (n - 1)) {
+				newEntities[i].next = &newEntities[i + 1];
+			} else {
+				newEntities[i].next = NULL;
+			}
+		}
+		g_FreeEntity = newEntities;
+	}
+	e            = g_FreeEntity;
+	g_FreeEntity = e->next;
+	return e;
+}
+
+/////////////////////////////
 // Entity_New
 //
 //
-Entity _free_entity = NULL;
 Entity Entity_New() {
-	Entity e;
-
-	if (!_free_entity) {
-		// Allocate a big block of entities
-		int n            = 1024, i;
-		TEntity *newEnts = malloc(sizeof(TEntity) * n);
-		for (i = 0; i < n; i++) {
-			if (i < (n - 1)) {
-				newEnts[i].next = &newEnts[i + 1];
-			} else {
-				newEnts[i].next = NULL;
-			}
-		}
-		_free_entity = newEnts;
-	}
-	e            = _free_entity;
-	_free_entity = e->next;
+	Entity e = Entity_GetFree();
 
 	e->base = NULL;
 	e->type = 0;
@@ -114,8 +123,8 @@ void Entity_Destroy(Entity e) {
 	if (e->ondelete) {
 		e->ondelete(e);
 	}
-	e->next      = _free_entity;
-	_free_entity = e;
+	e->next      = g_FreeEntity;
+	g_FreeEntity = e;
 }
 
 /////////////////////////////
@@ -255,7 +264,7 @@ void Entity_Draw(Entity e, int x, int y, float f) {
 	}
 	if (e->internalFlags & EntityIntFlag_UpdatedPos) {
 		vec2_interpol(fPos, e->pos0, e->pos, f);
-		AnimPlay_Draw(&e->anim, fPos[0] + x, fPos[1] + y, scale);
+		AnimPlay_Draw(&e->anim, (int)(fPos[0] + x), fPos[1] + y, scale);
 	} else {
 		AnimPlay_Draw(&e->anim, e->pos[0] + x, e->pos[1] + y, scale);
 	}
@@ -357,15 +366,15 @@ void Entity_PostProcess(Entity e, int ft) {
 // CollisionInfo_New
 //
 //
-CollisionInfo _free_collInfo = NULL;
-CollisionInfo CollisionInfo_New(int responseType, Entity ent1, Entity ent2, float t, vec2 n, int applyFriction) {
+CollisionInfo g_FreeCollisionInfo = NULL;
+CollisionInfo CollisionInfo_New(int responseType, Entity ent1, Entity ent2, float t, const vec2 n, int applyFriction) {
 	CollisionInfo collInfo;
 
-	if (!_free_collInfo) {
+	if (!g_FreeCollisionInfo) {
 		collInfo = malloc(sizeof(TCollisionInfo));
 	} else {
-		collInfo       = _free_collInfo;
-		_free_collInfo = collInfo->next;
+		collInfo            = g_FreeCollisionInfo;
+		g_FreeCollisionInfo = collInfo->next;
 	}
 	collInfo->next = NULL;
 
@@ -391,10 +400,10 @@ void CollisionInfo_Destroy(CollisionInfo *collInfoRef) {
 	CollisionInfo collInfo = collInfoRef[0];
 	CollisionInfo nextCollInfo;
 	while (collInfo != NULL) {
-		nextCollInfo   = collInfo->next;
-		collInfo->next = _free_collInfo;
-		_free_collInfo = collInfo;
-		collInfo       = nextCollInfo;
+		nextCollInfo        = collInfo->next;
+		collInfo->next      = g_FreeCollisionInfo;
+		g_FreeCollisionInfo = collInfo;
+		collInfo            = nextCollInfo;
 	}
 	collInfoRef[0] = NULL;
 }
@@ -533,7 +542,7 @@ int Entity_CheckCollision(Entity ent1, Entity ent2, CollisionInfo *collInfoRef) 
 
 	// Circle-Circle test from ent1
 	vec2_minus(vel, ent1->vel, ent2->vel);
-	if (Colision_CircleCircle(ent1->pos, ent1->radius, vel, ent2->pos, ent2->radius, &t, n)) {
+	if (Collision_CircleCircle(ent1->pos, ent1->radius, vel, ent2->pos, ent2->radius, &t, n)) {
 		CollisionInfo_Add(collInfoRef, CollisionResponse_Circle, ent1, ent2, t, n, 0);
 		return (1);
 	}
@@ -544,7 +553,7 @@ int Entity_CheckCollision(Entity ent1, Entity ent2, CollisionInfo *collInfoRef) 
 // Entity_CollisionResponseCircle
 //
 // Normal response to a collision between circles.
-void Entity_CollisionResponseCircle(Entity b1, Entity b2, float t, vec2 n) {
+void Entity_CollisionResponseCircle(Entity b1, Entity b2, float t, const vec2 n) {
 	float moment;
 	vec2 temp;
 	float elast;
@@ -716,7 +725,7 @@ void Entity_GetPos(Entity e, vec2 pos) { vec2_copy(pos, e->pos); }
 // Entity_SetPos
 //
 //
-void Entity_SetPos(Entity e, vec2 pos) {
+void Entity_SetPos(Entity e, const vec2 pos) {
 	vec2_copy(e->pos, pos);
 	vec2_copy(e->oldpos, pos);
 	vec2_copy(e->pos0, pos);
@@ -727,7 +736,7 @@ void Entity_SetPos(Entity e, vec2 pos) {
 // Entity_AddPos
 //
 //
-void Entity_AddPos(Entity e, vec2 pos) {
+void Entity_AddPos(Entity e, const vec2 pos) {
 	vec2_plus(e->pos, e->pos, pos);
 	vec2_copy(e->oldpos, e->pos);
 	vec2_copy(e->pos0, e->pos);
@@ -738,7 +747,7 @@ void Entity_AddPos(Entity e, vec2 pos) {
 // Entity_UpdatePos
 //
 //
-void Entity_UpdatePos(Entity e, vec2 pos) {
+void Entity_UpdatePos(Entity e, const vec2 pos) {
 
 	// Mark the update of the position.
 	vec2_copy(e->oldpos, e->pos);
@@ -750,7 +759,7 @@ void Entity_UpdatePos(Entity e, vec2 pos) {
 /////////////////////////////
 // Entity_AddVel
 //
-void Entity_AddVel(Entity e, vec2 vel) {
+void Entity_AddVel(Entity e, const vec2 vel) {
 	vec2_plus(e->vel, e->vel, vel);
 	Entity_CalcBBox(e);
 }
@@ -758,7 +767,7 @@ void Entity_AddVel(Entity e, vec2 vel) {
 /////////////////////////////
 // Entity_SetVel
 //
-void Entity_SetVel(Entity e, vec2 vel) {
+void Entity_SetVel(Entity e, const vec2 vel) {
 	vec2_copy(e->vel, vel);
 	Entity_CalcBBox(e);
 }
@@ -783,7 +792,7 @@ void Entity_SetVelV(Entity e, float v) {
 // Entity_AddVelLimit
 //
 //
-void Entity_AddVelLimit(Entity e, vec2 vel, float limit) {
+void Entity_AddVelLimit(Entity e, const vec2 vel, float limit) {
 	float vlen_orig, vlen;
 	vec2 dir, vel_temp;
 
@@ -915,7 +924,7 @@ void Entity_SetDefaultColor(Entity e, float r, float g, float b, float a) {
 /////////////////////////////
 // Entity_SetScale
 //
-void Entity_SetScale(Entity e, float scale[2]) {
+void Entity_SetScale(Entity e, const float scale[2]) {
 	e->scale[0] = scale[0];
 	e->scale[1] = scale[1];
 	e->internalFlags |= EntityIntFlag_UpdatedScale;
@@ -933,7 +942,7 @@ void Entity_GetScale(Entity e, float scale[2]) {
 // Entity_Iluminate
 //
 //
-void Entity_Iluminate(Entity e, Entity *elist, int n) {
+void Entity_Iluminate(Entity e, Entity *entityList, int n) {
 	int i;
 	vec2 vdist;
 	float qdist, f;
@@ -951,15 +960,17 @@ void Entity_Iluminate(Entity e, Entity *elist, int n) {
 	e->color[3] = e->color[3];
 
 	for (i = 0; i < n; i++) {
-		if (e == elist[i] || !(elist[i]->flags & EntityFlag_Light))
+		if (e == entityList[i] || !(entityList[i]->flags & EntityFlag_Light)) {
 			continue;
+		}
 
-		vec2_minus(vdist, e->pos, elist[i]->pos);
+		vec2_minus(vdist, e->pos, entityList[i]->pos);
 		qdist = vec2_dot(vdist, vdist);
-		qrad  = elist[i]->light[3] * elist[i]->light[3];
+		qrad  = entityList[i]->light[3] * entityList[i]->light[3];
 		if (qdist < qrad) {
 			f = 1.0f - qdist / qrad;
-			Entity_AddColor(e, f * elist[i]->light[0], f * elist[i]->light[1], f * elist[i]->light[2], 0.0f);
+			Entity_AddColor(
+				e, f * entityList[i]->light[0], f * entityList[i]->light[1], f * entityList[i]->light[2], 0.0f);
 		}
 	}
 

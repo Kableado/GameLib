@@ -1,7 +1,7 @@
-// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011-2023 Valeriano Alfonso Rodriguez (Kableado)
 
-#ifndef _AUDIO_H_
-#define _AUDIO_H_
+#ifndef Audio_H
+#define Audio_H
 
 /////////////////////////////
 // Audio_Init
@@ -37,7 +37,7 @@ AudioSnd Audio_LoadSound(char *filename);
 // Audio_PlaySound
 //
 // Loads a sound, giving a reference.
-AudioChn Audio_PlaySound(AudioSnd snd, float leftvol, float rightvol, int loop);
+AudioChn Audio_PlaySound(AudioSnd snd, float leftVolume, float rightVolume, int loop);
 
 /////////////////////////////
 // Audio_StopChan

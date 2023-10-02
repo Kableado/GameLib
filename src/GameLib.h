@@ -1,7 +1,7 @@
-// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011-2023 Valeriano Alfonso Rodriguez (Kableado)
 
-#ifndef _GAMELIB_H_
-#define _GAMELIB_H_
+#ifndef GameLib_H
+#define GameLib_H
 
 #include "Anim.h"
 #include "Audio.h"
@@ -15,7 +15,7 @@
 // GameLib_Init
 //
 // Initializes the game.
-int GameLib_Init(int w, int h, char *title, int pfps, int fps);
+int GameLib_Init(int w, int h, char *title, int pFps, int fps);
 
 /////////////////////////////
 // GameLib_AddEntity
@@ -51,11 +51,11 @@ void GameLib_Loop(void (*gameproc)(), void (*gamepostproc)(), void (*gamepredraw
 //
 //
 void GameLib_GetPos(int pos[2]);
-void GameLib_SetPos(int pos[2]);
-void GameLib_UpdatePos(int pos[2]);
+void GameLib_SetPos(const int pos[2]);
+void GameLib_UpdatePos(const int pos[2]);
 void GameLib_GetSize(int size[2]);
 void GameLib_GetPosInstant(int pos[2], float f);
-void GameLib_SetPosOffset(int posOffset[2]);
+void GameLib_SetPosOffset(const int posOffset[2]);
 
 /////////////////////////////
 // GameLib_MoveToPos
@@ -64,8 +64,8 @@ void GameLib_SetPosOffset(int posOffset[2]);
 //
 //
 void GameLib_MoveToPos(vec2 pos, float f);
-void GameLib_MoveToPosH(vec2 pos, float f);
-void GameLib_MoveToPosV(vec2 pos, float f);
+void GameLib_MoveToPosH(const vec2 pos, float f);
+void GameLib_MoveToPosV(const vec2 pos, float f);
 
 /////////////////////////////
 // GameLib_ForEachEn

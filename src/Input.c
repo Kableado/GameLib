@@ -1,4 +1,4 @@
-// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011-2023 Valeriano Alfonso Rodriguez (Kableado)
 
 #include <SDL.h>
 #include <math.h>
@@ -158,13 +158,13 @@ int Input_GetDir(vec2 dir) {
 	Uint8 buttons;
 	int mx, my;
 	float dlen;
-	extern int _width, _height;
+	extern int g_Width, g_Height;
 
 	// Get mouse state
 	buttons = SDL_GetMouseState(&mx, &my);
 	if (buttons) {
 		// Use the mouse
-		vec2_set(dir, mx - (_width / 2), my - (_height / 2.0f));
+		vec2_set(dir, mx - (g_Width / 2), my - (g_Height / 2.0f));
 		dlen = 1.0f / sqrtf(vec2_dot(dir, dir));
 		vec2_scale(dir, dir, dlen);
 		return (1);

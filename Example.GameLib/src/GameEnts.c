@@ -1,11 +1,10 @@
-// Copyright (C) 2012 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2012-2023 Valeriano Alfonso Rodriguez (Kableado)
 
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "GameLib.h"
-extern int gamelib_debug;
 
 #include "GameEnts.h"
 

@@ -1,7 +1,7 @@
-// Copyright (C) 2011 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011-2023 Valeriano Alfonso Rodriguez (Kableado)
 
-#ifndef _INPUT_H_
-#define _INPUT_H_
+#ifndef Input_H
+#define Input_H
 
 #include "Util.h"
 

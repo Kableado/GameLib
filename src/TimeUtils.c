@@ -1,9 +1,6 @@
-// Copyright (C) 2011-2014 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011-2023 Valeriano Alfonso Rodriguez (Kableado)
 
-#include <math.h>
-#include <stdio.h>
 #include <sys/time.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "TimeUtils.h"
@@ -53,10 +50,10 @@ long long Time_GetTime() {
 	usecs = (t.tv_sec * 1000000ll) + (t.tv_usec);
 	return (usecs);
 }
-void Time_Pause(int pausa) {
+void Time_Pause(long long pause) {
 	struct timeval tv;
-	tv.tv_sec  = (long long)pausa / 1000000;
-	tv.tv_usec = (long long)pausa % 1000000;
+	tv.tv_sec  = (long long)pause / 1000000;
+	tv.tv_usec = (long long)pause % 1000000;
 	select(0, NULL, NULL, NULL, &tv);
 }
 #endif // if WIN32

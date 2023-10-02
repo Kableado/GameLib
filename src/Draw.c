@@ -1,8 +1,8 @@
-// Copyright (C) 2011-2015 Valeriano Alfonso Rodriguez (Kableado)
+// Copyright (C) 2011-2023 Valeriano Alfonso Rodriguez (Kableado)
 
 #ifdef WIN32
 
-//	Windows
+// Windows
 #define _WIN32_WINNT 0x0501
 #include <GL/gl.h>
 #include <GL/glext.h>
@@ -17,7 +17,7 @@
 
 #else
 
-//	Linux
+// Linux + Emscripten
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -60,21 +60,21 @@ struct TDrawImage {
 };
 
 // Globals
-static SDL_Window *_window      = NULL;
-static SDL_GLContext _glcontext = NULL;
-static SDL_Renderer *_renderer  = NULL;
-int _width;
-int _height;
-long long proc_t_frame = 33333;
-long long draw_t_frame = 16667;
-int _fps               = 60;
-QuadArray2D _quadArray = NULL;
-DrawImage _currentImg  = NULL;
-float _color[4];
+static SDL_Window *g_Window      = NULL;
+static SDL_GLContext g_GLContext = NULL;
+static SDL_Renderer *g_Renderer  = NULL;
+int g_Width;
+int g_Height;
+long long g_ProcTFrame  = 33333;
+long long g_DrawTFrame  = 16667;
+int g_FPS               = 60;
+QuadArray2D g_QuadArray = NULL;
+DrawImage g_CurrentImg  = NULL;
+float g_Color[4];
 
 #if USE_OpenGLES
 
-GLuint _whiteTex;
+GLuint g_WhiteTex;
 
 GLuint Draw_CompileShader(GLenum type, const char *source) {
 	char *strType = type == GL_VERTEX_SHADER     ? "VertexShader"
@@ -82,7 +82,7 @@ GLuint Draw_CompileShader(GLenum type, const char *source) {
 	                                             : "unknownShader";
 	GLuint shader = glCreateShader(type);
 	if (shader == 0) {
-		Print("Error creating shader of type: %s\n", strType);
+		Print("ERROR: Creating shader of type: %s\n", strType);
 		return 0;
 	}
 
@@ -98,7 +98,7 @@ GLuint Draw_CompileShader(GLenum type, const char *source) {
 		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
 		GLchar strInfoLog[infoLogLength + 1];
 		glGetShaderInfoLog(shader, infoLogLength, NULL, strInfoLog);
-		Print("Error compiling shader of type: %s: %s\n", strType, strInfoLog);
+		Print("ERROR: Compiling shader of type: %s: %s\n", strType, strInfoLog);
 
 		glDeleteShader(shader);
 		return 0;
@@ -131,16 +131,16 @@ GLuint Draw_BuildProgram(const char *vertexShaderSource, const char *fragmentSha
 	return programObject;
 }
 
-GLuint programObject;
+GLuint g_ProgramObject;
 
-GLuint vertPosLoc;
-GLuint vertTexLoc;
-GLuint vertColorLoc;
+GLint g_VertPosLoc;
+GLint g_VertTexLoc;
+GLint g_VertColorLoc;
 
-GLuint textureLoc;
-GLuint projectionMatrixLoc;
+GLint g_TextureLoc;
+GLint g_ProjectionMatrixLoc;
 
-GLuint vertexObject;
+GLuint g_VertexObject;
 
 #define Max_Vertices 6000
 
@@ -154,7 +154,7 @@ GLuint Draw_UploadGLTexture(int w, int h, unsigned char *pixels);
 // Draw_Init
 //
 // Initializes the game window.
-int Draw_Init(int width, int height, char *title, int pfps, int fps) {
+int Draw_Init(int width, int height, char *title, int pFps, int fps) {
 
 #ifdef WIN32
 #ifndef ATTACH_PARENT_PROCESS
@@ -173,11 +173,11 @@ int Draw_Init(int width, int height, char *title, int pfps, int fps) {
 #endif // WIN32
 
 	// Set globals
-	proc_t_frame = 1000000 / pfps;
-	draw_t_frame = 1000000 / fps;
-	_fps         = fps;
-	_width       = width;
-	_height      = height;
+	g_ProcTFrame = 1000000 / pFps;
+	g_DrawTFrame = 1000000 / fps;
+	g_FPS        = fps;
+	g_Width      = width;
+	g_Height     = height;
 
 	// Initialize SDL
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -187,16 +187,16 @@ int Draw_Init(int width, int height, char *title, int pfps, int fps) {
 	}
 
 	// Initialize video mode
-	_window =
+	g_Window =
 		SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_OPENGL);
-	if (_window == NULL) {
+	if (g_Window == NULL) {
 		Print("Draw_Init: Failure initializing video mode.\n");
 		Print("\tSDL Error: %s\n", SDL_GetError());
 		return (0);
 	}
-	_glcontext = SDL_GL_CreateContext(_window);
+	g_GLContext = SDL_GL_CreateContext(g_Window);
 
-	_renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
+	g_Renderer = SDL_CreateRenderer(g_Window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
 
 	Draw_ShowInfo();
 
@@ -211,11 +211,11 @@ int Draw_Init(int width, int height, char *title, int pfps, int fps) {
 
 	// Triplebuffer swap
 	glClear(GL_COLOR_BUFFER_BIT);
-	SDL_GL_SwapWindow(_window);
+	SDL_GL_SwapWindow(g_Window);
 	glClear(GL_COLOR_BUFFER_BIT);
-	SDL_GL_SwapWindow(_window);
+	SDL_GL_SwapWindow(g_Window);
 	glClear(GL_COLOR_BUFFER_BIT);
-	SDL_GL_SwapWindow(_window);
+	SDL_GL_SwapWindow(g_Window);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glEnableClientState(GL_COLOR_ARRAY);
@@ -254,48 +254,48 @@ int Draw_Init(int width, int height, char *title, int pfps, int fps) {
 										   "  gl_FragColor = texture2D(sTexture, vTexCoord)*vColor; \n"
 										   "}                                                       \n";
 
-	programObject = Draw_BuildProgram(vertexShaderSource, fragmentShaderSource_20);
-	if (programObject == 0) {
-		programObject = Draw_BuildProgram(vertexShaderSource, fragmentShaderSource_10);
+	g_ProgramObject = Draw_BuildProgram(vertexShaderSource, fragmentShaderSource_20);
+	if (g_ProgramObject == 0) {
+		g_ProgramObject = Draw_BuildProgram(vertexShaderSource, fragmentShaderSource_10);
 	}
-	glUseProgram(programObject);
+	glUseProgram(g_ProgramObject);
 
-	vertPosLoc   = glGetAttribLocation(programObject, "aPosition");
-	vertTexLoc   = glGetAttribLocation(programObject, "aTexCoord");
-	vertColorLoc = glGetAttribLocation(programObject, "aColor");
+	g_VertPosLoc   = glGetAttribLocation(g_ProgramObject, "aPosition");
+	g_VertTexLoc   = glGetAttribLocation(g_ProgramObject, "aTexCoord");
+	g_VertColorLoc = glGetAttribLocation(g_ProgramObject, "aColor");
 
-	textureLoc          = glGetUniformLocation(programObject, "sTexture");
-	projectionMatrixLoc = glGetUniformLocation(programObject, "sProjectionMatrix");
+	g_TextureLoc          = glGetUniformLocation(g_ProgramObject, "sTexture");
+	g_ProjectionMatrixLoc = glGetUniformLocation(g_ProgramObject, "sProjectionMatrix");
 
-	glUniform1i(textureLoc, 0);
+	glUniform1i(g_TextureLoc, 0);
 
-	glGenBuffers(1, &vertexObject);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexObject);
+	glGenBuffers(1, &g_VertexObject);
+	glBindBuffer(GL_ARRAY_BUFFER, g_VertexObject);
 	glBufferData(GL_ARRAY_BUFFER, Vertex2D_Length * sizeof(float) * Max_Vertices, NULL, GL_DYNAMIC_DRAW);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vertexObject);
+	glBindBuffer(GL_ARRAY_BUFFER, g_VertexObject);
 
 	glVertexAttribPointer(
-		vertPosLoc, 2, GL_FLOAT, GL_FALSE, Vertex2D_Length * sizeof(float), (void *)(0 * sizeof(float)));
+		g_VertPosLoc, 2, GL_FLOAT, GL_FALSE, Vertex2D_Length * sizeof(float), (void *)(0 * sizeof(float)));
 	glVertexAttribPointer(
-		vertTexLoc, 2, GL_FLOAT, GL_FALSE, Vertex2D_Length * sizeof(float), (void *)(2 * sizeof(float)));
+		g_VertTexLoc, 2, GL_FLOAT, GL_FALSE, Vertex2D_Length * sizeof(float), (void *)(2 * sizeof(float)));
 	glVertexAttribPointer(
-		vertColorLoc, 4, GL_FLOAT, GL_FALSE, Vertex2D_Length * sizeof(float), (void *)(4 * sizeof(float)));
+		g_VertColorLoc, 4, GL_FLOAT, GL_FALSE, Vertex2D_Length * sizeof(float), (void *)(4 * sizeof(float)));
 
-	glEnableVertexAttribArray(vertPosLoc);
-	glEnableVertexAttribArray(vertTexLoc);
-	glEnableVertexAttribArray(vertColorLoc);
+	glEnableVertexAttribArray(g_VertPosLoc);
+	glEnableVertexAttribArray(g_VertTexLoc);
+	glEnableVertexAttribArray(g_VertColorLoc);
 
 	unsigned char whiteTexData[4] = {255, 255, 255, 255};
-	_whiteTex                     = Draw_UploadGLTexture(1, 1, whiteTexData);
+	g_WhiteTex                    = Draw_UploadGLTexture(1, 1, whiteTexData);
 
 #endif
 
-	// Set the proyection (2D)
-	glViewport(0, 0, _width, _height);
+	// Set the projection (2D)
+	glViewport(0, 0, g_Width, g_Height);
 	float projectionMatrix[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-	projectionMatrix[0]        = (2.0f / _width);
-	projectionMatrix[5]        = -(2.0f / _height);
+	projectionMatrix[0]        = (2.0f / (float)g_Width);
+	projectionMatrix[5]        = -(2.0f / (float)g_Height);
 	projectionMatrix[10]       = -0.001f;
 	projectionMatrix[3]        = -1.0f;
 	projectionMatrix[7]        = 1.0f;
@@ -306,7 +306,7 @@ int Draw_Init(int width, int height, char *title, int pfps, int fps) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Initialize the triangle array
-	_quadArray = QuadArray2D_Create(400);
+	g_QuadArray = QuadArray2D_Create(400);
 
 	Draw_SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -327,10 +327,6 @@ void Draw_ShowInfo() {
 	Print(" Renderer: %s\n", str);
 	str = (char *)glGetString(GL_VERSION);
 	Print(" Version: %s\n", str);
-	GLint major, minor;
-	glGetIntegerv(GL_MAJOR_VERSION, &major);
-	glGetIntegerv(GL_MINOR_VERSION, &minor);
-	Print(" Version : %d.%d\n", major, minor);
 	str = (char *)glGetString(GL_SHADING_LANGUAGE_VERSION);
 	Print(" Shader Version: %s\n", str);
 	Print("*********************************\n");
@@ -362,7 +358,7 @@ void Draw_SetMatrix(float matrix[16]) {
 	glLoadMatrixf(tempMatrix);
 #endif
 #if USE_OpenGLES
-	glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, matrix);
+	glUniformMatrix4fv(g_ProjectionMatrixLoc, 1, GL_FALSE, matrix);
 #endif
 }
 
@@ -397,32 +393,33 @@ GLuint Draw_UploadGLTexture(int w, int h, unsigned char *pixels) {
 //
 // Performs all the queued draw actions.
 void Draw_Flush() {
-	if (_currentImg == NULL || _quadArray->nVertex <= 0) {
+	if (g_CurrentImg == NULL || g_QuadArray->nVertex <= 0) {
 		return;
 	}
-	if (_currentImg->tex == -1) {
-		_currentImg->tex = Draw_UploadGLTexture(_currentImg->w, _currentImg->h, _currentImg->data);
+	if (g_CurrentImg->tex == -1) {
+		g_CurrentImg->tex = Draw_UploadGLTexture(g_CurrentImg->w, g_CurrentImg->h, g_CurrentImg->data);
 	}
 
 #if USE_OpenGL
 	// Draw the quad array
-	glBindTexture(GL_TEXTURE_2D, _currentImg->tex);
-	glColorPointer(4, GL_FLOAT, Vertex2D_Length * sizeof(float), (GLvoid *)(_quadArray->vertexData + 4));
-	glTexCoordPointer(2, GL_FLOAT, Vertex2D_Length * sizeof(float), (GLvoid *)(_quadArray->vertexData + 2));
-	glVertexPointer(2, GL_FLOAT, Vertex2D_Length * sizeof(float), (GLvoid *)(_quadArray->vertexData));
-	glDrawArrays(GL_TRIANGLES, 0, _quadArray->nVertex);
+	glBindTexture(GL_TEXTURE_2D, g_CurrentImg->tex);
+	glColorPointer(4, GL_FLOAT, Vertex2D_Length * sizeof(float), (GLvoid *)(g_QuadArray->vertexData + 4));
+	glTexCoordPointer(2, GL_FLOAT, Vertex2D_Length * sizeof(float), (GLvoid *)(g_QuadArray->vertexData + 2));
+	glVertexPointer(2, GL_FLOAT, Vertex2D_Length * sizeof(float), (GLvoid *)(g_QuadArray->vertexData));
+	glDrawArrays(GL_TRIANGLES, 0, g_QuadArray->nVertex);
 
 #else
 
 	// Draw the quad array
-	glBindTexture(GL_TEXTURE_2D, _currentImg->tex);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, Vertex2D_Length * sizeof(float) * _quadArray->nVertex, _quadArray->vertexData);
-	glDrawArrays(GL_TRIANGLES, 0, _quadArray->nVertex);
+	glBindTexture(GL_TEXTURE_2D, g_CurrentImg->tex);
+	glBufferSubData(
+		GL_ARRAY_BUFFER, 0, Vertex2D_Length * sizeof(float) * g_QuadArray->nVertex, g_QuadArray->vertexData);
+	glDrawArrays(GL_TRIANGLES, 0, g_QuadArray->nVertex);
 
 #endif
 
 	// Empty it
-	QuadArray2D_Clean(_quadArray);
+	QuadArray2D_Clean(g_QuadArray);
 }
 
 /////////////////////////////
@@ -435,35 +432,37 @@ void Draw_Clean(unsigned char r, unsigned char g, unsigned char b) {
 	glClear(GL_COLOR_BUFFER_BIT);
 #else
 	Draw_Flush();
-	float fr            = r / 255.0f;
-	float fg            = g / 255.0f;
-	float fb            = b / 255.0f;
+	float fr            = (float)r / 255.0f;
+	float fg            = (float)g / 255.0f;
+	float fb            = (float)b / 255.0f;
+	float fWidth        = (float)g_Width;
+	float fHeight       = (float)g_Height;
 	GLfloat vVertices[] = {
-		0.0,    0.0,              // Position 0
-		0.0,    0.0,              // TexCoord 0
-		fr,     fg,      fb, 1.0, // Color
+		0.0f,   0.0f,              // Position 0
+		0.0f,   0.0f,              // TexCoord 0
+		fr,     fg,      fb, 1.0f, // Color
 
-		0.0,    _height,          // Position 1
-		0.0,    1.0,              // TexCoord 1
-		fr,     fg,      fb, 1.0, // Color
+		0.0f,   fHeight,           // Position 1
+		0.0f,   1.0f,              // TexCoord 1
+		fr,     fg,      fb, 1.0f, // Color
 
-		_width, _height,          // Position 2
-		1.0,    1.0,              // TexCoord 2
-		fr,     fg,      fb, 1.0, // Color
+		fWidth, fHeight,           // Position 2
+		1.0f,   1.0f,              // TexCoord 2
+		fr,     fg,      fb, 1.0f, // Color
 
-		_width, _height,          // Position 2
-		1.0,    1.0,              // TexCoord 2
-		fr,     fg,      fb, 1.0, // Color
+		fWidth, fHeight,           // Position 2
+		1.0f,   1.0f,              // TexCoord 2
+		fr,     fg,      fb, 1.0f, // Color
 
-		_width, 0.0,              // Position 3
-		1.0,    0.0,              // TexCoord 3
-		fr,     fg,      fb, 1.0, // Color
+		fWidth, 0.0f,              // Position 3
+		1.0f,   0.0f,              // TexCoord 3
+		fr,     fg,      fb, 1.0f, // Color
 
-		0.0,    0.0,              // Position 0
-		0.0,    0.0,              // TexCoord 0
-		fr,     fg,      fb, 1.0, // Color
+		0.0f,   0.0f,              // Position 0
+		0.0f,   0.0f,              // TexCoord 0
+		fr,     fg,      fb, 1.0f, // Color
 	};
-	glBindTexture(GL_TEXTURE_2D, _whiteTex);
+	glBindTexture(GL_TEXTURE_2D, g_WhiteTex);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vVertices), vVertices);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 #endif
@@ -472,13 +471,13 @@ void Draw_Clean(unsigned char r, unsigned char g, unsigned char b) {
 /////////////////////////////
 // Draw_LoopIteration
 //
-// One iteracion of the loop updating the game window.
-void (*_proc_func)(void *data)          = NULL;
-void (*_draw_func)(void *data, float f) = NULL;
-void *_data                             = NULL;
-int _draw_looping                       = 0;
-int _draw_exitoverrided                 = 0;
-long long _accTime;
+// One iteration of the loop updating the game window.
+void (*g_ProcFunc)(void *data)          = NULL;
+void (*g_DrawFunc)(void *data, float f) = NULL;
+void *g_Data                            = NULL;
+int g_DrawLooping                       = 0;
+int g_DrawExitOverride                  = 0;
+long long g_AccumulatedTime;
 int Draw_LoopIteration() {
 	SDL_Event event;
 
@@ -494,10 +493,10 @@ int Draw_LoopIteration() {
 			}
 		}
 		if (event.type == SDL_MOUSEMOTION) {
-			Input_SetPointerPosition(event.motion.x / (float)_width, event.motion.y / (float)_height);
+			Input_SetPointerPosition(event.motion.x / (float)g_Width, event.motion.y / (float)g_Height);
 		}
 		if (event.type == SDL_MOUSEBUTTONDOWN) {
-			Input_SetPointerPosition(event.button.x / (float)_width, event.button.y / (float)_height);
+			Input_SetPointerPosition(event.button.x / (float)g_Width, event.button.y / (float)g_Height);
 			Input_SetPointerDown(1);
 		}
 		if (event.type == SDL_FINGERMOTION) {
@@ -508,7 +507,7 @@ int Draw_LoopIteration() {
 			Input_SetPointerDown(1);
 		}
 		if (event.type == SDL_MOUSEBUTTONUP) {
-			Input_SetPointerPosition(event.button.x / (float)_width, event.button.y / (float)_height);
+			Input_SetPointerPosition(event.button.x / (float)g_Width, event.button.y / (float)g_Height);
 			Input_SetPointerDown(0);
 		}
 		if (event.type == SDL_FINGERUP) {
@@ -520,41 +519,41 @@ int Draw_LoopIteration() {
 	while (SDL_PollEvent(&event)) {
 		if (event.type == SDL_QUIT) {
 			Input_SetKey(InputKey_Exit, 1);
-			if (!_draw_exitoverrided) {
-				_draw_looping = 0;
+			if (!g_DrawExitOverride) {
+				g_DrawLooping = 0;
 			}
 		}
 		if (event.type == SDL_KEYDOWN) {
 			if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
 				Input_SetKey(InputKey_Exit, 1);
-				if (!_draw_exitoverrided) {
-					_draw_looping = 0;
+				if (!g_DrawExitOverride) {
+					g_DrawLooping = 0;
 				}
 			}
 		}
 		if (event.type == SDL_MOUSEMOTION) {
-			Input_SetPointerPosition(event.motion.x / (float)_width, event.motion.y / (float)_height);
+			Input_SetPointerPosition((float)event.motion.x / (float)g_Width, (float)event.motion.y / (float)g_Height);
 		}
 		if (event.type == SDL_MOUSEBUTTONDOWN) {
-			Input_SetPointerPosition(event.button.x / (float)_width, event.button.y / (float)_height);
+			Input_SetPointerPosition((float)event.button.x / (float)g_Width, (float)event.button.y / (float)g_Height);
 			Input_SetPointerDown(1);
 		}
 		if (event.type == SDL_MOUSEBUTTONUP) {
-			Input_SetPointerPosition(event.button.x / (float)_width, event.button.y / (float)_height);
+			Input_SetPointerPosition((float)event.button.x / (float)g_Width, (float)event.button.y / (float)g_Height);
 			Input_SetPointerDown(0);
 		}
 	}
 #endif
 
 	// Process
-	if (_proc_func) {
-		if (_accTime > 100000) {
-			_accTime = 100000;
+	if (g_ProcFunc) {
+		if (g_AccumulatedTime > 100000) {
+			g_AccumulatedTime = 100000;
 		}
-		while (_accTime >= proc_t_frame && _draw_looping) {
+		while (g_AccumulatedTime >= g_ProcTFrame && g_DrawLooping) {
 			Input_Frame();
-			_proc_func(_data);
-			_accTime -= proc_t_frame;
+			g_ProcFunc(g_Data);
+			g_AccumulatedTime -= g_ProcTFrame;
 			Input_PostFrame();
 		}
 	}
@@ -563,13 +562,13 @@ int Draw_LoopIteration() {
 	Audio_Frame();
 
 	// Draw
-	SDL_GL_SwapWindow(_window);
-	if (_draw_func) {
-		_draw_func(_data, (float)_accTime / (float)proc_t_frame);
+	SDL_GL_SwapWindow(g_Window);
+	if (g_DrawFunc) {
+		g_DrawFunc(g_Data, (float)g_AccumulatedTime / (float)g_ProcTFrame);
 		Draw_Flush();
 	}
 
-	return _draw_looping;
+	return g_DrawLooping;
 }
 
 #ifdef EMSCRIPTEN
@@ -580,7 +579,7 @@ void Draw_LoopIterationAux() {
 
 	// Update time
 	_procTime2 = Time_GetTime();
-	_accTime += _procTime2 - _procTime1;
+	g_AccumulatedTime += _procTime2 - _procTime1;
 	_procTime1 = _procTime2;
 }
 #endif
@@ -591,35 +590,35 @@ void Draw_LoopIterationAux() {
 // Loops updating the game window.
 void Draw_Loop(void (*proc)(void *data), void (*draw)(void *data, float f), void *data) {
 
-	_proc_func = proc;
-	_draw_func = draw;
-	_data      = data;
-	if (_draw_looping) {
+	g_ProcFunc = proc;
+	g_DrawFunc = draw;
+	g_Data     = data;
+	if (g_DrawLooping) {
 		return;
 	}
-	_draw_looping = 1;
+	g_DrawLooping = 1;
 #ifndef EMSCRIPTEN
 	long long procTime1, procTime2, drawTime1, drawTime2;
-	_accTime  = proc_t_frame;
+	g_AccumulatedTime = g_ProcTFrame;
 	procTime1 = drawTime1 = Time_GetTime();
 	while (Draw_LoopIteration()) {
 
-		// Wait to round draw_t_frame
+		// Wait to round g_DrawTFrame
 		drawTime2 = Time_GetTime();
-		Time_Pause(draw_t_frame - (drawTime2 - drawTime1));
+		Time_Pause(g_DrawTFrame - (drawTime2 - drawTime1));
 		drawTime2 = Time_GetTime();
 		drawTime1 = drawTime2;
 
 		// Update time
 		procTime2 = Time_GetTime();
-		_accTime += procTime2 - procTime1;
+		g_AccumulatedTime += procTime2 - procTime1;
 		procTime1 = procTime2;
 	}
 #else
-	_accTime   = proc_t_frame;
-	_procTime1 = Time_GetTime();
-	if (_fps <= 50) {
-		emscripten_set_main_loop(Draw_LoopIterationAux, _fps, 1);
+	g_AccumulatedTime = g_ProcTFrame;
+	_procTime1        = Time_GetTime();
+	if (g_FPS <= 50) {
+		emscripten_set_main_loop(Draw_LoopIterationAux, g_FPS, 1);
 	} else {
 		emscripten_set_main_loop(Draw_LoopIterationAux, 0, 1);
 	}
@@ -632,7 +631,7 @@ void Draw_Loop(void (*proc)(void *data), void (*draw)(void *data, float f), void
 // Breaks the drawing loop
 void Draw_BreakLoop() {
 #ifndef EMSCRIPTEN
-	_draw_looping = 0;
+	g_DrawLooping = 0;
 #endif
 }
 
@@ -640,7 +639,7 @@ void Draw_BreakLoop() {
 // Draw_OverrideExit
 //
 // Overrides the default exit mechanism
-void Draw_OverrideExit(int override) { _draw_exitoverrided = override; }
+void Draw_OverrideExit(int override) { g_DrawExitOverride = override; }
 
 /////////////////////////////
 // Draw_CreateImage
@@ -664,7 +663,7 @@ DrawImg Draw_CreateImage(int w, int h) {
 /////////////////////////////
 // Draw_LoadImage
 //
-// Loads a image, giving a reference.
+// Loads an image, giving a reference.
 DrawImg Draw_LoadImage(char *filename) {
 	DrawImage image;
 
@@ -737,17 +736,17 @@ int Draw_GetFlip(DrawImg img) {
 // Draw_DrawImg
 //
 // Draws an image.
-void Draw_DrawImg(DrawImg img, int x, int y, float scale[2]) {
+void Draw_DrawImg(DrawImg img, int x, int y, const float scale[2]) {
 	DrawImage image = img;
 	float x1, x2, y1, y2;
 	float u1 = 0.0f, u2 = 1.0f;
 	float v1 = 0.0f, v2 = 1.0f;
 
 	// Prepare screen coordinates
-	x1 = x + (image->x * scale[0]);
-	y1 = y + (image->y * scale[1]);
-	x2 = x1 + (image->w * scale[0]);
-	y2 = y1 + (image->h * scale[1]);
+	x1 = (float)x + ((float)image->x * scale[0]);
+	y1 = (float)y + ((float)image->y * scale[1]);
+	x2 = x1 + ((float)image->w * scale[0]);
+	y2 = y1 + ((float)image->h * scale[1]);
 
 	// Apply flipping
 	if (image->flip & 1) {
@@ -762,11 +761,11 @@ void Draw_DrawImg(DrawImg img, int x, int y, float scale[2]) {
 	}
 
 	// Draw a quad
-	if (_currentImg != image) {
+	if (g_CurrentImg != image) {
 		Draw_Flush();
-		_currentImg = image;
+		g_CurrentImg = image;
 	}
-	QuadArray2D_AddQuad(_quadArray, x1, y1, u1, v1, x2, y2, u2, v2, _color);
+	QuadArray2D_AddQuad(g_QuadArray, x1, y1, u1, v1, x2, y2, u2, v2, g_Color);
 }
 
 /////////////////////////////
@@ -775,13 +774,13 @@ void Draw_DrawImg(DrawImg img, int x, int y, float scale[2]) {
 // Draws an image, resizing.
 void Draw_DrawImgResized(DrawImg img, int x, int y, float w, float h) {
 	DrawImage image = img;
-	int x1, x2, y1, y2;
+	float x1, x2, y1, y2;
 	float u1 = 0.0f, u2 = 1.0f;
 	float v1 = 0.0f, v2 = 1.0f;
 
 	// Prepare
-	x1 = x + image->x;
-	y1 = y + image->y;
+	x1 = (float)x + (float)image->x;
+	y1 = (float)y + (float)image->y;
 	x2 = x1 + w;
 	y2 = y1 + h;
 
@@ -798,36 +797,36 @@ void Draw_DrawImgResized(DrawImg img, int x, int y, float w, float h) {
 	}
 
 	// Draw a quad
-	if (_currentImg != image) {
+	if (g_CurrentImg != image) {
 		Draw_Flush();
-		_currentImg = image;
+		g_CurrentImg = image;
 	}
-	QuadArray2D_AddQuad(_quadArray, x1, y1, u1, v1, x2, y2, u2, v2, _color);
+	QuadArray2D_AddQuad(g_QuadArray, x1, y1, u1, v1, x2, y2, u2, v2, g_Color);
 }
 
 /////////////////////////////
 // Draw_DrawImgPart
 //
 // Draws an image part.
-void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j, float scale[2]) {
+void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j, const float scale[2]) {
 	DrawImage image = img;
-	int x1, x2, y1, y2;
+	float x1, x2, y1, y2;
 	float us, u1, u2;
 	float vs, v1, v2;
 
 	// Prepare screen coordinates
-	x1 = x + (image->x * scale[0]);
-	y1 = y + (image->y * scale[1]);
-	x2 = x1 + (w * scale[0]);
-	y2 = y1 + (h * scale[1]);
+	x1 = (float)x + ((float)image->x * scale[0]);
+	y1 = (float)y + ((float)image->y * scale[1]);
+	x2 = x1 + ((float)w * scale[0]);
+	y2 = y1 + ((float)h * scale[1]);
 
 	// Prepare image coordinates
-	us = 1.0f / image->w;
-	u1 = us * i * w;
-	u2 = u1 + (us * w);
-	vs = 1.0f / image->h;
-	v1 = vs * j * h;
-	v2 = v1 + (vs * h);
+	us = 1.0f / (float)image->w;
+	u1 = us * (float)(i * w);
+	u2 = u1 + (us * (float)w);
+	vs = 1.0f / (float)image->h;
+	v1 = vs * (float)(j * h);
+	v2 = v1 + (vs * (float)h);
 
 	// Apply flipping
 	if (image->flip & 1) {
@@ -842,33 +841,33 @@ void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j, flo
 	}
 
 	// Draw a quad
-	if (_currentImg != image) {
+	if (g_CurrentImg != image) {
 		Draw_Flush();
-		_currentImg = image;
+		g_CurrentImg = image;
 	}
-	QuadArray2D_AddQuad(_quadArray, x1, y1, u1, v1, x2, y2, u2, v2, _color);
+	QuadArray2D_AddQuad(g_QuadArray, x1, y1, u1, v1, x2, y2, u2, v2, g_Color);
 }
 
 /////////////////////////////
 // Draw_DrawImgPartHoriz
 //
 // Draws an image part horizontally.
-void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i, float scale[2]) {
+void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i, const float scale[2]) {
 	DrawImage image = img;
-	int x1, x2, y1, y2;
+	float x1, x2, y1, y2;
 	float us, u1, u2;
 	float v1 = 0.0f, v2 = 1.0f;
 
 	// Prepare screen coordinates
-	x1 = x + (image->x * scale[0]);
-	y1 = y + (image->y * scale[1]);
-	x2 = x1 + (w * scale[0]);
-	y2 = y1 + (image->h * scale[1]);
+	x1 = (float)x + ((float)image->x * scale[0]);
+	y1 = (float)y + ((float)image->y * scale[1]);
+	x2 = x1 + ((float)w * scale[0]);
+	y2 = y1 + ((float)image->h * scale[1]);
 
 	// Prepare image coordinates
-	us = 1.0f / image->w;
-	u1 = us * i * w;
-	u2 = u1 + us * w;
+	us = 1.0f / (float)image->w;
+	u1 = us * (float)(i * w);
+	u2 = u1 + (us * (float)w);
 
 	// Apply flipping
 	if (image->flip & 1) {
@@ -883,11 +882,11 @@ void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i, float scale[
 	}
 
 	// Draw a quad
-	if (_currentImg != image) {
+	if (g_CurrentImg != image) {
 		Draw_Flush();
-		_currentImg = image;
+		g_CurrentImg = image;
 	}
-	QuadArray2D_AddQuad(_quadArray, x1, y1, u1, v1, x2, y2, u2, v2, _color);
+	QuadArray2D_AddQuad(g_QuadArray, x1, y1, u1, v1, x2, y2, u2, v2, g_Color);
 }
 
 /////////////////////////////
@@ -895,28 +894,29 @@ void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i, float scale[
 //
 //
 void Draw_ImgParallax(
-	DrawImg img, int imgSize[2], int imgOffset[2], float parallaxFactor[2], int gamePos[2], int gameSize[2]) {
-	int paralaxPos[2];
-	int mult[2];
+	DrawImg img, int imgSize[2], const int imgOffset[2], const float parallaxFactor[2], const int gamePos[2],
+	const int gameSize[2]) {
+	int parallaxPos[2];
+	int multiply[2];
 	int x, y;
 
-	paralaxPos[0] = (gamePos[0] * parallaxFactor[0]) + imgOffset[0];
-	paralaxPos[1] = (gamePos[1] * parallaxFactor[1]) + imgOffset[1];
+	parallaxPos[0] = (int)((float)gamePos[0] * parallaxFactor[0]) + imgOffset[0];
+	parallaxPos[1] = (int)((float)gamePos[1] * parallaxFactor[1]) + imgOffset[1];
 
-	mult[0] = floor(paralaxPos[0] / imgSize[0]);
-	if (paralaxPos[0] < 0) {
-		mult[0]--;
+	multiply[0] = (int)floorf((float)parallaxPos[0] / (float)imgSize[0]);
+	if (parallaxPos[0] < 0) {
+		multiply[0]--;
 	}
-	mult[1] = floor(paralaxPos[1] / imgSize[1]);
-	if (paralaxPos[1] < 0) {
-		mult[1]--;
+	multiply[1] = (int)floorf((float)parallaxPos[1] / (float)imgSize[1]);
+	if (parallaxPos[1] < 0) {
+		multiply[1]--;
 	}
 
-	y = (mult[1] * imgSize[1]) - paralaxPos[1];
+	y = (multiply[1] * imgSize[1]) - parallaxPos[1];
 	while (y < gameSize[1]) {
-		x = (mult[0] * imgSize[0]) - paralaxPos[0];
+		x = (multiply[0] * imgSize[0]) - parallaxPos[0];
 		while (x < gameSize[0]) {
-			Draw_DrawImgResized(img, x, y, imgSize[0], imgSize[1]);
+			Draw_DrawImgResized(img, x, y, (float)imgSize[0], (float)imgSize[1]);
 			x += imgSize[0];
 		}
 		y += imgSize[1];
@@ -928,10 +928,10 @@ void Draw_ImgParallax(
 //
 //
 void Draw_SetColor(float r, float g, float b, float a) {
-	_color[0] = r;
-	_color[1] = g;
-	_color[2] = b;
-	_color[3] = a;
+	g_Color[0] = r;
+	g_Color[1] = g;
+	g_Color[2] = b;
+	g_Color[3] = a;
 }
 
 ////////////////////////////////////////////////
@@ -948,7 +948,7 @@ typedef struct {
 /////////////////////////////
 // Draw_DefaultImage
 //
-// Creates a image with the default font.
+// Creates an image with the default font.
 #include "FontData.h"
 DrawImage Draw_DefaultFontImage(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
 	DrawImage img;
@@ -965,7 +965,7 @@ DrawImage Draw_DefaultFontImage(unsigned char r, unsigned char g, unsigned char 
 				img->data[offset + 0] = r;
 				img->data[offset + 1] = g;
 				img->data[offset + 2] = b;
-				if (((fontdata_8x8[c * 8 + y] >> (7 - x)) & 0x01) == 1) {
+				if (((fontData_8x8[c * 8 + y] >> (7 - x)) & 0x01) == 1) {
 					img->data[offset + 3] = a;
 				} else {
 					img->data[offset + 3] = 0x00;
@@ -1020,7 +1020,7 @@ DrawFnt Draw_LoadFont(char *fichero, int min, int max) {
 /////////////////////////////
 // Draw_FontScale
 //
-void Draw_FontScale(DrawFnt f, float scale[2]) {
+void Draw_FontScale(DrawFnt f, const float scale[2]) {
 	DrawFont *font = f;
 
 	font->scale[0] = scale[0];
@@ -1041,7 +1041,7 @@ void Draw_DrawText(DrawFnt f, char *text, int x, int y) {
 		if ((*ptr) < font->max) {
 			Draw_DrawImgPartHoriz(font->img, x, y, font->w, (*ptr) - font->min, font->scale);
 		}
-		x += font->w * font->scale[0];
+		x += (int)((float)font->w * font->scale[0]);
 		ptr++;
 	}
 }
@@ -1095,34 +1095,34 @@ void Draw_SaveRGBAToPNG(char *filename, unsigned char *data, int width, int heig
 }
 
 /////////////////////////////
-// Draw_SaveScreenshoot
+// Draw_SaveScreenshot
 //
 //
-void Draw_SaveScreenshoot(char *filename) {
+void Draw_SaveScreenshot(char *filename) {
 #if USE_OpenGL
 	unsigned char *pixelData;
 	unsigned char *image_line;
 	int i, half_height, line_size;
 
-	pixelData = malloc(_width * _height * 4);
+	pixelData = malloc(g_Width * g_Height * 4);
 
-	glReadPixels(0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
+	glReadPixels(0, 0, g_Width, g_Height, GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
 
 	// Flip the image data
-	line_size   = _width * 4;
-	half_height = _height / 2;
+	line_size   = g_Width * 4;
+	half_height = g_Height / 2;
 	image_line  = malloc(line_size);
 	for (i = 0; i < half_height; i++) {
 		memcpy(image_line, pixelData + i * line_size, line_size);
-		memcpy(pixelData + i * line_size, pixelData + (_height - (i + 1)) * line_size, line_size);
-		memcpy(pixelData + (_height - (i + 1)) * line_size, image_line, line_size);
+		memcpy(pixelData + i * line_size, pixelData + (g_Height - (i + 1)) * line_size, line_size);
+		memcpy(pixelData + (g_Height - (i + 1)) * line_size, image_line, line_size);
 	}
 
 	// Save the image
 	if (EndsWith(filename, ".bmp") || EndsWith(filename, ".BMP")) {
-		Draw_SaveRGBAToBMP(filename, pixelData, _width, _height);
+		Draw_SaveRGBAToBMP(filename, pixelData, g_Width, g_Height);
 	} else if (EndsWith(filename, ".png") || EndsWith(filename, ".PNG")) {
-		Draw_SaveRGBAToPNG(filename, pixelData, _width, _height);
+		Draw_SaveRGBAToPNG(filename, pixelData, g_Width, g_Height);
 	}
 
 	// Cleanup
