@@ -22,6 +22,13 @@
 #define EntityFlag_PlatformCollision 0x00000101
 #define EntityFlag_BlockCollision 0x0000FF01
 
+// TODO: Need to confirm these values and add others if they exist
+// For now, assuming EntityIntFlag_UpdatedScale is 16
+// and EntityIntFlag_UpdatedPosition is handled differently or defined elsewhere
+// #define EntityIntFlag_UpdatedPosition 1 // Example, if needed
+// #define EntityIntFlag_UpdatedScale 16 // Example, if needed
+#define EntityIntFlag_UpdatedRotation 32
+
 typedef struct TEntity TEntity, *Entity;
 struct TEntity {
 	Entity base;
@@ -59,6 +66,9 @@ struct TEntity {
 
 	float scale0[2];
 	float scale[2];
+
+	float rotation0;
+	float rotation;
 
 	void (*oncopy)(Entity ent);
 	void (*oninit)(Entity ent);
@@ -257,6 +267,15 @@ void Entity_SetDefaultColor(Entity e, float r, float g, float b, float a);
 //
 void Entity_SetScale(Entity e, const float scale[2]);
 void Entity_GetScale(Entity e, float scale[2]);
+
+/////////////////////////////
+// Entity_SetRotation
+// Entity_GetRotation
+// Entity_AddRotation
+//
+void Entity_SetRotation(Entity e, float angle);
+void Entity_GetRotation(Entity e, float *angle);
+void Entity_AddRotation(Entity e, float angle);
 
 /////////////////////////////
 // Entity_Iluminate

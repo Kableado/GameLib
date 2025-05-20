@@ -56,3 +56,5 @@ if(hasParent)
     set(GAMELIB_HEADERS_PATH ${GAMELIB_HEADERS_PATH} PARENT_SCOPE)
     set(GAMELIB_LIBRARIES ${GAMELIB_LIBRARIES} PARENT_SCOPE)
 endif()
+
+add_subdirectory(Example.GameLib)

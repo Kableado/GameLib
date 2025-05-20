@@ -10,6 +10,9 @@
 #include "GameEnts.h"
 #include "GameMap.h"
 
+// Make g_PlayerInstance from main.c available here
+extern Entity g_PlayerInstance;
+
 int ReadLine(FILE *f, char *line, int max) {
 	int c;
 	int i = 0;
@@ -37,6 +40,9 @@ Entity GameMapAux_CreateEnt(Entity ent, int i, int j, int res) {
 	Entity e;
 	vec2 pos;
 	e = Entity_Copy(ent);
+	if (e->type == Ent_Player) {
+		g_PlayerInstance = e;
+	}
 	vec2_set(pos, (res / 2) + i * res, (res / 2) + j * res);
 	vec2_plus(e->pos, e->pos, pos);
 	GameLib_AddEntity(e);
