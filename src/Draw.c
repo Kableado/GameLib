@@ -865,150 +865,176 @@ DrawImg Draw_DrawCircle(DrawImg img, int centerX, int centerY, int radius, int i
 // Draw_DrawImg
 //
 // Draws an image.
-void Draw_DrawImg(DrawImg img, int x, int y, const float scale[2]) {
+void Draw_DrawImg(DrawImg img, int x, int y, const float scale[2], float rotation) {
 	DrawImage image = img;
-	float u1 = 0.0f, u2 = 1.0f;
-	float v1 = 0.0f, v2 = 1.0f;
-
-	// Prepare screen coordinates
-	const float x1 = (float)x + ((float)image->x * scale[0]);
-	const float y1 = (float)y + ((float)image->y * scale[1]);
-	const float x2 = x1 + ((float)image->w * scale[0]);
-	const float y2 = y1 + ((float)image->h * scale[1]);
-
-	// Apply flipping
-	if (image->flip & 1) {
-		const float t = u1;
-		u1            = u2;
-		u2            = t;
-	}
-	if (image->flip & 2) {
-		const float t = v1;
-		v1            = v2;
-		v2            = t;
-	}
-
-	// Draw a quad
 	if (g_CurrentImg != image) {
 		Draw_Flush();
 		g_CurrentImg = image;
 	}
-	QuadArray2D_AddQuad(g_QuadArray, x1, y1, u1, v1, x2, y2, u2, v2, g_Color);
+
+	float rel_tl_x, rel_tl_y, rel_tr_x, rel_tr_y, rel_bl_x, rel_bl_y, rel_br_x, rel_br_y;
+	float u_tl, v_tl, u_tr, v_tr, u_br, v_br, u_bl, v_bl;
+
+	rel_tl_x = image->x * scale[0]; rel_tl_y = image->y * scale[1];
+	rel_tr_x = (image->x + image->w) * scale[0]; rel_tr_y = image->y * scale[1];
+	rel_bl_x = image->x * scale[0]; rel_bl_y = (image->y + image->h) * scale[1];
+	rel_br_x = (image->x + image->w) * scale[0]; rel_br_y = (image->y + image->h) * scale[1];
+	u_tl=0.0f; v_tl=0.0f; u_tr=1.0f; v_tr=0.0f; u_br=1.0f; v_br=1.0f; u_bl=0.0f; v_bl=1.0f;
+
+	if (image->flip & 1) { float tu = u_tl; u_tl = u_tr; u_tr = tu; tu = u_bl; u_bl = u_br; u_br = tu; } // Horizontal flip
+	if (image->flip & 2) { float tv = v_tl; v_tl = v_bl; v_bl = tv; tv = v_tr; v_tr = v_br; v_br = tv; } // Vertical flip
+
+	float s_rot = sinf(rotation);
+	float c_rot = cosf(rotation);
+	float final_tl_x = (rel_tl_x * c_rot - rel_tl_y * s_rot) + x;
+	float final_tl_y = (rel_tl_x * s_rot + rel_tl_y * c_rot) + y;
+	float final_tr_x = (rel_tr_x * c_rot - rel_tr_y * s_rot) + x;
+	float final_tr_y = (rel_tr_x * s_rot + rel_tr_y * c_rot) + y;
+	float final_bl_x = (rel_bl_x * c_rot - rel_bl_y * s_rot) + x;
+	float final_bl_y = (rel_bl_x * s_rot + rel_bl_y * c_rot) + y;
+	float final_br_x = (rel_br_x * c_rot - rel_br_y * s_rot) + x;
+	float final_br_y = (rel_br_x * s_rot + rel_br_y * c_rot) + y;
+
+	QuadArray2D_AddArbitraryQuad(g_QuadArray,
+								 final_tl_x, final_tl_y, u_tl, v_tl,
+								 final_tr_x, final_tr_y, u_tr, v_tr,
+								 final_br_x, final_br_y, u_br, v_br,
+								 final_bl_x, final_bl_y, u_bl, v_bl,
+								 g_Color);
 }
 
 /////////////////////////////
 // Draw_DrawImgResized
 //
 // Draws an image, resizing.
-void Draw_DrawImgResized(DrawImg img, int x, int y, float w, float h) {
+void Draw_DrawImgResized(DrawImg img, int x, int y, float w_param, float h_param, float rotation) {
 	DrawImage image = img;
-	float u1 = 0.0f, u2 = 1.0f;
-	float v1 = 0.0f, v2 = 1.0f;
-
-	// Prepare
-	const float x1 = (float)x + (float)image->x;
-	const float y1 = (float)y + (float)image->y;
-	const float x2 = x1 + w;
-	const float y2 = y1 + h;
-
-	// Apply flipping
-	if (image->flip & 1) {
-		const float t = u1;
-		u1            = u2;
-		u2            = t;
-	}
-	if (image->flip & 2) {
-		const float t = v1;
-		v1            = v2;
-		v2            = t;
-	}
-
-	// Draw a quad
 	if (g_CurrentImg != image) {
 		Draw_Flush();
 		g_CurrentImg = image;
 	}
-	QuadArray2D_AddQuad(g_QuadArray, x1, y1, u1, v1, x2, y2, u2, v2, g_Color);
+
+	float rel_tl_x, rel_tl_y, rel_tr_x, rel_tr_y, rel_bl_x, rel_bl_y, rel_br_x, rel_br_y;
+	float u_tl, v_tl, u_tr, v_tr, u_br, v_br, u_bl, v_bl;
+
+	rel_tl_x = image->x; rel_tl_y = image->y;
+	rel_tr_x = image->x + w_param; rel_tr_y = image->y;
+	rel_bl_x = image->x; rel_bl_y = image->y + h_param;
+	rel_br_x = image->x + w_param; rel_br_y = image->y + h_param;
+	u_tl=0.0f; v_tl=0.0f; u_tr=1.0f; v_tr=0.0f; u_br=1.0f; v_br=1.0f; u_bl=0.0f; v_bl=1.0f;
+
+	if (image->flip & 1) { float tu = u_tl; u_tl = u_tr; u_tr = tu; tu = u_bl; u_bl = u_br; u_br = tu; } // Horizontal flip
+	if (image->flip & 2) { float tv = v_tl; v_tl = v_bl; v_bl = tv; tv = v_tr; v_tr = v_br; v_br = tv; } // Vertical flip
+
+	float s_rot = sinf(rotation);
+	float c_rot = cosf(rotation);
+	float final_tl_x = (rel_tl_x * c_rot - rel_tl_y * s_rot) + x;
+	float final_tl_y = (rel_tl_x * s_rot + rel_tl_y * c_rot) + y;
+	float final_tr_x = (rel_tr_x * c_rot - rel_tr_y * s_rot) + x;
+	float final_tr_y = (rel_tr_x * s_rot + rel_tr_y * c_rot) + y;
+	float final_bl_x = (rel_bl_x * c_rot - rel_bl_y * s_rot) + x;
+	float final_bl_y = (rel_bl_x * s_rot + rel_bl_y * c_rot) + y;
+	float final_br_x = (rel_br_x * c_rot - rel_br_y * s_rot) + x;
+	float final_br_y = (rel_br_x * s_rot + rel_br_y * c_rot) + y;
+
+	QuadArray2D_AddArbitraryQuad(g_QuadArray,
+								 final_tl_x, final_tl_y, u_tl, v_tl,
+								 final_tr_x, final_tr_y, u_tr, v_tr,
+								 final_br_x, final_br_y, u_br, v_br,
+								 final_bl_x, final_bl_y, u_bl, v_bl,
+								 g_Color);
 }
 
 /////////////////////////////
 // Draw_DrawImgPart
 //
 // Draws an image part.
-void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j, const float scale[2]) {
+void Draw_DrawImgPart(DrawImg img, int x, int y, int w_param, int h_param, int i_param, int j_param, const float scale[2], float rotation) {
 	DrawImage image = img;
-
-	// Prepare screen coordinates
-	const float x1 = (float)x + ((float)image->x * scale[0]);
-	const float y1 = (float)y + ((float)image->y * scale[1]);
-	const float x2 = x1 + ((float)w * scale[0]);
-	const float y2 = y1 + ((float)h * scale[1]);
-
-	// Prepare image coordinates
-	const float us = 1.0f / (float)image->w;
-	float u1       = us * (float)(i * w);
-	float u2       = u1 + (us * (float)w);
-	const float vs = 1.0f / (float)image->h;
-	float v1       = vs * (float)(j * h);
-	float v2       = v1 + (vs * (float)h);
-
-	// Apply flipping
-	if (image->flip & 1) {
-		const float t = u1;
-		u1            = u2;
-		u2            = t;
-	}
-	if (image->flip & 2) {
-		const float t = v1;
-		v1            = v2;
-		v2            = t;
-	}
-
-	// Draw a quad
 	if (g_CurrentImg != image) {
 		Draw_Flush();
 		g_CurrentImg = image;
 	}
-	QuadArray2D_AddQuad(g_QuadArray, x1, y1, u1, v1, x2, y2, u2, v2, g_Color);
+
+	float rel_tl_x, rel_tl_y, rel_tr_x, rel_tr_y, rel_bl_x, rel_bl_y, rel_br_x, rel_br_y;
+	float u_tl, v_tl, u_tr, v_tr, u_br, v_br, u_bl, v_bl;
+
+	rel_tl_x = image->x * scale[0]; rel_tl_y = image->y * scale[1];
+	rel_tr_x = (image->x + w_param) * scale[0]; rel_tr_y = image->y * scale[1];
+	rel_bl_x = image->x * scale[0]; rel_bl_y = (image->y + h_param) * scale[1];
+	rel_br_x = (image->x + w_param) * scale[0]; rel_br_y = (image->y + h_param) * scale[1];
+	float tex_u_start = (float)(i_param * w_param) / image->w;
+	float tex_v_start = (float)(j_param * h_param) / image->h;
+	float tex_u_end = tex_u_start + (float)w_param / image->w;
+	float tex_v_end = tex_v_start + (float)h_param / image->h;
+	u_tl = tex_u_start; v_tl = tex_v_start; u_tr = tex_u_end; v_tr = tex_v_start; u_br = tex_u_end; v_br = tex_v_end; u_bl = tex_u_start; v_bl = tex_v_end;
+
+	if (image->flip & 1) { float tu = u_tl; u_tl = u_tr; u_tr = tu; tu = u_bl; u_bl = u_br; u_br = tu; } // Horizontal flip
+	if (image->flip & 2) { float tv = v_tl; v_tl = v_bl; v_bl = tv; tv = v_tr; v_tr = v_br; v_br = tv; } // Vertical flip
+
+	float s_rot = sinf(rotation);
+	float c_rot = cosf(rotation);
+	float final_tl_x = (rel_tl_x * c_rot - rel_tl_y * s_rot) + x;
+	float final_tl_y = (rel_tl_x * s_rot + rel_tl_y * c_rot) + y;
+	float final_tr_x = (rel_tr_x * c_rot - rel_tr_y * s_rot) + x;
+	float final_tr_y = (rel_tr_x * s_rot + rel_tr_y * c_rot) + y;
+	float final_bl_x = (rel_bl_x * c_rot - rel_bl_y * s_rot) + x;
+	float final_bl_y = (rel_bl_x * s_rot + rel_bl_y * c_rot) + y;
+	float final_br_x = (rel_br_x * c_rot - rel_br_y * s_rot) + x;
+	float final_br_y = (rel_br_x * s_rot + rel_br_y * c_rot) + y;
+
+	QuadArray2D_AddArbitraryQuad(g_QuadArray,
+								 final_tl_x, final_tl_y, u_tl, v_tl,
+								 final_tr_x, final_tr_y, u_tr, v_tr,
+								 final_br_x, final_br_y, u_br, v_br,
+								 final_bl_x, final_bl_y, u_bl, v_bl,
+								 g_Color);
 }
 
 /////////////////////////////
 // Draw_DrawImgPartHoriz
 //
 // Draws an image part horizontally.
-void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i, const float scale[2]) {
+void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w_param, int i_param, const float scale[2], float rotation) {
 	DrawImage image = img;
-	float v1 = 0.0f, v2 = 1.0f;
-
-	// Prepare screen coordinates
-	const float x1 = (float)x + ((float)image->x * scale[0]);
-	const float y1 = (float)y + ((float)image->y * scale[1]);
-	const float x2 = x1 + ((float)w * scale[0]);
-	const float y2 = y1 + ((float)image->h * scale[1]);
-
-	// Prepare image coordinates
-	const float us = 1.0f / (float)image->w;
-	float u1       = us * (float)(i * w);
-	float u2       = u1 + (us * (float)w);
-
-	// Apply flipping
-	if (image->flip & 1) {
-		const float t = u1;
-		u1            = u2;
-		u2            = t;
-	}
-	if (image->flip & 2) {
-		const float t = v1;
-		v1            = v2;
-		v2            = t;
-	}
-
-	// Draw a quad
 	if (g_CurrentImg != image) {
 		Draw_Flush();
 		g_CurrentImg = image;
 	}
-	QuadArray2D_AddQuad(g_QuadArray, x1, y1, u1, v1, x2, y2, u2, v2, g_Color);
+
+	float rel_tl_x, rel_tl_y, rel_tr_x, rel_tr_y, rel_bl_x, rel_bl_y, rel_br_x, rel_br_y;
+	float u_tl, v_tl, u_tr, v_tr, u_br, v_br, u_bl, v_bl;
+
+	rel_tl_x = image->x * scale[0]; rel_tl_y = image->y * scale[1];
+	rel_tr_x = (image->x + w_param) * scale[0]; rel_tr_y = image->y * scale[1];
+	rel_bl_x = image->x * scale[0]; rel_bl_y = (image->y + image->h) * scale[1];
+	rel_br_x = (image->x + w_param) * scale[0]; rel_br_y = (image->y + image->h) * scale[1];
+	float tex_u_start = (float)(i_param * w_param) / image->w;
+	float tex_v_start = 0.0f;
+	float tex_u_end = tex_u_start + (float)w_param / image->w;
+	float tex_v_end = 1.0f;
+	u_tl = tex_u_start; v_tl = tex_v_start; u_tr = tex_u_end; v_tr = tex_v_start; u_br = tex_u_end; v_br = tex_v_end; u_bl = tex_u_start; v_bl = tex_v_end;
+
+	if (image->flip & 1) { float tu = u_tl; u_tl = u_tr; u_tr = tu; tu = u_bl; u_bl = u_br; u_br = tu; } // Horizontal flip
+	if (image->flip & 2) { float tv = v_tl; v_tl = v_bl; v_bl = tv; tv = v_tr; v_tr = v_br; v_br = tv; } // Vertical flip
+
+	float s_rot = sinf(rotation);
+	float c_rot = cosf(rotation);
+	float final_tl_x = (rel_tl_x * c_rot - rel_tl_y * s_rot) + x;
+	float final_tl_y = (rel_tl_x * s_rot + rel_tl_y * c_rot) + y;
+	float final_tr_x = (rel_tr_x * c_rot - rel_tr_y * s_rot) + x;
+	float final_tr_y = (rel_tr_x * s_rot + rel_tr_y * c_rot) + y;
+	float final_bl_x = (rel_bl_x * c_rot - rel_bl_y * s_rot) + x;
+	float final_bl_y = (rel_bl_x * s_rot + rel_bl_y * c_rot) + y;
+	float final_br_x = (rel_br_x * c_rot - rel_br_y * s_rot) + x;
+	float final_br_y = (rel_br_x * s_rot + rel_br_y * c_rot) + y;
+
+	QuadArray2D_AddArbitraryQuad(g_QuadArray,
+								 final_tl_x, final_tl_y, u_tl, v_tl,
+								 final_tr_x, final_tr_y, u_tr, v_tr,
+								 final_br_x, final_br_y, u_br, v_br,
+								 final_bl_x, final_bl_y, u_bl, v_bl,
+								 g_Color);
 }
 
 /////////////////////////////
@@ -1037,7 +1063,7 @@ void Draw_ImgParallax(
 	while (y < gameSize[1]) {
 		int x = (multiply[0] * imgSize[0]) - parallaxPos[0];
 		while (x < gameSize[0]) {
-			Draw_DrawImgResized(img, x, y, (float)imgSize[0], (float)imgSize[1]);
+			Draw_DrawImgResized(img, x, y, (float)imgSize[0], (float)imgSize[1], 0.0f);
 			x += imgSize[0];
 		}
 		y += imgSize[1];
@@ -1157,7 +1183,7 @@ void Draw_DrawText(DrawFnt f, const char *text, int x, int y) {
 	const char *ptr = text;
 	while (*ptr) {
 		if ((*ptr) < font->max) {
-			Draw_DrawImgPartHoriz(font->img, x, y, font->w, (*ptr) - font->min, font->scale);
+			Draw_DrawImgPartHoriz(font->img, x, y, font->w, (*ptr) - font->min, font->scale, 0.0f);
 		}
 		x += (int)((float)font->w * font->scale[0]);
 		ptr++;

@@ -91,3 +91,42 @@ void QuadArray2D_AddQuad(
 	v[3] = v0;
 	QuadArray2D_AddVertex(quadArray, v);
 }
+
+void QuadArray2D_AddArbitraryQuad(
+	QuadArray2D quadArray,
+	float x_tl, float y_tl, float u_tl, float v_tl, // Top-Left vertex
+	float x_tr, float y_tr, float u_tr, float v_tr, // Top-Right vertex
+	float x_br, float y_br, float u_br, float v_br, // Bottom-Right vertex
+	float x_bl, float y_bl, float u_bl, float v_bl, // Bottom-Left vertex
+	const float color[]) {
+
+	float v[Vertex2D_Length];
+
+	// Set the common color for all vertices
+	v[4] = color[0];
+	v[5] = color[1];
+	v[6] = color[2];
+	v[7] = color[3];
+
+	// Triangle 1: TL, TR, BR
+	// TL
+	v[0] = x_tl; v[1] = y_tl; v[2] = u_tl; v[3] = v_tl;
+	QuadArray2D_AddVertex(quadArray, v);
+	// TR
+	v[0] = x_tr; v[1] = y_tr; v[2] = u_tr; v[3] = v_tr;
+	QuadArray2D_AddVertex(quadArray, v);
+	// BR
+	v[0] = x_br; v[1] = y_br; v[2] = u_br; v[3] = v_br;
+	QuadArray2D_AddVertex(quadArray, v);
+
+	// Triangle 2: BR, BL, TL
+	// BR
+	v[0] = x_br; v[1] = y_br; v[2] = u_br; v[3] = v_br;
+	QuadArray2D_AddVertex(quadArray, v);
+	// BL
+	v[0] = x_bl; v[1] = y_bl; v[2] = u_bl; v[3] = v_bl;
+	QuadArray2D_AddVertex(quadArray, v);
+	// TL
+	v[0] = x_tl; v[1] = y_tl; v[2] = u_tl; v[3] = v_tl;
+	QuadArray2D_AddVertex(quadArray, v);
+}

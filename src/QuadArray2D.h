@@ -28,4 +28,13 @@ void QuadArray2D_AddQuad(
 	QuadArray2D quadArray, float x0, float y0, float u0, float v0, float x1, float y1, float u1, float v1,
 	const float color[]);
 
+void QuadArray2D_AddArbitraryQuad(
+	QuadArray2D quadArray,
+	float x_tl, float y_tl, float u_tl, float v_tl, // Top-Left vertex
+	float x_tr, float y_tr, float u_tr, float v_tr, // Top-Right vertex
+	float x_br, float y_br, float u_br, float v_br, // Bottom-Right vertex
+	float x_bl, float y_bl, float u_bl, float v_bl, // Bottom-Left vertex
+	const float color[]
+);
+
 #endif

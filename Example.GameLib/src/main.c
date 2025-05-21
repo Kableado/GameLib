@@ -14,6 +14,9 @@
 DrawFnt font;
 DrawImg imgBackground;
 
+// Global instance for the player entity
+Entity g_PlayerInstance = NULL;
+
 void MainGame_Text(int x, int y, char *text) {
 	Draw_SetColor(0.0f, 0.0f, 0.0f, 0.5f);
 	Draw_DrawText(font, text, x + 1, y + 1);
@@ -21,7 +24,14 @@ void MainGame_Text(int x, int y, char *text) {
 	Draw_DrawText(font, text, x, y);
 }
 
-void ProcGame() {}
+void ProcGame() {
+	// Rotate the player entity
+	if (g_PlayerInstance) {
+		float current_rotation;
+		Entity_GetRotation(g_PlayerInstance, &current_rotation);
+		Entity_SetRotation(g_PlayerInstance, current_rotation + 0.01f);
+	}
+}
 void PostProcGame() {
 	// Apply gravity to every entity
 	GameLib_ForEachEnt(EntityApplyGravity);

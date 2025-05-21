@@ -248,6 +248,8 @@ int Entity_BBoxIntersect(Entity ent1, Entity ent2) {
 void Entity_Draw(Entity e, int x, int y, float f) {
 	vec2 fPos;
 	float scale[2];
+	float currentRotation;
+
 	if (e->internalFlags & EntityIntFlag_UpdatedColor) {
 		Draw_SetColor(
 			e->color0[0] - f * (e->color0[0] - e->color[0]),
@@ -264,11 +266,18 @@ void Entity_Draw(Entity e, int x, int y, float f) {
 		scale[0] = e->scale[0];
 		scale[1] = e->scale[1];
 	}
+
+	if (e->internalFlags & EntityIntFlag_UpdatedRotation) {
+		currentRotation = e->rotation0 - f * (e->rotation0 - e->rotation);
+	} else {
+		currentRotation = e->rotation;
+	}
+
 	if (e->internalFlags & EntityIntFlag_UpdatedPos) {
 		vec2_interpol(fPos, e->pos0, e->pos, f);
-		AnimPlay_Draw(&e->anim, (int)(fPos[0] + x), fPos[1] + y, scale);
+		AnimPlay_Draw(&e->anim, (int)(fPos[0] + x), fPos[1] + y, scale, currentRotation);
 	} else {
-		AnimPlay_Draw(&e->anim, e->pos[0] + x, e->pos[1] + y, scale);
+		AnimPlay_Draw(&e->anim, e->pos[0] + x, e->pos[1] + y, scale, currentRotation);
 	}
 }
 
@@ -308,6 +317,11 @@ void Entity_Process(Entity e, int ft) {
 		e->scale0[0] = e->scale[0];
 		e->scale0[1] = e->scale[1];
 		e->internalFlags &= ~EntityIntFlag_UpdatedScale;
+	}
+
+	if (e->internalFlags & EntityIntFlag_UpdatedRotation) {
+		e->rotation0 = e->rotation;
+		e->internalFlags &= ~EntityIntFlag_UpdatedRotation;
 	}
 
 	if (e->internalFlags & EntityIntFlag_UpdatedColor) {
@@ -938,6 +952,31 @@ void Entity_SetScale(Entity e, const float scale[2]) {
 void Entity_GetScale(Entity e, float scale[2]) {
 	scale[0] = e->scale[0];
 	scale[1] = e->scale[1];
+}
+
+/////////////////////////////
+// Entity_SetRotation
+//
+void Entity_SetRotation(Entity e, float angle) {
+	e->rotation = angle;
+	e->internalFlags |= EntityIntFlag_UpdatedRotation;
+}
+
+/////////////////////////////
+// Entity_GetRotation
+//
+void Entity_GetRotation(Entity e, float *angle) {
+	if (angle) {
+		*angle = e->rotation;
+	}
+}
+
+/////////////////////////////
+// Entity_AddRotation
+//
+void Entity_AddRotation(Entity e, float angle) {
+	e->rotation += angle;
+	e->internalFlags |= EntityIntFlag_UpdatedRotation;
 }
 
 /////////////////////////////

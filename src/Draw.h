@@ -111,25 +111,25 @@ DrawImg Draw_DrawCircle(DrawImg img, int centerX, int centerY, int radius, int i
 // Draw_DrawImg
 //
 // Draws an image.
-void Draw_DrawImg(DrawImg img, int x, int y, const float scale[2]);
+void Draw_DrawImg(DrawImg img, int x, int y, const float scale[2], float rotation);
 
 /////////////////////////////
 // Draw_DrawImgResized
 //
 // Draws an image, resizing.
-void Draw_DrawImgResized(DrawImg img, int x, int y, float w, float h);
+void Draw_DrawImgResized(DrawImg img, int x, int y, float w, float h, float rotation);
 
 /////////////////////////////
 // Draw_DrawImgPart
 //
 // Draws an image part.
-void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j, const float scale[2]);
+void Draw_DrawImgPart(DrawImg img, int x, int y, int w, int h, int i, int j, const float scale[2], float rotation);
 
 /////////////////////////////
 // Draw_DrawImgPartHoriz
 //
 // Draws an image part horizontally.
-void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i, const float scale[2]);
+void Draw_DrawImgPartHoriz(DrawImg img, int x, int y, int w, int i, const float scale[2], float rotation);
 
 /////////////////////////////
 // Draw_ImgParallax
