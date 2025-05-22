@@ -7,6 +7,7 @@
 #include "Bucket.h"
 #include "Draw.h"
 #include "Util.h"
+#include "Component.h"
 
 ////////////////////////////////////////////////
 // Entity
@@ -34,41 +35,13 @@ struct TEntity {
 	Entity base;
 
 	int type;
-	vec2 oldpos;
-	vec2 pos0;
-	vec2 pos;
 	int flags;
 	int internalFlags;
 	int zorder;
 	float sortYOffset;
 
-	vec2 dir;
-
-	vec2 vel;
-	vec2 bod_offset;
-	float radius;
-	float width;
-	float height;
-	float mass;
-	float elast;
-	float backFric_static;
-	float backFric_dynamic;
-	float fric_static;
-	float fric_dynamic;
-
-	AnimPlay anim;
-
-	float color0[4];
-	float color[4];
-
-	float light[4];
-	float defaultColor[4];
-
-	float scale0[2];
-	float scale[2];
-
-	float rotation0;
-	float rotation;
+	EntBody *body;
+	EntSprite *sprite;
 
 	void (*oncopy)(Entity ent);
 	void (*oninit)(Entity ent);

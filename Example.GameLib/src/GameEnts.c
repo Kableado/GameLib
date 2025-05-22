@@ -21,6 +21,11 @@ int EntityApplyGravity(Entity e) {
 	float vTerminal = 50.0f;
 	vec2 vGrav;
 
+	// Guard against NULL entity or body
+	if (!e || !e->body) {
+		return (0); // Or some other error/no-op indicator
+	}
+
 	// Only apply gravity to some entity types
 	if (!(e->type == Ent_Player || 0)) {
 		return (1);
@@ -39,6 +44,11 @@ void Player_Proc(Entity e, int ft) {
 	float jumpVel           = 50.0f;
 	float airMovementFactor = 0.1f;
 
+	// Guard against NULL entity or its components
+	if (!e || !e->body || !e->sprite) {
+		return;
+	}
+
 	// Process elasticity
 	float entityScale[2];
 	Entity_GetScale(e, entityScale);
@@ -50,8 +60,8 @@ void Player_Proc(Entity e, int ft) {
 		if (Input_GetKey(InputKey_Jump) == InputKey_Pressed || Input_GetKey(InputKey_Up) == InputKey_Pressed) {
 
 			// Apply jump
-			if (e->vel[1] > (-jumpVel)) {
-				e->vel[1] = -jumpVel;
+			if (e->body->vel[1] > (-jumpVel)) {
+				e->body->vel[1] = -jumpVel;
 			}
 			Entity_CalcBBox(e);
 
@@ -97,24 +107,33 @@ void Player_Proc(Entity e, int ft) {
 }
 
 void Player_PostProc(Entity e, int ft) {
+	// Guard against NULL entity or body
+	if (!e || !e->body) {
+		return;
+	}
 
 	// Scroll View
-	GameLib_MoveToPos(e->pos, 0.6f);
-	// GameLib_MoveToPos(e->pos, 1.0f);
+	GameLib_MoveToPos(e->body->pos, 0.6f);
+	// GameLib_MoveToPos(e->body->pos, 1.0f);
 }
 
 int Player_Collision(Entity ent, Entity ent2, float t, vec2 n) {
+	// Guard against NULL entity or its components
+	if (!ent || !ent->body || !ent->sprite) {
+		return -1; // Keep original error/no-op indicator
+	}
+
 	if (n[1] < 0 && fabs(n[1]) > fabs(n[0])) {
 		ent->A = 1;
 	}
 
 	if (fabs(n[0]) > fabs(n[1])) {
-		float intensity = (fabs(ent->vel[0]) - 10.0f) / 40.0f;
+		float intensity = (fabs(ent->body->vel[0]) - 10.0f) / 40.0f;
 		if (intensity > 0) {
 			Entity_SetScale(ent, (float[2]){1.0f - (0.3f * intensity), 1.0f + (0.3f * intensity)});
 		}
 	} else {
-		float intensity = (fabs(ent->vel[1]) - 10.0f) / 40.0f;
+		float intensity = (fabs(ent->body->vel[1]) - 10.0f) / 40.0f;
 		if (intensity > 0) {
 			Entity_SetScale(ent, (float[2]){1.0f + (0.3f * intensity), 1.0f - (0.3f * intensity)});
 		}
@@ -142,38 +161,38 @@ void GameEnts_Init() {
 	// Entity_SetLight(ent_Player,.2,.2,.2,200);
 	ent_Player->flags  = EntityFlag_Collision | EntityFlag_Overlap;
 	ent_Player->zorder = 0;
-	AnimPlay_SetImg(&ent_Player->anim, img_player);
+	AnimPlay_SetImg(&ent_Player->sprite->anim, img_player);
 	ent_Player->proc         = Player_Proc;
 	ent_Player->postproc     = Player_PostProc;
 	ent_Player->collision    = Player_Collision;
-	ent_Player->mass         = 1.0f;
-	ent_Player->radius       = 12;
-	ent_Player->width        = 24;
-	ent_Player->height       = 24;
-	ent_Player->fric_static  = 0.0f;
-	ent_Player->fric_dynamic = 0.2f;
+	ent_Player->body->mass         = 1.0f;
+	ent_Player->body->radius       = 12;
+	ent_Player->body->width        = 24;
+	ent_Player->body->height       = 24;
+	ent_Player->body->fric_static  = 0.0f;
+	ent_Player->body->fric_dynamic = 0.2f;
 
 	ent_Platform         = Entity_New();
 	ent_Platform->type   = Ent_Platform;
 	ent_Platform->flags  = EntityFlag_PlatformCollision;
 	ent_Platform->zorder = -1;
-	AnimPlay_SetImg(&ent_Platform->anim, img_platform);
-	ent_Platform->mass         = 0.0f;
-	ent_Platform->radius       = 12;
-	ent_Platform->width        = 64;
-	ent_Platform->height       = 16;
-	ent_Platform->fric_static  = 0.0f;
-	ent_Platform->fric_dynamic = 0.2f;
+	AnimPlay_SetImg(&ent_Platform->sprite->anim, img_platform);
+	ent_Platform->body->mass         = 0.0f;
+	ent_Platform->body->radius       = 12;
+	ent_Platform->body->width        = 64;
+	ent_Platform->body->height       = 16;
+	ent_Platform->body->fric_static  = 0.0f;
+	ent_Platform->body->fric_dynamic = 0.2f;
 
 	ent_Block         = Entity_New();
 	ent_Block->type   = Ent_Block;
 	ent_Block->flags  = EntityFlag_BlockCollision;
 	ent_Block->zorder = -1;
-	AnimPlay_SetImg(&ent_Block->anim, img_block);
-	ent_Block->mass         = 0.0f;
-	ent_Block->radius       = 32;
-	ent_Block->width        = 64;
-	ent_Block->height       = 64;
-	ent_Block->fric_static  = 0.0f;
-	ent_Block->fric_dynamic = 0.2f;
+	AnimPlay_SetImg(&ent_Block->sprite->anim, img_block);
+	ent_Block->body->mass         = 0.0f;
+	ent_Block->body->radius       = 32;
+	ent_Block->body->width        = 64;
+	ent_Block->body->height       = 64;
+	ent_Block->body->fric_static  = 0.0f;
+	ent_Block->body->fric_dynamic = 0.2f;
 }
