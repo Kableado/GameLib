@@ -72,11 +72,20 @@ typedef float vec2[2];
 	(v)[0] = (v2)[0] * (s) + (v1)[0];                                                                                  \
 	(v)[1] = (v2)[1] * (s) + (v1)[1]
 float vec2_norm(vec2 v);
+float vec2_cross_scalar(const vec2 v1, const vec2 v2);
+void vec2_rotate(vec2 out, const vec2 in, float angle_rad);
 #define vec2_interpol(v, v1, v2, f)                                                                                    \
 	(v)[0] = (v1)[0] - f * ((v1)[0] - (v2)[0]);                                                                        \
 	(v)[1] = (v1)[1] - f * ((v1)[1] - (v2)[1])
 void vec2_orthogonalize4(vec2 v);
 void vec2_orthogonalize8(vec2 v);
+
+/////////////////////////////
+// OBB/Polygon Geometry Utilities (for SAT)
+//
+void compute_obb_vertices(vec2 out_vertices[4], const vec2 center, float width, float height, float rotation_rad);
+void get_polygon_axes(vec2 *out_axes, int *out_num_axes, const vec2 *vertices, int num_vertices);
+void project_polygon_onto_axis(const vec2 *vertices, int num_vertices, const vec2 axis, float *out_min_proj, float *out_max_proj);
 
 /////////////////////////////
 // Intersect_RayUnitCircle

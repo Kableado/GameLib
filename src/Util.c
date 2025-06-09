@@ -88,6 +88,22 @@ int SolveQuadratic(float a, float b, float c, float *RMin, float *RMax) {
 // vec2 //
 //////////
 // A 2D vector.
+
+// Calculate the 2D scalar cross product (v1.x * v2.y - v1.y * v2.x)
+float vec2_cross_scalar(const vec2 v1, const vec2 v2) {
+    return v1[0] * v2[1] - v1[1] * v2[0];
+}
+
+// Rotate a 2D vector by a given angle in radians
+void vec2_rotate(vec2 out, const vec2 in, float angle_rad) {
+    float s = sinf(angle_rad);
+    float c = cosf(angle_rad);
+    float x = in[0];
+    float y = in[1];
+    out[0] = x * c - y * s;
+    out[1] = x * s + y * c;
+}
+
 float vec2_norm(vec2 v) {
 	float len;
 	len = vec2_len(v);
@@ -147,6 +163,82 @@ void vec2_orthogonalize8(vec2 v) {
 			v[1] = -0.707f;
 		}
 	}
+}
+
+/////////////////////////////
+// OBB/Polygon Geometry Utilities (for SAT)
+//
+
+void compute_obb_vertices(vec2 out_vertices[4], const vec2 center, float width, float height, float rotation_rad) {
+    float h_width = width / 2.0f;
+    float h_height = height / 2.0f;
+
+    // Local, unrotated vertices of the box
+    vec2 local_vertices[4];
+    vec2_set(local_vertices[0], -h_width, -h_height); // Bottom-left
+    vec2_set(local_vertices[1],  h_width, -h_height); // Bottom-right
+    vec2_set(local_vertices[2],  h_width,  h_height); // Top-right
+    vec2_set(local_vertices[3], -h_width,  h_height); // Top-left
+
+    // Rotate each local vertex and translate to world space
+    for (int i = 0; i < 4; ++i) {
+        vec2 rotated_vertex;
+        vec2_rotate(rotated_vertex, local_vertices[i], rotation_rad);
+        vec2_plus(out_vertices[i], center, rotated_vertex);
+    }
+}
+
+void get_polygon_axes(vec2 *out_axes, int *out_num_axes, const vec2 *vertices, int num_vertices) {
+    int current_axis_idx = 0;
+    for (int i = 0; i < num_vertices; ++i) {
+        vec2 p1 = {vertices[i][0], vertices[i][1]};
+        vec2 p2 = {vertices[(i + 1) % num_vertices][0], vertices[(i + 1) % num_vertices][1]}; // Wrap around for last edge
+
+        vec2 edge;
+        vec2_minus(edge, p2, p1);
+
+        vec2 normal;
+        vec2_perp(normal, edge); // normal[0] = -edge[1]; normal[1] = edge[0];
+        vec2_norm(normal);       // Normalize the axis
+
+        // Avoid adding duplicate axes (e.g., for a rectangle) by checking orientation
+        // A simple check: if axis is (-x, -y) of an existing one, skip.
+        // A more robust way would be to check dot product == -1 with existing axes.
+        int found_parallel = 0;
+        for (int j = 0; j < current_axis_idx; ++j) {
+            if (vec2_dot(normal, out_axes[j]) < -0.999f) { // Check if axis is nearly opposite
+                found_parallel = 1;
+                break;
+            }
+        }
+        if (!found_parallel) {
+            vec2_copy(out_axes[current_axis_idx], normal);
+            current_axis_idx++;
+        }
+    }
+    *out_num_axes = current_axis_idx;
+}
+
+void project_polygon_onto_axis(const vec2 *vertices, int num_vertices, const vec2 axis, float *out_min_proj, float *out_max_proj) {
+    if (num_vertices == 0) {
+        *out_min_proj = 0;
+        *out_max_proj = 0;
+        return;
+    }
+
+    float min_p = vec2_dot(vertices[0], axis);
+    float max_p = min_p;
+
+    for (int i = 1; i < num_vertices; ++i) {
+        float p = vec2_dot(vertices[i], axis);
+        if (p < min_p) {
+            min_p = p;
+        } else if (p > max_p) {
+            max_p = p;
+        }
+    }
+    *out_min_proj = min_p;
+    *out_max_proj = max_p;
 }
 
 /////////////////////////////

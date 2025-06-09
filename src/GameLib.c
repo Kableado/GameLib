@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include "GameLib.h"
+#include "Physics.h" // Added for physics functions
 
 #include <float.h>
 
@@ -245,6 +246,7 @@ void GameLib_ProcLoop(void *data) {
 	int i, j;
 	int repeat;
 	long long time;
+	float deltaTime = (float)g_ProcFt / 1000.0f; // Calculate deltaTime
 
 	// Step the gamePosition
 	g_GamePos0[0] = g_GamePos1[0] + g_GamePosOffset[0];
@@ -264,6 +266,12 @@ void GameLib_ProcLoop(void *data) {
 	}
 	GameLib_Compactate();
 	g_EntitiesLock = 0;
+
+	// --- Physics Integration Step ---
+	// Optional: Add a new profiling timer like t_physics_integrate if desired
+	// long long physics_time_start = Time_GetTime();
+	Physics_Step(g_Entity, g_NumEntities, deltaTime);
+	// t_physics_integrate += Time_GetTime() - physics_time_start;
 
 	if (BucketGrid_ProcessChanged(&g_BucketGrid) == 0) {
 		Print("Rebuild BucketGrid");
@@ -335,6 +343,60 @@ void GameLib_ProcLoop(void *data) {
 	GameLib_Compactate();
 	g_EntitiesLock = 0;
 	t_col += Time_GetTime() - time;
+
+	// --- New SAT Collision Detection and Response Loop ---
+     g_EntitiesLock = 1;
+     for (int i = 0; i < g_NumEntities; ++i) {
+         Entity ent1 = g_Entity[i];
+
+         if (!ent1 || !ent1->body || !(ent1->flags & EntityFlag_Collision)) {
+             continue;
+         }
+
+         for (int j = i + 1; j < g_NumEntities; ++j) {
+             Entity ent2 = g_Entity[j];
+
+             if (!ent2 || !ent2->body || !(ent2->flags & EntityFlag_Collision)) {
+                 continue;
+             }
+
+             // Determine interaction type
+             int is_ent1_box = (ent1->type == Ent_Box);
+             int is_ent2_box = (ent2->type == Ent_Box);
+             int is_ent1_platform = (ent1->type == Ent_Platform);
+             int is_ent2_platform = (ent2->type == Ent_Platform);
+
+             if (is_ent1_box && is_ent2_box) {
+                 // Box vs Box
+                 CollisionResult result;
+                 CheckCollision_SAT(&result, ent1, ent2);
+                 if (result.colliding) {
+                     ResolveCollision_LinearImpulse(ent1, ent2, &result);
+                 }
+             } else if (is_ent1_box && is_ent2_platform) {
+                 // Box vs Platform
+                 CollisionResult result;
+                 CheckCollision_SAT(&result, ent1, ent2); // ent1=Box, ent2=Platform
+                 if (result.colliding) {
+                     ResolveCollision_LinearImpulse(ent1, ent2, &result);
+                 }
+             } else if (is_ent1_platform && is_ent2_box) {
+                 // Platform vs Box (already handled if we ensure ent1 is always the box, or pass in specific order)
+                 // To avoid double collision response, pass consistently or ensure ResolveCollision handles static correctly.
+                 // Let CheckCollision_SAT determine normal, ResolveCollision_LinearImpulse apply impulses.
+                 // It's better to call it once per pair.
+                 CollisionResult result;
+                 // Note: SAT normal might depend on order, but MTV direction is corrected in CheckCollision_SAT.
+                 // ResolveCollision_LinearImpulse uses inverseMass so order of dynamic vs static matters less for outcome.
+                 CheckCollision_SAT(&result, ent1, ent2); // ent1=Platform, ent2=Box
+                 if (result.colliding) {
+                     ResolveCollision_LinearImpulse(ent1, ent2, &result);
+                 }
+             }
+         }
+     }
+     GameLib_Compactate();
+     g_EntitiesLock = 0;
 
 	// Process Overlaps
 	time           = Time_GetTime();

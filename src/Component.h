@@ -15,11 +15,28 @@ typedef struct EntBody {
     float width;
     float height;
     float mass;
-    float elast;
-    float backFric_static;
-    float backFric_dynamic;
-    float fric_static;
-    float fric_dynamic;
+    float elast;    // Assuming this is restitution (0-1 range)
+
+    // Consolidating friction:
+    float static_friction;  // Renaming for clarity from fric_static
+    float dynamic_friction; // Renaming for clarity from fric_dynamic
+
+    // New physics properties:
+    float inverseMass;
+    float angularVelocity;
+    float torque; // Accumulated torque for the current frame
+    float momentOfInertia;
+    float inverseMomentOfInertia;
+
+    // New rotation fields for physics:
+    float rotation;
+    float rotation0; // For previous frame's rotation (if needed for interpolation)
+
+    // Deprecating or holding these for review:
+    // float backFric_static;
+    // float backFric_dynamic;
+    // float fric_static; // Superseded by static_friction
+    // float fric_dynamic; // Superseded by dynamic_friction
 } EntBody;
 
 typedef struct EntSprite {

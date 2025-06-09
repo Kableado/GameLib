@@ -217,7 +217,7 @@ void Entity_Draw(Entity e, int x, int y, float f) {
 
 	vec2 fPos;
 	float scale[2];
-	float currentRotation;
+	// float currentRotation; // old
 
 	if (e->internalFlags & EntityIntFlag_UpdatedColor) {
 		Draw_SetColor(
@@ -236,10 +236,28 @@ void Entity_Draw(Entity e, int x, int y, float f) {
 		scale[1] = e->sprite->scale[1];
 	}
 
-	if (e->internalFlags & EntityIntFlag_UpdatedRotation) {
-		currentRotation = e->sprite->rotation0 - f * (e->sprite->rotation0 - e->sprite->rotation);
+	// if (e->internalFlags & EntityIntFlag_UpdatedRotation) { // old
+	// currentRotation = e->sprite->rotation0 - f * (e->sprite->rotation0 - e->sprite->rotation); // old
+	// } else { // old
+	// currentRotation = e->sprite->rotation; // old
+	// } // old
+	float currentRotation;
+	if (e->body) { // If there's a physics body, it dictates rotation
+		if (e->internalFlags & EntityIntFlag_UpdatedRotation) { // Check if body's rotation was updated for interpolation
+			currentRotation = e->body->rotation0 - f * (e->body->rotation0 - e->body->rotation);
+		} else {
+			currentRotation = e->body->rotation;
+		}
+		// Optional: synchronize sprite's rotation for non-physics uses if needed
+		// e->sprite->rotation = e->body->rotation;
+	} else if (e->sprite) { // Fallback to sprite if no body
+		if (e->internalFlags & EntityIntFlag_UpdatedRotation) {
+			currentRotation = e->sprite->rotation0 - f * (e->sprite->rotation0 - e->sprite->rotation);
+		} else {
+			currentRotation = e->sprite->rotation;
+		}
 	} else {
-		currentRotation = e->sprite->rotation;
+		currentRotation = 0.0f; // Default if no body or sprite
 	}
 
 	if (e->internalFlags & EntityIntFlag_UpdatedPos) {
@@ -291,8 +309,16 @@ void Entity_Process(Entity e, int ft) {
 		e->internalFlags &= ~EntityIntFlag_UpdatedScale;
 	}
 
-	if (e->sprite && (e->internalFlags & EntityIntFlag_UpdatedRotation)) {
-		e->sprite->rotation0 = e->sprite->rotation;
+	// if (e->sprite && (e->internalFlags & EntityIntFlag_UpdatedRotation)) { // old
+	// e->sprite->rotation0 = e->sprite->rotation; // old
+	// e->internalFlags &= ~EntityIntFlag_UpdatedRotation; // old
+	// } // old
+	if (e->internalFlags & EntityIntFlag_UpdatedRotation) {
+		if (e->body) {
+			e->body->rotation0 = e->body->rotation;
+		} else if (e->sprite) { // Fallback for non-physical entities
+			e->sprite->rotation0 = e->sprite->rotation;
+		}
 		e->internalFlags &= ~EntityIntFlag_UpdatedRotation;
 	}
 
@@ -953,18 +979,39 @@ void Entity_GetScale(Entity e, float scale[2]) {
 // Entity_SetRotation
 //
 void Entity_SetRotation(Entity e, float angle) {
-	if (!e || !e->sprite) return;
-	e->sprite->rotation = angle;
-	e->internalFlags |= EntityIntFlag_UpdatedRotation;
+	// if (!e || !e->sprite) return; // old
+	// e->sprite->rotation = angle; // old
+	// e->internalFlags |= EntityIntFlag_UpdatedRotation; // old
+	if (!e) return;
+	int changed = 0;
+	if (e->body) {
+		e->body->rotation = angle;
+		changed = 1;
+	}
+	if (e->sprite) { // Keep sprite rotation in sync or for non-physical entities
+		e->sprite->rotation = angle;
+		changed = 1;
+	}
+	if (changed) {
+		e->internalFlags |= EntityIntFlag_UpdatedRotation;
+	}
 }
 
 /////////////////////////////
 // Entity_GetRotation
 //
 void Entity_GetRotation(Entity e, float *angle) {
-	if (!e || !e->sprite) return;
-	if (angle) {
+	// if (!e || !e->sprite) return; // old
+	// if (angle) { // old
+	// *angle = e->sprite->rotation; // old
+	// } // old
+	if (!e || !angle) return;
+	if (e->body) {
+		*angle = e->body->rotation;
+	} else if (e->sprite) {
 		*angle = e->sprite->rotation;
+	} else {
+		*angle = 0.0f; // Default if no body/sprite
 	}
 }
 
@@ -972,9 +1019,22 @@ void Entity_GetRotation(Entity e, float *angle) {
 // Entity_AddRotation
 //
 void Entity_AddRotation(Entity e, float angle) {
-	if (!e || !e->sprite) return;
-	e->sprite->rotation += angle;
-	e->internalFlags |= EntityIntFlag_UpdatedRotation;
+	// if (!e || !e->sprite) return; // old
+	// e->sprite->rotation += angle; // old
+	// e->internalFlags |= EntityIntFlag_UpdatedRotation; // old
+	if (!e) return;
+	int changed = 0;
+	if (e->body) {
+		e->body->rotation += angle;
+		changed = 1;
+	}
+	if (e->sprite) { // Keep sprite rotation in sync or for non-physical entities
+		e->sprite->rotation += angle;
+		changed = 1;
+	}
+	if (changed) {
+		e->internalFlags |= EntityIntFlag_UpdatedRotation;
+	}
 }
 
 /////////////////////////////

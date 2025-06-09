@@ -34,8 +34,26 @@ void EntBody_Init(EntBody *body) {
     body->elast = 0.0f;
     body->backFric_static = 0.0f;
     body->backFric_dynamic = 0.0f;
-    body->fric_static = 0.0f;
-    body->fric_dynamic = 0.0f;
+    body->fric_static = 0.0f; // Will be superseded by static_friction
+    body->fric_dynamic = 0.0f; // Will be superseded by dynamic_friction
+
+    // Initialize new physics properties
+    body->static_friction = 0.5f; // Default static friction
+    body->dynamic_friction = 0.3f; // Default dynamic friction
+    body->inverseMass = (body->mass > 0.0f) ? 1.0f / body->mass : 0.0f;
+    body->angularVelocity = 0.0f;
+    body->torque = 0.0f;
+    // Assuming rectangular shape for moment of inertia calculation: I = (1/12) * m * (w^2 + h^2)
+    // This is a placeholder; actual calculation might be more complex or shape-dependent
+    if (body->width > 0 && body->height > 0 && body->mass > 0) {
+        body->momentOfInertia = (1.0f/12.0f) * body->mass * (body->width * body->width + body->height * body->height);
+        body->inverseMomentOfInertia = (body->momentOfInertia > 0.0f) ? 1.0f / body->momentOfInertia : 0.0f;
+    } else {
+        body->momentOfInertia = 0.0f; // Or some other default for non-physical/point objects
+        body->inverseMomentOfInertia = 0.0f;
+    }
+    body->rotation = 0.0f;
+    body->rotation0 = 0.0f;
 }
 
 void EntBody_Destroy(EntBody *body) {
@@ -61,10 +79,21 @@ EntBody* EntBody_Copy(EntBody *src_body) {
     dst_body->height = src_body->height;
     dst_body->mass = src_body->mass;
     dst_body->elast = src_body->elast;
-    dst_body->backFric_static = src_body->backFric_static;
-    dst_body->backFric_dynamic = src_body->backFric_dynamic;
-    dst_body->fric_static = src_body->fric_static;
-    dst_body->fric_dynamic = src_body->fric_dynamic;
+    dst_body->backFric_static = src_body->backFric_static; // Keep for now if used elsewhere
+    dst_body->backFric_dynamic = src_body->backFric_dynamic; // Keep for now
+    dst_body->fric_static = src_body->fric_static;         // Old field
+    dst_body->fric_dynamic = src_body->fric_dynamic;       // Old field
+
+    // Copy new physics properties
+    dst_body->static_friction = src_body->static_friction;
+    dst_body->dynamic_friction = src_body->dynamic_friction;
+    dst_body->inverseMass = src_body->inverseMass;
+    dst_body->angularVelocity = src_body->angularVelocity;
+    dst_body->torque = src_body->torque; // Typically, torque isn't copied as it's frame-specific, but for completeness
+    dst_body->momentOfInertia = src_body->momentOfInertia;
+    dst_body->inverseMomentOfInertia = src_body->inverseMomentOfInertia;
+    dst_body->rotation = src_body->rotation;
+    dst_body->rotation0 = src_body->rotation0;
 
     return dst_body;
 }

@@ -57,6 +57,22 @@ int main(int argc, char *argv[]) {
 	GameLib_DelEnts();
 	GameMap_LoadLevel("data/level_01.txt", 64);
 
+	// Create Box 1
+	Entity box1 = Entity_Copy(ent_Box); // ent_Box should be available from GameEnts.h
+	if (box1) {
+		vec2 pos1 = {200.0f, 100.0f}; // Example position, adjust as needed
+		Entity_SetPos(box1, pos1);
+		GameLib_AddEnt(box1);
+	}
+
+	// Create Box 2
+	Entity box2 = Entity_Copy(ent_Box);
+	if (box2) {
+		vec2 pos2 = {300.0f, 100.0f}; // Example position, adjust as needed
+		Entity_SetPos(box2, pos2);
+		GameLib_AddEnt(box2);
+	}
+
 	/////////////////////////
 	// Run the world.
 	//

@@ -15,6 +15,7 @@ DrawImg img_block;
 Entity ent_Player;
 Entity ent_Platform;
 Entity ent_Block;
+Entity ent_Box;
 
 int EntityApplyGravity(Entity e) {
 	float grav      = 10.0f;
@@ -27,7 +28,7 @@ int EntityApplyGravity(Entity e) {
 	}
 
 	// Only apply gravity to some entity types
-	if (!(e->type == Ent_Player || 0)) {
+	if (!(e->type == Ent_Player || e->type == Ent_Box || 0)) {
 		return (1);
 	}
 
@@ -177,12 +178,20 @@ void GameEnts_Init() {
 	ent_Platform->flags  = EntityFlag_PlatformCollision;
 	ent_Platform->zorder = -1;
 	AnimPlay_SetImg(&ent_Platform->sprite->anim, img_platform);
-	ent_Platform->body->mass         = 0.0f;
-	ent_Platform->body->radius       = 12;
-	ent_Platform->body->width        = 64;
-	ent_Platform->body->height       = 16;
-	ent_Platform->body->fric_static  = 0.0f;
-	ent_Platform->body->fric_dynamic = 0.2f;
+	ent_Platform->body->mass         = 0.0f; // Confirming static nature
+	ent_Platform->body->radius       = 12;   // Existing value, assuming appropriate
+	ent_Platform->body->width        = 64;   // Existing value, assuming appropriate
+	ent_Platform->body->height       = 16;   // Existing value, assuming appropriate
+
+    // Set physics properties for interaction with EntBox:
+    ent_Platform->body->inverseMass = 0.0f; // Static object
+    ent_Platform->body->inverseMomentOfInertia = 0.0f; // Static, does not rotate due to physics
+
+    ent_Platform->body->elast = 0.1f; // Low restitution for platforms
+    ent_Platform->body->static_friction = 0.8f;  // High static friction
+    ent_Platform->body->dynamic_friction = 0.7f; // High dynamic friction
+    // Old fric_static and fric_dynamic are removed by not including them here.
+    // Rotation should remain 0.0f as set by EntBody_Init for static platforms.
 
 	ent_Block         = Entity_New();
 	ent_Block->type   = Ent_Block;
@@ -195,4 +204,49 @@ void GameEnts_Init() {
 	ent_Block->body->height       = 64;
 	ent_Block->body->fric_static  = 0.0f;
 	ent_Block->body->fric_dynamic = 0.2f;
+
+    ent_Box = Entity_New();
+    ent_Box->type = Ent_Box; // Ensure Ent_Box is defined in GameEnts.h (should be from earlier step)
+    ent_Box->flags = EntityFlag_Collision;
+    ent_Box->zorder = 0;
+    AnimPlay_SetImg(&ent_Box->sprite->anim, img_block); // Reuse img_block for now
+
+    // Base physical properties
+    ent_Box->body->mass = 1.0f;
+    ent_Box->body->width = 32;  // Example width
+    ent_Box->body->height = 32; // Example height
+
+    // Derived physics properties
+    if (ent_Box->body->mass > 0.0f) {
+        ent_Box->body->inverseMass = 1.0f / ent_Box->body->mass;
+    } else {
+        ent_Box->body->inverseMass = 0.0f; // Infinite mass for static objects
+    }
+
+    if (ent_Box->body->inverseMass == 0.0f) {
+        ent_Box->body->momentOfInertia = 0.0f; // Static objects have infinite inertia
+        ent_Box->body->inverseMomentOfInertia = 0.0f;
+    } else {
+        // For a solid rectangle: I = (1/12) * m * (w^2 + h^2)
+        float w = ent_Box->body->width;
+        float h = ent_Box->body->height;
+        ent_Box->body->momentOfInertia = (1.0f/12.0f) * ent_Box->body->mass * (w*w + h*h);
+        if (ent_Box->body->momentOfInertia > 0.0f) {
+            ent_Box->body->inverseMomentOfInertia = 1.0f / ent_Box->body->momentOfInertia;
+        } else {
+            // Should not happen for a dynamic body with non-zero width/height
+            ent_Box->body->inverseMomentOfInertia = 0.0f;
+        }
+    }
+
+    ent_Box->body->elast = 0.3f;                // Restitution (bounciness)
+    ent_Box->body->static_friction = 0.6f;      // Static friction coefficient
+    ent_Box->body->dynamic_friction = 0.4f;     // Dynamic friction coefficient
+
+    // Ensure these old fields are not present or are superseded for ent_Box
+    // ent_Box->body->fric_static = 0.0f; (old name)
+    // ent_Box->body->fric_dynamic = 0.0f; (old name)
+
+    ent_Box->proc = NULL;       // No specific per-frame logic for basic box
+    ent_Box->collision = NULL;  // Collision will be handled by the physics system
 }
